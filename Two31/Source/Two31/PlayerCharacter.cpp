@@ -61,7 +61,6 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 
 void APlayerCharacter::OnFire()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT(""));
 	if (ProjectileClass != NULL)
 	{
 		const FRotator SpawnRotation = GetControlRotation();
