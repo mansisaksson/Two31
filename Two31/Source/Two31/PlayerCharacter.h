@@ -31,22 +31,35 @@ protected:
 	void OnFire();
 
 	void MoveForward(float Val);
-	void MoveRight(float Val);
+	void MoveSideways(float Val);
 
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 
+	void StartSprint();
+	void StopSprint();
+
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float BaseTurnRate;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float BaseLookUpRate;
-	
+	/* Sprint speed = max walk speed, walk speed = max walk speed / muliplier */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float SprintMultiplier;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	bool bCanJump;
+
 	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
 	TSubclassOf<class AProjectile> ProjectileClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	USoundBase* FireSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* FireAnimation;
+
+private:
+	bool bIsSprinting;
+
 };

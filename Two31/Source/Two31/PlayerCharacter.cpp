@@ -13,6 +13,10 @@ APlayerCharacter::APlayerCharacter()
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
+	SprintMultiplier = 1.5f;
+
+	bIsSprinting = false;
+	bCanJump = true;
 
 	// Create a CameraComponent	
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
@@ -45,11 +49,18 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 	// set up gameplay key bindings
 	check(InputComponent);
 
-	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	/*to remove*/
+	if (bCanJump)
+	{
+		InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+		InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	}
+
+	InputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::StartSprint);
+	InputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::StopSprint);
 
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
-	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
+	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveSideways);
 
 	InputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::OnFire);
 
@@ -86,14 +97,20 @@ void APlayerCharacter::MoveForward(float Value)
 {
 	if (Value != 0.0f)
 	{
+		if (!bIsSprinting || Value < 0)
+		{
+			Value /= SprintMultiplier;
+		}
+
 		AddMovementInput(GetActorForwardVector(), Value);
 	}
 }
 
-void APlayerCharacter::MoveRight(float Value)
+void APlayerCharacter::MoveSideways(float Value)
 {
 	if (Value != 0.0f)
 	{
+		Value /= SprintMultiplier;
 		AddMovementInput(GetActorRightVector(), Value);
 	}
 }
@@ -108,4 +125,16 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void APlayerCharacter::StartSprint()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Sprinting"));
+	bIsSprinting = true;
+}
+
+void APlayerCharacter::StopSprint()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Not sprinting"));
+	bIsSprinting = false;
 }
