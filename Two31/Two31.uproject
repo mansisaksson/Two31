@@ -1,0 +1,16 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{BB87E4FD-4E5A-DF54-1699-65A9A27F005F}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "Two31",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		}
+	]
+}
