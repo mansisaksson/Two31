@@ -37,13 +37,13 @@ public:
 	float GetMaxArmor();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int GetClipSize();
+	int32 GetClipSize();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int GetCurrentAmmo();
+	int32 GetCurrentAmmo();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int GetReserveAmmo();
+	int32 GetReserveAmmo();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int GetMaxAmmo();
+	int32 GetMaxAmmo();
 
 protected:
 	void OnFire();
@@ -85,8 +85,8 @@ private:
 	float CurrentArmor;
 	float MaxArmor;
 
-	int ClipSize;
-	int CurrentAmmo;
-	int ReserveAmmo;
-	int MaxAmmo;
+	int32 ClipSize;
+	int32 CurrentAmmo;
+	int32 ReserveAmmo;
+	int32 MaxAmmo;
 };

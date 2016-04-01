@@ -168,22 +168,22 @@ float APlayerCharacter::GetMaxArmor()
 	return MaxArmor;
 }
 
-int APlayerCharacter::GetClipSize()
+int32 APlayerCharacter::GetClipSize()
 {
 	return ClipSize;
 }
 
-int APlayerCharacter::GetCurrentAmmo()
+int32 APlayerCharacter::GetCurrentAmmo()
 {
 	return CurrentAmmo;
 }
 
-int APlayerCharacter::GetReserveAmmo()
+int32 APlayerCharacter::GetReserveAmmo()
 {
 	return ReserveAmmo;
 }
 
-int APlayerCharacter::GetMaxAmmo()
+int32 APlayerCharacter::GetMaxAmmo()
 {
 	return MaxAmmo;
 }
