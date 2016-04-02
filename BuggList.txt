@@ -1,0 +1,4 @@
+
+ *** Buggs ***
+
+- Springer fortare om man går diagonalt

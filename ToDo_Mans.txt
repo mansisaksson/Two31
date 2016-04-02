@@ -1,0 +1,9 @@
+
+*** TODO ***
+
+Weapon System
+	- Weapon Pickup
+	- Weapon Ammo
+	- Weapon Reload
+	- Ammo pickup
+	

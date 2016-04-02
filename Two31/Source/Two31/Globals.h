@@ -7,11 +7,13 @@
 UENUM(BlueprintType)
 enum class EItemType : uint8 
 {
-	SMG			UMETA(DisplayName = "SMG"),
-	Pistol		UMETA(DisplayName = "Pistol"),
-	Armor		UMETA(DisplayName = "Armor"),
-	HealthPack	UMETA(DisplayName = "HealthPack"),
-	None		UMETA(DisplayName = "None")
+	SMG				UMETA(DisplayName = "SMG"),
+	RocketLauncher	UMETA(DisplayName = "RocketLauncher"),
+	Shotgun			UMETA(DisplayName = "Shotgun"),
+	Pistol			UMETA(DisplayName = "Pistol"),
+	Armor			UMETA(DisplayName = "Armor"),
+	HealthPack		UMETA(DisplayName = "HealthPack"),
+	None			UMETA(DisplayName = "None")
 };
 
 USTRUCT(BlueprintType)

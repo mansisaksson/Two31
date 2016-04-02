@@ -1,5 +1,6 @@
 #include "Two31.h"
 #include "Weapon.h"
+#include "Engine.h"
 
 AWeapon::AWeapon()
 {
@@ -9,7 +10,7 @@ AWeapon::AWeapon()
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->AttachTo(RootComponent);
-	WeaponMesh->SetOnlyOwnerSee(true);
+	WeaponMesh->SetOnlyOwnerSee(false);
 	WeaponMesh->bCastDynamicShadow = false;
 	WeaponMesh->CastShadow = false;
 	
@@ -27,19 +28,34 @@ void AWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void AWeapon::SetArmAnimations(USkeletalMeshComponent* ArmMesh)
+{
+	this->ArmMesh = ArmMesh;
+	if (ArmAnimationBlueprint != NULL && ArmMesh != NULL)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Animations")));
+		ArmMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		ArmMesh->SetAnimInstanceClass(ArmAnimationBlueprint);
+	}
+}
+
 void AWeapon::StartFire(FVector TowardsLocation)
 {
 	bIsFiring = true;
 }
 
-// Is called from the PlayerCharacter
-void AWeapon::UpdateFire(FVector TowardsLocation)
+void AWeapon::UpdateFire(float DeltaSeconds, FVector TowardsLocation)
 {
 
 }
 
-void AWeapon::EndFire(FVector TowardsLocation)
+void AWeapon::StopFire(FVector TowardsLocation)
 {
 	bIsFiring = false;
+}
+
+bool AWeapon::GetIsFiring()
+{
+	return bIsFiring;
 }
 

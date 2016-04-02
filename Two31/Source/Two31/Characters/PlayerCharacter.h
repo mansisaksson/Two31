@@ -3,6 +3,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+
 UCLASS()
 class TWO31_API APlayerCharacter : public ACharacter
 {
@@ -11,21 +12,16 @@ class TWO31_API APlayerCharacter : public ACharacter
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	class USkeletalMeshComponent* FPArmMesh;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	class USkeletalMeshComponent* FPGunMesh;
-
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FirstPersonCameraComponent;
+	class UCameraComponent* FPCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
-	class USceneComponent* GunLocation;
 
 public:
 	APlayerCharacter();
 
 	FORCEINLINE USkeletalMeshComponent* GetFPMeshArmMesh() const { return FPArmMesh; }
-	FORCEINLINE UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	FORCEINLINE UCameraComponent* GetFirstPersonCameraComponent() const { return FPCamera; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetHealth();
@@ -46,18 +42,27 @@ public:
 	int32 GetMaxAmmo();
 
 protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+
+	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+
 	void OnFire();
+	void OnReleaseFire();
+
+	void SelectWeaponSlot1();
+	void SelectWeaponSlot2();
+	void SelectWeaponSlot3();
+	void SelectWeaponSlot4();
 
 	void MoveForward(float Val);
 	void MoveSideways(float Val);
 
-	void TurnAtRate(float Rate);
-	void LookUpAtRate(float Rate);
-
 	void StartSprint();
 	void StopSprint();
 
-	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
+	void TurnAtRate(float Rate);
+	void LookUpAtRate(float Rate);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float BaseTurnRate;
@@ -71,14 +76,17 @@ protected:
 	bool bCanJump;
 
 	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
-	TSubclassOf<class AProjectile> ProjectileClass;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	USoundBase* FireSound;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimMontage* FireAnimation;
+	TSubclassOf<class AWeapon> StarterWeapon1;
+	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
+	TSubclassOf<class AWeapon> StarterWeapon2;
+	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
+	TSubclassOf<class AWeapon> StarterWeapon3;
+	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
+	TSubclassOf<class AWeapon> StarterWeapon4;
 
 private:
 	bool bIsSprinting;
+	bool bFireIsPressed;
 
 	float CurrentHealth;
 	float MaxHealth;
@@ -89,4 +97,10 @@ private:
 	int32 CurrentAmmo;
 	int32 ReserveAmmo;
 	int32 MaxAmmo;
+
+	class AWeapon* CurrentWeapon;
+	class AWeapon* WeaponSlot1;
+	class AWeapon* WeaponSlot2;
+	class AWeapon* WeaponSlot3;
+	class AWeapon* WeaponSlot4;
 };

@@ -1,7 +1,6 @@
 #include "Two31.h"
 #include "PlayerCharacter.h"
-#include "Projectile.h"
-#include "Animation/AnimInstance.h"
+#include "Utilities/Weapon.h"
 #include "GameFramework/InputSettings.h"
 #include "Engine.h"
 
@@ -25,37 +24,68 @@ APlayerCharacter::APlayerCharacter()
 	MaxAmmo = 200;
 
 	bIsSprinting = false;
+	bFireIsPressed = false;
 	bCanJump = true;
 
 	// Create a CameraComponent	
-	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCameraComponent->AttachParent = GetCapsuleComponent();
-	FirstPersonCameraComponent->RelativeLocation = FVector(0, 0, 64.f); // Position the camera
-	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	FPCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FPCamera->AttachParent = GetCapsuleComponent();
+	FPCamera->RelativeLocation = FVector(0, 0, 64.f); // Position the camera
+	FPCamera->bUsePawnControlRotation = true;
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	FPArmMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
 	FPArmMesh->SetOnlyOwnerSee(true);
-	FPArmMesh->AttachParent = FirstPersonCameraComponent;
+	FPArmMesh->AttachParent = FPCamera;
 	FPArmMesh->bCastDynamicShadow = false;
 	FPArmMesh->CastShadow = false;
+}
 
-	// Create a gun mesh component
-	FPGunMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun"));
-	FPGunMesh->SetOnlyOwnerSee(true);			// only the owning player will see this mesh
-	FPGunMesh->bCastDynamicShadow = false;
-	FPGunMesh->CastShadow = false;
-	FPGunMesh->AttachTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
+void APlayerCharacter::BeginPlay()
+{
+	if (StarterWeapon1 != NULL)
+	{
+		const FRotator SpawnRotation = FRotator::ZeroRotator;
+		const FVector SpawnLocation = FVector::ZeroVector;
+		WeaponSlot1 = GetWorld()->SpawnActor<AWeapon>(StarterWeapon1, SpawnLocation, SpawnRotation);
+		WeaponSlot1->AttachRootComponentTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
+		WeaponSlot1->SetActorHiddenInGame(true);
+	}
+	if (StarterWeapon2 != NULL)
+	{
+		const FRotator SpawnRotation = FRotator::ZeroRotator;
+		const FVector SpawnLocation = FVector::ZeroVector;
+		WeaponSlot2 = GetWorld()->SpawnActor<AWeapon>(StarterWeapon2, SpawnLocation, SpawnRotation);
+		WeaponSlot2->AttachRootComponentTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
+		WeaponSlot2->SetActorHiddenInGame(true);
+	}
+	if (StarterWeapon3 != NULL)
+	{
+		const FRotator SpawnRotation = FRotator::ZeroRotator;
+		const FVector SpawnLocation = FVector::ZeroVector;
+		WeaponSlot3 = GetWorld()->SpawnActor<AWeapon>(StarterWeapon3, SpawnLocation, SpawnRotation);
+		WeaponSlot3->AttachRootComponentTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
+		WeaponSlot3->SetActorHiddenInGame(true);
+	}
+	if (StarterWeapon4 != NULL)
+	{
+		const FRotator SpawnRotation = FRotator::ZeroRotator;
+		const FVector SpawnLocation = FVector::ZeroVector;
+		WeaponSlot4 = GetWorld()->SpawnActor<AWeapon>(StarterWeapon4, SpawnLocation, SpawnRotation);
+		WeaponSlot4->AttachRootComponentTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
+		WeaponSlot4->SetActorHiddenInGame(true);
+	}
+	SelectWeaponSlot1();
+}
 
-
-	// Default offset from the character location for projectiles to spawn
-	GunLocation = CreateDefaultSubobject<USceneComponent>("GunLocation");
-	GunLocation->SetRelativeLocation(FVector(100.0f, 30.0f, 10.0f));
+void APlayerCharacter::Tick(float DeltaSeconds)
+{
+	if (bFireIsPressed && CurrentWeapon != NULL)
+		CurrentWeapon->UpdateFire(DeltaSeconds, FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
-	// set up gameplay key bindings
 	check(InputComponent);
 
 	/*to remove*/
@@ -65,13 +95,18 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 		InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	}
 
-	InputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::StartSprint);
-	InputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::StopSprint);
+	InputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::OnFire);
+	InputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::OnReleaseFire);
+
+	InputComponent->BindAction("WeaponSlot1", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot1);
+	InputComponent->BindAction("WeaponSlot2", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot2);
+	InputComponent->BindAction("WeaponSlot3", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot3);
+	InputComponent->BindAction("WeaponSlot4", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot4);
 
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveSideways);
-
-	InputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::OnFire);
+	InputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::StartSprint);
+	InputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::StopSprint);
 
 	InputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	InputComponent->BindAxis("TurnRate", this, &APlayerCharacter::TurnAtRate);
@@ -81,24 +116,64 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 
 void APlayerCharacter::OnFire()
 {
-	if (ProjectileClass != NULL)
-	{
-		const FRotator SpawnRotation = GetControlRotation();
-		const FVector SpawnLocation = GetActorLocation() + SpawnRotation.RotateVector(GunLocation->GetComponentLocation());
+	bFireIsPressed = true;
+	if (CurrentWeapon != NULL)
+		CurrentWeapon->StartFire(FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
+}
 
-		UWorld* const World = GetWorld();
-		if (World != NULL)
-			World->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+void APlayerCharacter::OnReleaseFire()
+{
+	bFireIsPressed = false;
+	if (CurrentWeapon != NULL)
+		CurrentWeapon->StopFire(FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
+}
+
+void APlayerCharacter::SelectWeaponSlot1()
+{
+	if (WeaponSlot1 != NULL && CurrentWeapon != WeaponSlot1)
+	{
+		if (CurrentWeapon != NULL)
+			CurrentWeapon->SetActorHiddenInGame(true);
+
+		CurrentWeapon = WeaponSlot1;
+		CurrentWeapon->SetActorHiddenInGame(false);
+		CurrentWeapon->SetArmAnimations(FPArmMesh);
 	}
-
-	if (FireSound != NULL)
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
-
-	if (FireAnimation != NULL)
+}
+void APlayerCharacter::SelectWeaponSlot2()
+{
+	if (WeaponSlot2 != NULL && CurrentWeapon != WeaponSlot2)
 	{
-		UAnimInstance* AnimInstance = FPArmMesh->GetAnimInstance();
-		if (AnimInstance != NULL)
-			AnimInstance->Montage_Play(FireAnimation, 1.f);
+		if (CurrentWeapon != NULL)
+			CurrentWeapon->SetActorHiddenInGame(true);
+
+		CurrentWeapon = WeaponSlot2;
+		CurrentWeapon->SetActorHiddenInGame(false);
+		CurrentWeapon->SetArmAnimations(FPArmMesh);
+	}
+}
+void APlayerCharacter::SelectWeaponSlot3()
+{
+	if (WeaponSlot3 != NULL && CurrentWeapon != WeaponSlot3)
+	{
+		if (CurrentWeapon != NULL)
+			CurrentWeapon->SetActorHiddenInGame(true);
+
+		CurrentWeapon = WeaponSlot3;
+		CurrentWeapon->SetActorHiddenInGame(false);
+		CurrentWeapon->SetArmAnimations(FPArmMesh);
+	}
+}
+void APlayerCharacter::SelectWeaponSlot4()
+{
+	if (WeaponSlot4 != NULL && CurrentWeapon != WeaponSlot4)
+	{
+		if (CurrentWeapon != NULL)
+			CurrentWeapon->SetActorHiddenInGame(true);
+
+		CurrentWeapon = WeaponSlot4;
+		CurrentWeapon->SetActorHiddenInGame(false);
+		CurrentWeapon->SetArmAnimations(FPArmMesh);
 	}
 }
 
@@ -107,9 +182,7 @@ void APlayerCharacter::MoveForward(float Value)
 	if (Value != 0.0f)
 	{
 		if (!bIsSprinting || Value < 0)
-		{
 			Value /= SprintMultiplier;
-		}
 
 		AddMovementInput(GetActorForwardVector(), Value);
 	}
@@ -124,28 +197,24 @@ void APlayerCharacter::MoveSideways(float Value)
 	}
 }
 
-void APlayerCharacter::TurnAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void APlayerCharacter::LookUpAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
-}
-
 void APlayerCharacter::StartSprint()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Sprinting"));
 	bIsSprinting = true;
 }
 
 void APlayerCharacter::StopSprint()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Not sprinting"));
 	bIsSprinting = false;
+}
+
+void APlayerCharacter::TurnAtRate(float Rate)
+{
+	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+}
+
+void APlayerCharacter::LookUpAtRate(float Rate)
+{
+	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
 float APlayerCharacter::GetHealth()
