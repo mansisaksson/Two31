@@ -50,6 +50,7 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::BeginPlay()
 {
+	Super::BeginPlay();
 	EquipWeapon(StarterWeapon1);
 	EquipWeapon(StarterWeapon2);
 	EquipWeapon(StarterWeapon2);
@@ -58,6 +59,7 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::Tick(float DeltaSeconds)
 {
+	Super::Tick(DeltaSeconds);
 	if (bFireIsPressed && CurrentWeapon != NULL)
 		CurrentWeapon->UpdateFire(DeltaSeconds, FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
 }
