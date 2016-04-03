@@ -1,5 +1,9 @@
 #include "Two31.h"
 #include "PlayerCharacter.h"
+#include "../Utilities/Pickups/Pickup.h"
+#include "../Utilities/Pickups/WeaponPickup.h"
+#include "../Utilities/Pickups/HealthPickup.h"
+#include "../Utilities/Pickups/AmmoPickup.h"
 #include "Utilities/Weapon.h"
 #include "GameFramework/InputSettings.h"
 #include "Engine.h"
@@ -13,6 +17,7 @@ APlayerCharacter::APlayerCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 	SprintMultiplier = 1.5f;
+	
 	CurrentHealth = 50.f;
 	MaxHealth = 100.f;
 	CurrentArmor = 35.f;
@@ -22,6 +27,8 @@ APlayerCharacter::APlayerCharacter()
 	CurrentAmmo = 32;
 	ReserveAmmo = 100;
 	MaxAmmo = 200;
+
+	WeaponSlots.SetNum(4);
 
 	bIsSprinting = false;
 	bFireIsPressed = false;
@@ -43,45 +50,61 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::BeginPlay()
 {
-	if (StarterWeapon1 != NULL)
-	{
-		const FRotator SpawnRotation = FRotator::ZeroRotator;
-		const FVector SpawnLocation = FVector::ZeroVector;
-		WeaponSlot1 = GetWorld()->SpawnActor<AWeapon>(StarterWeapon1, SpawnLocation, SpawnRotation);
-		WeaponSlot1->AttachRootComponentTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
-		WeaponSlot1->SetActorHiddenInGame(true);
-	}
-	if (StarterWeapon2 != NULL)
-	{
-		const FRotator SpawnRotation = FRotator::ZeroRotator;
-		const FVector SpawnLocation = FVector::ZeroVector;
-		WeaponSlot2 = GetWorld()->SpawnActor<AWeapon>(StarterWeapon2, SpawnLocation, SpawnRotation);
-		WeaponSlot2->AttachRootComponentTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
-		WeaponSlot2->SetActorHiddenInGame(true);
-	}
-	if (StarterWeapon3 != NULL)
-	{
-		const FRotator SpawnRotation = FRotator::ZeroRotator;
-		const FVector SpawnLocation = FVector::ZeroVector;
-		WeaponSlot3 = GetWorld()->SpawnActor<AWeapon>(StarterWeapon3, SpawnLocation, SpawnRotation);
-		WeaponSlot3->AttachRootComponentTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
-		WeaponSlot3->SetActorHiddenInGame(true);
-	}
-	if (StarterWeapon4 != NULL)
-	{
-		const FRotator SpawnRotation = FRotator::ZeroRotator;
-		const FVector SpawnLocation = FVector::ZeroVector;
-		WeaponSlot4 = GetWorld()->SpawnActor<AWeapon>(StarterWeapon4, SpawnLocation, SpawnRotation);
-		WeaponSlot4->AttachRootComponentTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
-		WeaponSlot4->SetActorHiddenInGame(true);
-	}
-	SelectWeaponSlot1();
+	EquipWeapon(StarterWeapon1);
+	EquipWeapon(StarterWeapon2);
+	EquipWeapon(StarterWeapon2);
+	EquipWeapon(StarterWeapon4);
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	if (bFireIsPressed && CurrentWeapon != NULL)
 		CurrentWeapon->UpdateFire(DeltaSeconds, FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
+}
+
+void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	if (Cast<APickup>(OtherActor))
+	{
+		if (Cast<AWeaponPickup>(OtherActor))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Weapon Pickup"));
+			AWeaponPickup* WeaponPickup = Cast<AWeaponPickup>(OtherActor);
+			if (EquipWeapon(WeaponPickup->GetWeapon()))
+				WeaponPickup->Destroy();
+		}
+		else if (Cast<AHealthPickup>(OtherActor))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Health Pickup"));
+		}
+		else if (Cast<AAmmoPickup>(OtherActor))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Ammo Pickup"));
+		}
+	}
+}
+
+bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
+{
+	if (Weapon != NULL)
+	{
+		for (size_t i = 0; i < WeaponSlots.Num(); i++)
+		{
+			if (WeaponSlots[i] == NULL)
+			{
+				const FRotator SpawnRotation = FRotator::ZeroRotator;
+				const FVector SpawnLocation = FVector::ZeroVector;
+				WeaponSlots[i] = GetWorld()->SpawnActor<AWeapon>(Weapon, SpawnLocation, SpawnRotation);
+				WeaponSlots[i]->AttachRootComponentTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
+				WeaponSlots[i]->SetActorHiddenInGame(true);
+
+				if (CurrentWeapon == NULL)
+					SelectWeaponSlot(i);
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
@@ -120,7 +143,6 @@ void APlayerCharacter::OnFire()
 	if (CurrentWeapon != NULL)
 		CurrentWeapon->StartFire(FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
 }
-
 void APlayerCharacter::OnReleaseFire()
 {
 	bFireIsPressed = false;
@@ -128,53 +150,33 @@ void APlayerCharacter::OnReleaseFire()
 		CurrentWeapon->StopFire(FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
 }
 
-void APlayerCharacter::SelectWeaponSlot1()
+void APlayerCharacter::SelectWeaponSlot(int index)
 {
-	if (WeaponSlot1 != NULL && CurrentWeapon != WeaponSlot1)
+	if (WeaponSlots[index] != NULL && CurrentWeapon != WeaponSlots[index])
 	{
 		if (CurrentWeapon != NULL)
 			CurrentWeapon->SetActorHiddenInGame(true);
 
-		CurrentWeapon = WeaponSlot1;
+		CurrentWeapon = WeaponSlots[index];
 		CurrentWeapon->SetActorHiddenInGame(false);
 		CurrentWeapon->SetArmAnimations(FPArmMesh);
 	}
+}
+void APlayerCharacter::SelectWeaponSlot1()
+{
+	SelectWeaponSlot(0);
 }
 void APlayerCharacter::SelectWeaponSlot2()
 {
-	if (WeaponSlot2 != NULL && CurrentWeapon != WeaponSlot2)
-	{
-		if (CurrentWeapon != NULL)
-			CurrentWeapon->SetActorHiddenInGame(true);
-
-		CurrentWeapon = WeaponSlot2;
-		CurrentWeapon->SetActorHiddenInGame(false);
-		CurrentWeapon->SetArmAnimations(FPArmMesh);
-	}
+	SelectWeaponSlot(1);
 }
 void APlayerCharacter::SelectWeaponSlot3()
 {
-	if (WeaponSlot3 != NULL && CurrentWeapon != WeaponSlot3)
-	{
-		if (CurrentWeapon != NULL)
-			CurrentWeapon->SetActorHiddenInGame(true);
-
-		CurrentWeapon = WeaponSlot3;
-		CurrentWeapon->SetActorHiddenInGame(false);
-		CurrentWeapon->SetArmAnimations(FPArmMesh);
-	}
+	SelectWeaponSlot(2);
 }
 void APlayerCharacter::SelectWeaponSlot4()
 {
-	if (WeaponSlot4 != NULL && CurrentWeapon != WeaponSlot4)
-	{
-		if (CurrentWeapon != NULL)
-			CurrentWeapon->SetActorHiddenInGame(true);
-
-		CurrentWeapon = WeaponSlot4;
-		CurrentWeapon->SetActorHiddenInGame(false);
-		CurrentWeapon->SetArmAnimations(FPArmMesh);
-	}
+	SelectWeaponSlot(3);
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -187,7 +189,6 @@ void APlayerCharacter::MoveForward(float Value)
 		AddMovementInput(GetActorForwardVector(), Value);
 	}
 }
-
 void APlayerCharacter::MoveSideways(float Value)
 {
 	if (Value != 0.0f)
@@ -201,7 +202,6 @@ void APlayerCharacter::StartSprint()
 {
 	bIsSprinting = true;
 }
-
 void APlayerCharacter::StopSprint()
 {
 	bIsSprinting = false;
@@ -211,7 +211,6 @@ void APlayerCharacter::TurnAtRate(float Rate)
 {
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
-
 void APlayerCharacter::LookUpAtRate(float Rate)
 {
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
@@ -221,17 +220,14 @@ float APlayerCharacter::GetHealth()
 {
 	return CurrentHealth;
 }
-
 float APlayerCharacter::GetMaxHealth()
 {
 	return MaxHealth;
 }
-
 float APlayerCharacter::GetArmor()
 {
 	return CurrentArmor;
 }
-
 float APlayerCharacter::GetMaxArmor()
 {
 	return MaxArmor;
@@ -241,17 +237,14 @@ int32 APlayerCharacter::GetClipSize()
 {
 	return ClipSize;
 }
-
 int32 APlayerCharacter::GetCurrentAmmo()
 {
 	return CurrentAmmo;
 }
-
 int32 APlayerCharacter::GetReserveAmmo()
 {
 	return ReserveAmmo;
 }
-
 int32 APlayerCharacter::GetMaxAmmo()
 {
 	return MaxAmmo;

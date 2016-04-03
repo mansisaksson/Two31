@@ -45,11 +45,16 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+	bool EquipWeapon(TSubclassOf<class AWeapon> Weapon);
+
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
 	void OnFire();
 	void OnReleaseFire();
 
+	void SelectWeaponSlot(int index);
 	void SelectWeaponSlot1();
 	void SelectWeaponSlot2();
 	void SelectWeaponSlot3();
@@ -99,8 +104,5 @@ private:
 	int32 MaxAmmo;
 
 	class AWeapon* CurrentWeapon;
-	class AWeapon* WeaponSlot1;
-	class AWeapon* WeaponSlot2;
-	class AWeapon* WeaponSlot3;
-	class AWeapon* WeaponSlot4;
+	TArray<class AWeapon*> WeaponSlots;
 };

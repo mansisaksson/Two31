@@ -2,18 +2,12 @@
 #include "Object.h"
 #include "Globals.generated.h"
 
-#define COLLISION_BEAMTRACE		ECC_GameTraceChannel1
-
 UENUM(BlueprintType)
-enum class EItemType : uint8 
+enum class EAmmoType : uint8 
 {
 	SMG				UMETA(DisplayName = "SMG"),
-	RocketLauncher	UMETA(DisplayName = "RocketLauncher"),
-	Shotgun			UMETA(DisplayName = "Shotgun"),
-	Pistol			UMETA(DisplayName = "Pistol"),
-	Armor			UMETA(DisplayName = "Armor"),
-	HealthPack		UMETA(DisplayName = "HealthPack"),
-	None			UMETA(DisplayName = "None")
+	Explosive		UMETA(DisplayName = "Explosive"),
+	Plasma			UMETA(DisplayName = "Plasma")
 };
 
 USTRUCT(BlueprintType)
