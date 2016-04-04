@@ -26,8 +26,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MuzzeFlash;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float ReloadTime;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float RPM;
 
@@ -35,5 +34,5 @@ private:
 	void FireShot(FVector TowardsLocation);
 
 	float timeSinceFire;
-	float timeSinceReloadStart;
+
 };
