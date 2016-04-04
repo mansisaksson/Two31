@@ -70,6 +70,10 @@ protected:
 	void StartSprint();
 	void StopSprint();
 
+	void NextWeapon();
+	void PreviousWeapon();
+	int GetIndex();
+
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 
