@@ -24,9 +24,6 @@ APlayerCharacter::APlayerCharacter()
 	CurrentArmor = 35.f;
 	MaxArmor = 100.f;
 
-	ReserveAmmo = 100;
-	MaxAmmo = 200;
-
 	WeaponSlots.SetNum(4);
 
 	bIsSprinting = false;
@@ -135,9 +132,6 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 	InputComponent->BindAction("WeaponSlot3", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot3);
 	InputComponent->BindAction("WeaponSlot4", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot4);
 
-	InputComponent->BindAction("NextWeapon", IE_Pressed, this, &APlayerCharacter::NextWeapon);
-	InputComponent->BindAction("PreviousWeapon", IE_Pressed, this, &APlayerCharacter::PreviousWeapon);
-
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveSideways);
 	InputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::StartSprint);
@@ -171,7 +165,27 @@ void APlayerCharacter::SelectWeaponSlot(int index)
 
 		CurrentWeapon = WeaponSlots[index];
 		CurrentWeapon->SetActorHiddenInGame(false);
-		CurrentWeapon->EquipWeapon(FPArmMesh, &ReserveAmmo);
+		
+		switch ((EAmmoType)CurrentWeapon->GetAmmoType())
+		{
+		case EAmmoType::BulletAmmo:
+			CurrentAmmo = &BulletAmmo;
+			break;
+		case EAmmoType::ShotgunAmmo:
+			CurrentAmmo = &ShotgunAmmo;
+			break;
+		case EAmmoType::ExplosiveAmmo:
+			CurrentAmmo = &ExplosiveAmmo;
+			break;
+		case EAmmoType::PlasmaAmmo:
+			CurrentAmmo = &PlasmaAmmo;
+			break;
+		default:
+			CurrentAmmo = NULL;
+			break;
+		}
+
+		CurrentWeapon->EquipWeapon(FPArmMesh, &CurrentAmmo->AmmoPool);
 	}
 }
 void APlayerCharacter::SelectWeaponSlot1()
@@ -217,55 +231,6 @@ void APlayerCharacter::StartSprint()
 void APlayerCharacter::StopSprint()
 {
 	bIsSprinting = false;
-}
-
-void APlayerCharacter::NextWeapon()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Scrolled to next weapon. 2"));
-	int index = GetIndex() + 1;
-	if (index > WeaponSlots.Num()-1)
-		index = 0;
-
-	int tempIndex = index;
-	while (WeaponSlots[tempIndex] == NULL)
-	{
-		tempIndex++;
-		if (tempIndex > WeaponSlots.Num() - 1)
-			tempIndex = 0;
-		if (tempIndex == index)
-			break;
-	}
-
-	SelectWeaponSlot(tempIndex);
-}
-void APlayerCharacter::PreviousWeapon()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Scrolled to previous weapon."));
-	int index = GetIndex() - 1;
-	if (index < 0)
-		index = WeaponSlots.Num()-1;
-	
-	int tempIndex = index;
-	while (WeaponSlots[tempIndex] == NULL)
-	{
-		tempIndex--;
-		if (tempIndex < 0)
-			tempIndex = WeaponSlots.Num() - 1;
-		if (tempIndex == index)
-			break;
-	}
-
-	SelectWeaponSlot(tempIndex);
-}
-int APlayerCharacter::GetIndex()
-{
-	int index = -1;
-	for (size_t i = 0; i < WeaponSlots.Num(); i++)
-	{
-		if (CurrentWeapon == WeaponSlots[i])
-			index = i;
-	}
-	return index;
 }
 
 void APlayerCharacter::TurnAtRate(float Rate)
@@ -318,17 +283,21 @@ int32 APlayerCharacter::GetClipSize()
 		return CurrentWeapon->GetClipSize();
 	return 0;
 }
-int32 APlayerCharacter::GetCurrentAmmo()
+int32 APlayerCharacter::GetAmmoInClip()
 {
 	if (CurrentWeapon != NULL)
-		return CurrentWeapon->GetCurrentAmmo();
+		return CurrentWeapon->GetAmmoInClip();
 	return 0;
 }
-int32 APlayerCharacter::GetReserveAmmo()
+int32 APlayerCharacter::GetAmmoPool()
 {
-	return ReserveAmmo;
+	if (CurrentAmmo != NULL)
+		return CurrentAmmo->AmmoPool;
+	return 0;
 }
 int32 APlayerCharacter::GetMaxAmmo()
 {
-	return MaxAmmo;
+	if (CurrentAmmo != NULL)
+		return CurrentAmmo->MaxAmmo;
+	return 0;
 }

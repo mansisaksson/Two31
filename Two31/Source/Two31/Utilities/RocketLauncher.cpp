@@ -5,7 +5,7 @@
 ARocketLauncher::ARocketLauncher()
 	: AWeapon()
 {
-
+	ClipSize = 8;
 }
 
 void ARocketLauncher::BeginPlay()
