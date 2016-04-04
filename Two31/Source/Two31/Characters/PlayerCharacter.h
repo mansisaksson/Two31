@@ -1,8 +1,8 @@
 #pragma once
 
 #include "GameFramework/Character.h"
+#include "../Utilities/WeaponGlobals.h"
 #include "PlayerCharacter.generated.h"
-
 
 UCLASS()
 class TWO31_API APlayerCharacter : public ACharacter
@@ -39,9 +39,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetClipSize();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetCurrentAmmo();
+	int32 GetAmmoInClip();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetReserveAmmo();
+	int32 GetAmmoPool();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetMaxAmmo();
 
@@ -70,10 +70,6 @@ protected:
 	void StartSprint();
 	void StopSprint();
 
-	void NextWeapon();
-	void PreviousWeapon();
-	int GetIndex();
-
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 
@@ -97,6 +93,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
 	TSubclassOf<class AWeapon> StarterWeapon4;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	FAmmo BulletAmmo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	FAmmo ShotgunAmmo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	FAmmo PlasmaAmmo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	FAmmo ExplosiveAmmo;
+
 private:
 	bool bIsSprinting;
 	bool bFireIsPressed;
@@ -106,9 +111,7 @@ private:
 	float CurrentArmor;
 	float MaxArmor;
 
-	int32 ReserveAmmo;
-	int32 MaxAmmo;
-
+	FAmmo* CurrentAmmo;
 	class AWeapon* CurrentWeapon;
 	TArray<class AWeapon*> WeaponSlots;
 };

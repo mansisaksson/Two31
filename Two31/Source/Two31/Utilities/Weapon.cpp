@@ -7,7 +7,6 @@ AWeapon::AWeapon()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ClipSize = 30;
-	CurrentAmmo = 30;
 	bIsFiring = false;
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
@@ -23,6 +22,7 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 void AWeapon::Tick(float DeltaTime)
@@ -34,6 +34,8 @@ void AWeapon::EquipWeapon(USkeletalMeshComponent* ArmMesh, int* AmmoPool)
 {
 	SetArmAnimations(ArmMesh);
 	SetAmmoPool(AmmoPool);
+	// if too little ammo...
+	AmmoInClip = ClipSize;
 }
 
 void AWeapon::SetArmAnimations(USkeletalMeshComponent* ArmMesh)
@@ -76,9 +78,9 @@ int32 AWeapon::GetClipSize()
 {
 	return ClipSize;
 }
-int32 AWeapon::GetCurrentAmmo()
+int32 AWeapon::GetAmmoInClip()
 {
-	return CurrentAmmo;
+	return AmmoInClip;
 }
 uint8 AWeapon::GetAmmoType()
 {
