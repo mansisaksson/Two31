@@ -102,8 +102,6 @@ private:
 	float CurrentArmor;
 	float MaxArmor;
 
-	int32 ClipSize;
-	int32 CurrentAmmo;
 	int32 ReserveAmmo;
 	int32 MaxAmmo;
 
