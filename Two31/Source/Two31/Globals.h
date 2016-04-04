@@ -2,14 +2,6 @@
 #include "Object.h"
 #include "Globals.generated.h"
 
-UENUM(BlueprintType)
-enum class EAmmoType : uint8 
-{
-	SMG				UMETA(DisplayName = "SMG"),
-	Explosive		UMETA(DisplayName = "Explosive"),
-	Plasma			UMETA(DisplayName = "Plasma")
-};
-
 USTRUCT(BlueprintType)
 struct FTestStruct
 {

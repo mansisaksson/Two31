@@ -6,6 +6,8 @@ AWeapon::AWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	ClipSize = 30;
+	CurrentAmmo = 30;
 	bIsFiring = false;
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
@@ -26,6 +28,12 @@ void AWeapon::BeginPlay()
 void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AWeapon::EquipWeapon(USkeletalMeshComponent* ArmMesh, int* AmmoPool)
+{
+	SetArmAnimations(ArmMesh);
+	SetAmmoPool(AmmoPool);
 }
 
 void AWeapon::SetArmAnimations(USkeletalMeshComponent* ArmMesh)
@@ -54,8 +62,25 @@ void AWeapon::StopFire(FVector TowardsLocation)
 	bIsFiring = false;
 }
 
+void AWeapon::SetAmmoPool(int* AmmoPool)
+{
+	this->AmmoPool = AmmoPool;
+}
+
 bool AWeapon::GetIsFiring()
 {
 	return bIsFiring;
 }
 
+int32 AWeapon::GetClipSize()
+{
+	return ClipSize;
+}
+int32 AWeapon::GetCurrentAmmo()
+{
+	return CurrentAmmo;
+}
+uint8 AWeapon::GetAmmoType()
+{
+	return (uint8)AmmoType;
+}

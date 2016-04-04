@@ -4,6 +4,6 @@
 AAmmoPickup::AAmmoPickup()
 	: APickup()
 {
-	AmmoType = EAmmoType::SMG;
+	AmmoType = EAmmoType::Bullets;
 	AmmoValue = 100;
 }

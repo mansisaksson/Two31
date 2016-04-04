@@ -1,6 +1,6 @@
 #pragma once
 #include "Pickup.h"
-#include "../../Globals.h"
+#include "../Weapon.h"
 #include "AmmoPickup.generated.h"
 
 UCLASS()
