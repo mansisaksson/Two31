@@ -5,8 +5,11 @@
 ASMG::ASMG()
 	: AWeapon()
 {
+	ClipSize = 30;
 	timeSinceFire = 0;
 	RPM = 500;
+	ReloadTime = 2.f;
+	timeSinceReloadStart = 0;
 }
 
 void ASMG::BeginPlay()
@@ -19,6 +22,15 @@ void ASMG::Tick(float DeltaTime)
 {
 	AWeapon::Tick(DeltaTime);
 
+	if (AmmoInClip <= 0 && (*AmmoPool) > 0)
+	{
+		timeSinceReloadStart += DeltaTime;
+		if (timeSinceReloadStart >= ReloadTime)
+		{
+			timeSinceReloadStart = 0.f;
+			AmmoInClip = ClipSize;
+		}
+	}
 }
 
 void ASMG::StartFire(FVector TowardsLocation)
@@ -57,8 +69,9 @@ void ASMG::FireShot(FVector TowardsLocation)
 		return;
 	}
 
-	if ((*AmmoPool) > 0)
+	if ((*AmmoPool) > 0 && AmmoInClip > 0)
 	{
+		AmmoInClip--;
 		(*AmmoPool)--;
 
 		FHitResult result;
