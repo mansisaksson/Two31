@@ -132,6 +132,9 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 	InputComponent->BindAction("WeaponSlot3", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot3);
 	InputComponent->BindAction("WeaponSlot4", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot4);
 
+	InputComponent->BindAction("NextWeapon", IE_Pressed, this, &APlayerCharacter::NextWeapon);
+	InputComponent->BindAction("PreviousWeapon", IE_Pressed, this, &APlayerCharacter::PreviousWeapon);
+
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveSideways);
 	InputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::StartSprint);
@@ -185,7 +188,8 @@ void APlayerCharacter::SelectWeaponSlot(int index)
 			break;
 		}
 
-		CurrentWeapon->EquipWeapon(FPArmMesh, &CurrentAmmo->AmmoPool);
+		if (CurrentAmmo != NULL)
+			CurrentWeapon->EquipWeapon(FPArmMesh, &CurrentAmmo->AmmoPool);
 	}
 }
 void APlayerCharacter::SelectWeaponSlot1()
@@ -231,6 +235,55 @@ void APlayerCharacter::StartSprint()
 void APlayerCharacter::StopSprint()
 {
 	bIsSprinting = false;
+}
+
+void APlayerCharacter::NextWeapon()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Scrolled to next weapon. 2"));
+	int index = GetIndex() + 1;
+	if (index > WeaponSlots.Num() - 1)
+		index = 0;
+
+	int tempIndex = index;
+	while (WeaponSlots[tempIndex] == NULL)
+	{
+		tempIndex++;
+		if (tempIndex > WeaponSlots.Num() - 1)
+			tempIndex = 0;
+		if (tempIndex == index)
+			break;
+	}
+
+	SelectWeaponSlot(tempIndex);
+}
+void APlayerCharacter::PreviousWeapon()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Scrolled to previous weapon."));
+	int index = GetIndex() - 1;
+	if (index < 0)
+		index = WeaponSlots.Num() - 1;
+
+	int tempIndex = index;
+	while (WeaponSlots[tempIndex] == NULL)
+	{
+		tempIndex--;
+		if (tempIndex < 0)
+			tempIndex = WeaponSlots.Num() - 1;
+		if (tempIndex == index)
+			break;
+	}
+
+	SelectWeaponSlot(tempIndex);
+}
+int APlayerCharacter::GetIndex()
+{
+	int index = -1;
+	for (size_t i = 0; i < WeaponSlots.Num(); i++)
+	{
+		if (CurrentWeapon == WeaponSlots[i])
+			index = i;
+	}
+	return index;
 }
 
 void APlayerCharacter::TurnAtRate(float Rate)
