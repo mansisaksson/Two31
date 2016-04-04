@@ -10,6 +10,9 @@ class TWO31_API AHealthPickup : public APickup
 public:	
 	AHealthPickup();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetHealth();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	int32 HealthValue;

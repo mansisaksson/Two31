@@ -3,6 +3,7 @@
 #include "../Utilities/Pickups/Pickup.h"
 #include "../Utilities/Pickups/WeaponPickup.h"
 #include "../Utilities/Pickups/HealthPickup.h"
+#include "../Utilities/Pickups/ArmorPickup.h"
 #include "../Utilities/Pickups/AmmoPickup.h"
 #include "Utilities/Weapon.h"
 #include "GameFramework/InputSettings.h"
@@ -78,10 +79,18 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		else if (Cast<AHealthPickup>(OtherActor))
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Health Pickup"));
+			AHealthPickup* Healthpack = Cast<AHealthPickup>(OtherActor);
+			if (ChangeHealth(Healthpack->GetHealth()))
+				Healthpack->Destroy();
+
 		}
-		else if (Cast<AAmmoPickup>(OtherActor))
+		else if (Cast<AArmorPickup>(OtherActor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Ammo Pickup"));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Armor Pickup"));
+			AArmorPickup* Armor = Cast<AArmorPickup>(OtherActor);
+			if (ChangeArmor(Armor->GetArmor()))
+				Armor->Destroy();
+
 		}
 	}
 }
@@ -226,6 +235,15 @@ float APlayerCharacter::GetMaxHealth()
 {
 	return MaxHealth;
 }
+bool APlayerCharacter::ChangeHealth(float pChange)
+{
+	if (CurrentHealth < MaxHealth)
+	{
+		CurrentHealth = FMath::Clamp((CurrentHealth + pChange), 0.f, MaxHealth);
+		return true;
+	}
+	return false;
+}
 float APlayerCharacter::GetArmor()
 {
 	return CurrentArmor;
@@ -233,6 +251,15 @@ float APlayerCharacter::GetArmor()
 float APlayerCharacter::GetMaxArmor()
 {
 	return MaxArmor;
+}
+bool APlayerCharacter::ChangeArmor(float pChange)
+{
+	if (CurrentArmor < MaxArmor)
+	{
+		CurrentArmor = FMath::Clamp((CurrentArmor + pChange), 0.f, MaxArmor);
+		return true;
+	}
+	return false;
 }
 
 int32 APlayerCharacter::GetClipSize()

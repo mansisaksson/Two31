@@ -4,5 +4,10 @@
 AHealthPickup::AHealthPickup()
 	: APickup()
 {
-	HealthValue = 100;
+	HealthValue = 10;
+}
+
+float AHealthPickup::GetHealth()
+{
+	return HealthValue;
 }

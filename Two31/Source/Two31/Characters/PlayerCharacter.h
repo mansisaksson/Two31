@@ -27,10 +27,14 @@ public:
 	float GetHealth();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxHealth();
+	UFUNCTION(BlueprintCallable, Category = GetFunction)
+	bool ChangeHealth(float pChange);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetArmor();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxArmor();
+	UFUNCTION(BlueprintCallable,Category = GetFunction)
+	bool ChangeArmor(float pChange);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetClipSize();
