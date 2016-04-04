@@ -51,6 +51,12 @@ void ASMG::StopFire(FVector TowardsLocation)
 
 void ASMG::FireShot(FVector TowardsLocation)
 {
+	if (AmmoPool == NULL)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No Ammo Pool assigned!"));
+		return;
+	}
+
 	if (*AmmoPool > 0)
 	{
 		AmmoPool--;
