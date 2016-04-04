@@ -24,8 +24,6 @@ APlayerCharacter::APlayerCharacter()
 	CurrentArmor = 35.f;
 	MaxArmor = 100.f;
 
-	ClipSize = 32;
-	CurrentAmmo = 32;
 	ReserveAmmo = 100;
 	MaxAmmo = 200;
 
@@ -173,7 +171,7 @@ void APlayerCharacter::SelectWeaponSlot(int index)
 
 		CurrentWeapon = WeaponSlots[index];
 		CurrentWeapon->SetActorHiddenInGame(false);
-		CurrentWeapon->SetArmAnimations(FPArmMesh);
+		CurrentWeapon->EquipWeapon(FPArmMesh, &ReserveAmmo);
 	}
 }
 void APlayerCharacter::SelectWeaponSlot1()
@@ -316,11 +314,15 @@ bool APlayerCharacter::ChangeArmor(float pChange)
 
 int32 APlayerCharacter::GetClipSize()
 {
-	return ClipSize;
+	if (CurrentWeapon != NULL)
+		return CurrentWeapon->GetClipSize();
+	return 0;
 }
 int32 APlayerCharacter::GetCurrentAmmo()
 {
-	return CurrentAmmo;
+	if (CurrentWeapon != NULL)
+		return CurrentWeapon->GetCurrentAmmo();
+	return 0;
 }
 int32 APlayerCharacter::GetReserveAmmo()
 {

@@ -57,9 +57,9 @@ void ASMG::FireShot(FVector TowardsLocation)
 		return;
 	}
 
-	if (*AmmoPool > 0)
+	if ((*AmmoPool) > 0)
 	{
-		AmmoPool--;
+		(*AmmoPool)--;
 
 		FHitResult result;
 		ECollisionChannel collisionChannel;
