@@ -26,11 +26,15 @@ public:
 	/* These are all called from the PlayerCharacter */
 	virtual void EquipWeapon(USkeletalMeshComponent* ArmMesh, int* AmmoPool);
 	virtual void SetArmAnimations(USkeletalMeshComponent* ArmMesh);
-	virtual void StartFire(FVector TowardsLocation);
-	virtual void UpdateFire(float DeltaSeconds, FVector TowardsLocation);
-	virtual void StopFire(FVector TowardsLocation);
 
+	virtual void StartFire(FVector TowardsLocation);
+	virtual void UpdateFire(FVector TowardsLocation);
+	virtual void StopFire(FVector TowardsLocation);
+	virtual void FireShot(FVector TowardsLocation);
+
+	void Reload();
 	void SetAmmoPool(int* ReserveAmmo);
+	void FillClip();
 
 	bool GetIsFiring();
 
@@ -42,20 +46,37 @@ public:
 	uint8 GetAmmoType();
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimBlueprintGeneratedClass* ArmAnimationBlueprint;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	EAmmoType AmmoType;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	int32 ClipSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	bool bAutoReload;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	bool bFullAuto;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float ReloadTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float RPM;
 	
 	USkeletalMeshComponent* ArmMesh;
 
 	int AmmoInClip;
 	int* AmmoPool;
 
-private:
+	float timeSinceReloadStart;
+	float timeSinceFire;
+
+	bool bCanFire;
 	bool bIsFiring;
+	bool bFirstTimeEquiped;
+
+private:
+	bool bReload;
+	bool bReadyToFire;
+
 };

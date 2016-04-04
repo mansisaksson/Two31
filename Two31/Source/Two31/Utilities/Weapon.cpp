@@ -7,14 +7,25 @@ AWeapon::AWeapon()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ClipSize = 30;
+	RPM = 500;
+	ReloadTime = 2.f;
+	bAutoReload = true;
+
+	timeSinceFire = 0.f;
+	timeSinceReloadStart = 0.f;
+
+	bReload = false;
 	bIsFiring = false;
+	bCanFire = true;
+	bReadyToFire = false;
+	bFirstTimeEquiped = true;
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-	WeaponMesh->AttachTo(RootComponent);
 	WeaponMesh->SetOnlyOwnerSee(false);
 	WeaponMesh->bCastDynamicShadow = false;
 	WeaponMesh->CastShadow = false;
-	
+	RootComponent = WeaponMesh;
+
 	BulletSpawnLocation = CreateDefaultSubobject<USceneComponent>("BulletSpawnLocation");
 	BulletSpawnLocation->AttachTo(WeaponMesh);
 }
@@ -28,14 +39,50 @@ void AWeapon::BeginPlay()
 void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (AmmoPool == NULL)
+		return;
+
+	if (bAutoReload && AmmoInClip <= 0)
+		bReload = true;
+
+	if (bReload && (*AmmoPool) > 0)
+	{
+		timeSinceReloadStart += DeltaTime;
+		if (timeSinceReloadStart >= ReloadTime)
+		{
+			bReload = false;
+			timeSinceReloadStart = 0.f;
+			FillClip();
+		}
+	}
+
+	if (!bCanFire)
+	{
+		timeSinceFire += DeltaTime;
+		if (timeSinceFire > 1.f / (RPM / 60.f))
+		{
+			timeSinceFire = 0;
+			bReadyToFire = true;
+		}
+	}
+
+	if (bReadyToFire && (bFullAuto || (!bFullAuto && !bIsFiring)))
+	{
+		bCanFire = true;
+		bReadyToFire = false;
+	}
 }
 
 void AWeapon::EquipWeapon(USkeletalMeshComponent* ArmMesh, int* AmmoPool)
 {
 	SetArmAnimations(ArmMesh);
 	SetAmmoPool(AmmoPool);
-	// if too little ammo...
-	AmmoInClip = ClipSize;
+	
+	if (bFirstTimeEquiped)
+		FillClip();
+	bFirstTimeEquiped = false;
+	timeSinceReloadStart = 0.f;
 }
 
 void AWeapon::SetArmAnimations(USkeletalMeshComponent* ArmMesh)
@@ -51,22 +98,52 @@ void AWeapon::SetArmAnimations(USkeletalMeshComponent* ArmMesh)
 
 void AWeapon::StartFire(FVector TowardsLocation)
 {
-	bIsFiring = true;
+	if (bCanFire)
+	{
+		bCanFire = false;
+		bIsFiring = true;
+		timeSinceFire = 0.f;
+		FireShot(TowardsLocation);
+	}
 }
-
-void AWeapon::UpdateFire(float DeltaSeconds, FVector TowardsLocation)
+void AWeapon::UpdateFire(FVector TowardsLocation)
 {
-
+	if (bCanFire && bFullAuto)
+	{
+		bCanFire = false;
+		bIsFiring = true;
+		timeSinceFire = 0.f;
+		FireShot(TowardsLocation);
+	}
 }
-
 void AWeapon::StopFire(FVector TowardsLocation)
 {
 	bIsFiring = false;
 }
+void AWeapon::FireShot(FVector TowardsLocation)
+{
 
+}
+
+void AWeapon::Reload()
+{
+	bReload = true;
+}
 void AWeapon::SetAmmoPool(int* AmmoPool)
 {
 	this->AmmoPool = AmmoPool;
+}
+void AWeapon::FillClip()
+{
+	if (AmmoPool != NULL)
+	{
+		int AmmoDelta = (*AmmoPool) - ClipSize;
+
+		if (AmmoDelta >= 0)
+			AmmoInClip = ClipSize;
+		else
+			AmmoInClip = ClipSize - (*AmmoPool);
+	}
 }
 
 bool AWeapon::GetIsFiring()

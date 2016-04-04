@@ -6,60 +6,10 @@ ASMG::ASMG()
 	: AWeapon()
 {
 	ClipSize = 30;
-	timeSinceFire = 0;
 	RPM = 500;
 	ReloadTime = 2.f;
-	timeSinceReloadStart = 0;
+	timeSinceFire = 0;
 }
-
-void ASMG::BeginPlay()
-{
-	AWeapon::BeginPlay();
-
-}
-
-void ASMG::Tick(float DeltaTime)
-{
-	AWeapon::Tick(DeltaTime);
-
-	if (AmmoInClip <= 0 && (*AmmoPool) > 0)
-	{
-		timeSinceReloadStart += DeltaTime;
-		if (timeSinceReloadStart >= ReloadTime)
-		{
-			timeSinceReloadStart = 0.f;
-			AmmoInClip = ClipSize;
-		}
-	}
-}
-
-void ASMG::StartFire(FVector TowardsLocation)
-{
-	AWeapon::StartFire(TowardsLocation);
-
-	FireShot(TowardsLocation);
-
-	timeSinceFire = 0.f;
-}
-
-void ASMG::UpdateFire(float DeltaSeconds, FVector TowardsLocation)
-{
-	AWeapon::UpdateFire(DeltaSeconds, TowardsLocation);
-
-	timeSinceFire += DeltaSeconds;
-	if (timeSinceFire > 1.f / (RPM / 60.f))
-	{
-		timeSinceFire = 0;
-		FireShot(TowardsLocation);
-	}
-}
-
-void ASMG::StopFire(FVector TowardsLocation)
-{
-	AWeapon::StopFire(TowardsLocation);
-
-}
-
 
 void ASMG::FireShot(FVector TowardsLocation)
 {
@@ -100,7 +50,7 @@ void ASMG::FireShot(FVector TowardsLocation)
 			if (MuzzeFlash != NULL)
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
 
-			if (result.GetComponent() != NULL)
+			if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable)
 			{
 				FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
 				Angle.Normalize();

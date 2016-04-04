@@ -57,7 +57,7 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	if (bFireIsPressed && CurrentWeapon != NULL)
-		CurrentWeapon->UpdateFire(DeltaSeconds, FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
+		CurrentWeapon->UpdateFire(FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
 }
 
 void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)

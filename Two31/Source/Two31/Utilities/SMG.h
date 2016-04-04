@@ -11,12 +11,7 @@ class TWO31_API ASMG : public AWeapon
 public:
 	ASMG();
 
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
-
-	virtual void StartFire(FVector TowardsLocation) override;
-	virtual void UpdateFire(float DeltaSeconds, FVector TowardsLocation) override;
-	virtual void StopFire(FVector TowardsLocation) override;
+	virtual void FireShot(FVector TowardsLocation) override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
@@ -26,14 +21,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MuzzeFlash;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float ReloadTime;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float RPM;
-
 private:
-	void FireShot(FVector TowardsLocation);
+	
 
-	float timeSinceFire;
-	float timeSinceReloadStart;
 };
