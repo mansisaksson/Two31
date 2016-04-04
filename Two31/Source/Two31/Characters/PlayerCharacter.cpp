@@ -24,9 +24,6 @@ APlayerCharacter::APlayerCharacter()
 	CurrentArmor = 35.f;
 	MaxArmor = 100.f;
 
-	ReserveAmmo = 100;
-	MaxAmmo = 200;
-
 	WeaponSlots.SetNum(4);
 
 	bIsSprinting = false;
@@ -168,7 +165,27 @@ void APlayerCharacter::SelectWeaponSlot(int index)
 
 		CurrentWeapon = WeaponSlots[index];
 		CurrentWeapon->SetActorHiddenInGame(false);
-		CurrentWeapon->EquipWeapon(FPArmMesh, &ReserveAmmo);
+		
+		switch ((EAmmoType)CurrentWeapon->GetAmmoType())
+		{
+		case EAmmoType::BulletAmmo:
+			CurrentAmmo = &BulletAmmo;
+			break;
+		case EAmmoType::ShotgunAmmo:
+			CurrentAmmo = &ShotgunAmmo;
+			break;
+		case EAmmoType::ExplosiveAmmo:
+			CurrentAmmo = &ExplosiveAmmo;
+			break;
+		case EAmmoType::PlasmaAmmo:
+			CurrentAmmo = &PlasmaAmmo;
+			break;
+		default:
+			CurrentAmmo = NULL;
+			break;
+		}
+
+		CurrentWeapon->EquipWeapon(FPArmMesh, &CurrentAmmo->AmmoPool);
 	}
 }
 void APlayerCharacter::SelectWeaponSlot1()
@@ -266,17 +283,21 @@ int32 APlayerCharacter::GetClipSize()
 		return CurrentWeapon->GetClipSize();
 	return 0;
 }
-int32 APlayerCharacter::GetCurrentAmmo()
+int32 APlayerCharacter::GetAmmoInClip()
 {
 	if (CurrentWeapon != NULL)
-		return CurrentWeapon->GetCurrentAmmo();
+		return CurrentWeapon->GetAmmoInClip();
 	return 0;
 }
-int32 APlayerCharacter::GetReserveAmmo()
+int32 APlayerCharacter::GetAmmoPool()
 {
-	return ReserveAmmo;
+	if (CurrentAmmo != NULL)
+		return CurrentAmmo->AmmoPool;
+	return 0;
 }
 int32 APlayerCharacter::GetMaxAmmo()
 {
-	return MaxAmmo;
+	if (CurrentAmmo != NULL)
+		return CurrentAmmo->MaxAmmo;
+	return 0;
 }
