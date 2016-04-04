@@ -2,8 +2,16 @@
 
 #include "GameFramework/Actor.h"
 #include "Animation/AnimInstance.h"
-#include "WeaponGlobals.h"
 #include "Weapon.generated.h"
+
+UENUM(BlueprintType)
+enum class EAmmoType : uint8
+{
+	Shells		UMETA(DisplayName = "Shells"),
+	Bullets		UMETA(DisplayName = "Bullets"),
+	Energy		UMETA(DisplayName = "Energy")
+};
+
 
 UCLASS()
 class TWO31_API AWeapon : public AActor
@@ -37,25 +45,23 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetClipSize();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetAmmoInClip();
+	int32 GetCurrentAmmo();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	uint8 GetAmmoType();
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* ArmAnimationBlueprint;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	EAmmoType AmmoType;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	int32 ClipSize;
-	
-	USkeletalMeshComponent* ArmMesh;
-
-	int AmmoInClip;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	int32 CurrentAmmo;
 	int* AmmoPool;
+
+	USkeletalMeshComponent* ArmMesh;
 
 private:
 	bool bIsFiring;
+	EAmmoType AmmoType;
 };
