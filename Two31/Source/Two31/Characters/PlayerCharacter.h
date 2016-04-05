@@ -38,14 +38,20 @@ public:
 	UFUNCTION(BlueprintCallable,Category = GetFunction)
 	bool ChangeArmor(float pChange);
 
+	/* Ta bort, Kan använda GetWeapon() Istället */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetClipSize();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetAmmoInClip();
+	/**/
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetAmmoPool();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetMaxAmmo();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	class AWeapon* GetCurrentWeapon();
 
 protected:
 	virtual void BeginPlay() override;

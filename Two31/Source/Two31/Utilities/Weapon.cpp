@@ -78,7 +78,7 @@ void AWeapon::EquipWeapon(USkeletalMeshComponent* ArmMesh, int* AmmoPool)
 {
 	SetArmAnimations(ArmMesh);
 	SetAmmoPool(AmmoPool);
-	
+
 	if (bFirstTimeEquiped)
 		FillClip();
 	bFirstTimeEquiped = false;
@@ -98,7 +98,7 @@ void AWeapon::SetArmAnimations(USkeletalMeshComponent* ArmMesh)
 
 void AWeapon::StartFire(FVector TowardsLocation)
 {
-	if (bCanFire)
+	if (bCanFire && !bReload)
 	{
 		bCanFire = false;
 		bIsFiring = true;
@@ -108,7 +108,7 @@ void AWeapon::StartFire(FVector TowardsLocation)
 }
 void AWeapon::UpdateFire(FVector TowardsLocation)
 {
-	if (bCanFire && bFullAuto)
+	if (bCanFire && bFullAuto && !bReload)
 	{
 		bCanFire = false;
 		bIsFiring = true;
@@ -162,4 +162,13 @@ int32 AWeapon::GetAmmoInClip()
 uint8 AWeapon::GetAmmoType()
 {
 	return (uint8)AmmoType;
+}
+
+float AWeapon::GetTotalReloadTime()
+{
+	return ReloadTime;
+}
+float AWeapon::GetTimeSinceReload()
+{
+	return timeSinceReloadStart;
 }

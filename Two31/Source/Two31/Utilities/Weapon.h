@@ -44,6 +44,10 @@ public:
 	int32 GetAmmoInClip();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	uint8 GetAmmoType();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetTotalReloadTime();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetTimeSinceReload();
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)

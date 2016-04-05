@@ -128,7 +128,7 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 
 	InputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::OnFire);
 	InputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::OnReleaseFire);
-	InputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::OnReload);
+	InputComponent->BindAction("Reload", IE_Released, this, &APlayerCharacter::OnReload);
 
 	InputComponent->BindAction("WeaponSlot1", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot1);
 	InputComponent->BindAction("WeaponSlot2", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot2);
@@ -385,4 +385,8 @@ int32 APlayerCharacter::GetMaxAmmo()
 	if (CurrentAmmo != NULL)
 		return CurrentAmmo->MaxAmmo;
 	return 0;
+}
+AWeapon* APlayerCharacter::GetCurrentWeapon()
+{
+	return CurrentWeapon;
 }
