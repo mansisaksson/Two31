@@ -128,6 +128,7 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 
 	InputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::OnFire);
 	InputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::OnReleaseFire);
+	InputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::OnReload);
 
 	InputComponent->BindAction("WeaponSlot1", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot1);
 	InputComponent->BindAction("WeaponSlot2", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot2);
@@ -162,6 +163,11 @@ void APlayerCharacter::OnReleaseFire()
 	bFireIsPressed = false;
 	if (CurrentWeapon != NULL)
 		CurrentWeapon->StopFire(FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
+}
+void APlayerCharacter::OnReload()
+{
+	if (CurrentWeapon != NULL)
+		CurrentWeapon->Reload();
 }
 
 void APlayerCharacter::SelectWeaponSlot(int index)

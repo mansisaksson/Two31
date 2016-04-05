@@ -59,6 +59,7 @@ protected:
 
 	void OnFire();
 	void OnReleaseFire();
+	void OnReload();
 
 	void SelectWeaponSlot(int index);
 	void SelectWeaponSlot1();

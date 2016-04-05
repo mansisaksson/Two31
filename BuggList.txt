@@ -1,4 +1,9 @@
 
  *** Buggs ***
 
-- Springer fortare om man går diagonalt
+- Springer fortare om man går diagonalt medans man spritar
+
+- Kan ladda om medans man skjuter
+- Ammo i klippet behöver beräknas om när man byter vapen
+
+

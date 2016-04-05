@@ -142,7 +142,7 @@ void AWeapon::FillClip()
 		if (AmmoDelta >= 0)
 			AmmoInClip = ClipSize;
 		else
-			AmmoInClip = ClipSize - (*AmmoPool);
+			AmmoInClip = ClipSize + AmmoDelta;
 	}
 }
 

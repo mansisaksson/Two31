@@ -1,9 +1,0 @@
-
-*** TODO ***
-
-Weapon System
-	- Weapon Pickup	(Done)
-	- Weapon Ammo	(Pending)
-	- Weapon Reload
-	- Ammo pickup
-	
