@@ -23,6 +23,7 @@ APlayerCharacter::APlayerCharacter()
 	MaxHealth = 100.f;
 	CurrentArmor = 35.f;
 	MaxArmor = 100.f;
+	MaxAmountOfHealthPacks = 3;
 
 	WeaponSlots.SetNum(4);
 	HealthPacks.SetNum(0);
@@ -243,7 +244,6 @@ void APlayerCharacter::StopSprint()
 
 void APlayerCharacter::NextWeapon()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Scrolled to next weapon. 2"));
 	int index = GetIndex() + 1;
 	if (index > WeaponSlots.Num() - 1)
 		index = 0;
@@ -262,7 +262,6 @@ void APlayerCharacter::NextWeapon()
 }
 void APlayerCharacter::PreviousWeapon()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Scrolled to previous weapon."));
 	int index = GetIndex() - 1;
 	if (index < 0)
 		index = WeaponSlots.Num() - 1;
@@ -332,7 +331,7 @@ bool APlayerCharacter::PickupHealthPack(AHealthPickup* Healthpack)
 		CurrentHealth = FMath::Clamp((CurrentHealth + Healthpack->GetHealth()), 0.f, MaxHealth);
 		return true;
 	}
-	else if ( CurrentHealth == MaxHealth && HealthPacks.Num() < 3 )
+	else if ( CurrentHealth == MaxHealth && HealthPacks.Num() < MaxAmountOfHealthPacks)
 	{
 		HealthPacks.Add(Healthpack->GetHealth());
 		return true;

@@ -30,6 +30,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = GetFunction)
 	bool PickupHealthPack(AHealthPickup* Healthpack);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	int32 GetHealthPacks();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetArmor();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxArmor();
@@ -44,9 +46,6 @@ public:
 	int32 GetAmmoPool();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetMaxAmmo();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetHealthPacks();
 
 protected:
 	virtual void BeginPlay() override;
@@ -93,6 +92,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	bool bCanJump;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	int32 MaxAmountOfHealthPacks;
 
 	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
 	TSubclassOf<class AWeapon> StarterWeapon1;
