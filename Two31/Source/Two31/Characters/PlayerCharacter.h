@@ -45,6 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetMaxAmmo();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	int32 GetHealthPacks();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -73,6 +76,9 @@ protected:
 	void NextWeapon();
 	void PreviousWeapon();
 	int GetIndex();
+
+	void UseHealthPack();
+	void TakeDamageTest();
 
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
@@ -114,6 +120,8 @@ private:
 	float MaxHealth;
 	float CurrentArmor;
 	float MaxArmor;
+
+	int32 HealthPacks;
 
 	FAmmo* CurrentAmmo;
 	class AWeapon* CurrentWeapon;

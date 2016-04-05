@@ -24,11 +24,14 @@ APlayerCharacter::APlayerCharacter()
 	CurrentArmor = 35.f;
 	MaxArmor = 100.f;
 
+	HealthPacks = 0;
+
 	WeaponSlots.SetNum(4);
 
 	bIsSprinting = false;
 	bFireIsPressed = false;
 	bCanJump = true;
+	//bFullHealth = false;
 
 	// Create a CameraComponent	
 	FPCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
@@ -134,6 +137,9 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 
 	InputComponent->BindAction("NextWeapon", IE_Pressed, this, &APlayerCharacter::NextWeapon);
 	InputComponent->BindAction("PreviousWeapon", IE_Pressed, this, &APlayerCharacter::PreviousWeapon);
+
+	InputComponent->BindAction("UseHealthPack", IE_Pressed, this, &APlayerCharacter::UseHealthPack);
+	InputComponent->BindAction("TakeDamageTest", IE_Pressed, this, &APlayerCharacter::TakeDamageTest);
 
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveSideways);
@@ -286,6 +292,23 @@ int APlayerCharacter::GetIndex()
 	return index;
 }
 
+void APlayerCharacter::UseHealthPack()
+{
+	if (HealthPacks > 0)
+	{
+		ChangeHealth(10.f);
+		HealthPacks--;
+	}
+}
+int32 APlayerCharacter::GetHealthPacks()
+{
+	return HealthPacks;
+}
+void APlayerCharacter::TakeDamageTest()
+{
+	ChangeHealth(-20.f);
+}
+
 void APlayerCharacter::TurnAtRate(float Rate)
 {
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
@@ -308,6 +331,11 @@ bool APlayerCharacter::ChangeHealth(float pChange)
 	if (CurrentHealth < MaxHealth)
 	{
 		CurrentHealth = FMath::Clamp((CurrentHealth + pChange), 0.f, MaxHealth);
+		return true;
+	}
+	else if (HealthPacks < 3)
+	{
+		HealthPacks++;
 		return true;
 	}
 	return false;
