@@ -28,7 +28,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxHealth();
 	UFUNCTION(BlueprintCallable, Category = GetFunction)
-	bool ChangeHealth(float pChange);
+	bool PickupHealthPack(AHealthPickup* Healthpack);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetArmor();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
@@ -121,9 +121,8 @@ private:
 	float CurrentArmor;
 	float MaxArmor;
 
-	int32 HealthPacks;
-
 	FAmmo* CurrentAmmo;
 	class AWeapon* CurrentWeapon;
 	TArray<class AWeapon*> WeaponSlots;
+	TArray<float> HealthPacks;
 };
