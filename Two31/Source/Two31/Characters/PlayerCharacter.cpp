@@ -24,14 +24,12 @@ APlayerCharacter::APlayerCharacter()
 	CurrentArmor = 35.f;
 	MaxArmor = 100.f;
 
-	HealthPacks = 0;
-
 	WeaponSlots.SetNum(4);
+	HealthPacks.SetNum(0);
 
 	bIsSprinting = false;
 	bFireIsPressed = false;
 	bCanJump = true;
-	//bFullHealth = false;
 
 	// Create a CameraComponent	
 	FPCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
@@ -78,7 +76,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Health Pickup"));
 			AHealthPickup* Healthpack = Cast<AHealthPickup>(OtherActor);
-			if (ChangeHealth(Healthpack->GetHealth()))
+			if (PickupHealthPack(Healthpack))
 				Healthpack->Destroy();
 
 		}
@@ -294,19 +292,20 @@ int APlayerCharacter::GetIndex()
 
 void APlayerCharacter::UseHealthPack()
 {
-	if (HealthPacks > 0)
+	if (CurrentHealth < MaxHealth && HealthPacks.Num() > 0 )
 	{
-		ChangeHealth(10.f);
-		HealthPacks--;
+		CurrentHealth = FMath::Clamp((CurrentHealth + HealthPacks[0]), 0.f, MaxHealth);
+		HealthPacks.RemoveAt(0);
 	}
 }
 int32 APlayerCharacter::GetHealthPacks()
 {
-	return HealthPacks;
+	return HealthPacks.Num();
 }
 void APlayerCharacter::TakeDamageTest()
 {
-	ChangeHealth(-20.f);
+	if (CurrentHealth > 0)
+		CurrentHealth -= 20;
 }
 
 void APlayerCharacter::TurnAtRate(float Rate)
@@ -326,16 +325,16 @@ float APlayerCharacter::GetMaxHealth()
 {
 	return MaxHealth;
 }
-bool APlayerCharacter::ChangeHealth(float pChange)
+bool APlayerCharacter::PickupHealthPack(AHealthPickup* Healthpack)
 {
 	if (CurrentHealth < MaxHealth)
 	{
-		CurrentHealth = FMath::Clamp((CurrentHealth + pChange), 0.f, MaxHealth);
+		CurrentHealth = FMath::Clamp((CurrentHealth + Healthpack->GetHealth()), 0.f, MaxHealth);
 		return true;
 	}
-	else if (HealthPacks < 3)
+	else if ( CurrentHealth == MaxHealth && HealthPacks.Num() < 3 )
 	{
-		HealthPacks++;
+		HealthPacks.Add(Healthpack->GetHealth());
 		return true;
 	}
 	return false;
