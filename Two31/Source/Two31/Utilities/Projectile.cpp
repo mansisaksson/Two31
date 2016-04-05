@@ -33,7 +33,7 @@ void AProjectile::BeginPlay()
 
 void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if ((OtherActor != NULL) && (OtherComp != NULL))
+	if ((OtherActor != NULL) && (OtherComp != NULL) && OtherComp->Mobility == EComponentMobility::Movable)
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 
 	if (ExplosionSound != NULL)
@@ -41,7 +41,6 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 
 	if (ExplosionParticle != NULL)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, GetActorLocation(), FRotator::ZeroRotator, true);
-
 
 	Destroy();
 }

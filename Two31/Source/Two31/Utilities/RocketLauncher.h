@@ -11,12 +11,7 @@ class TWO31_API ARocketLauncher : public AWeapon
 public:
 	ARocketLauncher();
 
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
-
-	virtual void StartFire(FVector TowardsLocation) override;
-	virtual void UpdateFire(float DeltaSeconds, FVector TowardsLocation) override;
-	virtual void StopFire(FVector TowardsLocation) override;
+	virtual void FireShot(FVector TowardsLocation) override;
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
