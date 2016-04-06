@@ -44,6 +44,8 @@ APlayerCharacter::APlayerCharacter()
 	FPArmMesh->AttachParent = FPCamera;
 	FPArmMesh->bCastDynamicShadow = false;
 	FPArmMesh->CastShadow = false;
+
+	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("Noise Emitter"));
 }
 
 void APlayerCharacter::BeginPlay()
@@ -55,11 +57,23 @@ void APlayerCharacter::BeginPlay()
 	EquipWeapon(StarterWeapon4);
 }
 
+static float LastFootstep = 0.f;
 void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
 	if (bFireIsPressed && CurrentWeapon != NULL)
 		CurrentWeapon->UpdateFire(FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
+
+	FVector VelocityVector = GetCharacterMovement()->Velocity;
+	float VectorMagnitude = VelocityVector.Size();
+
+	float Now = GetWorld()->GetTimeSeconds();
+	if (Now > LastFootstep + 1.0f && VectorMagnitude > 0.f && !GetCharacterMovement()->IsCrouching())
+	{
+		MakeNoise(1.0f, this, FVector::ZeroVector);
+		LastFootstep = Now;
+	}
 }
 
 void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)

@@ -12,4 +12,4 @@ DEFINE_LOG_CATEGORY(DebugInit);
 DEFINE_LOG_CATEGORY(DebugAI);
 
 //Logging for Critical Errors that must always be addressed
-DEFINE_LOG_CATEGORY(DebugCriticalErrors);
+DEFINE_LOG_CATEGORY(DebugError);

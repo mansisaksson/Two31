@@ -1,5 +1,8 @@
 #include "Two31.h"
 #include "EnemyCharacter.h"
+#include "Perception/PawnSensingComponent.h"
+#include "AIController.h"
+#include "Engine.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -7,6 +10,7 @@ AEnemyCharacter::AEnemyCharacter()
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
+	bIsChasingPlayer = false;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -25,20 +29,39 @@ AEnemyCharacter::AEnemyCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->AttachTo(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+	
+	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
 }
 
-void AEnemyCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
+void AEnemyCharacter::PostInitializeComponents()
 {
-	check(InputComponent);
-	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	Super::PostInitializeComponents();
+	PawnSensor->OnSeePawn.AddDynamic(this, &AEnemyCharacter::OnSeePawn);
+	PawnSensor->OnHearNoise.AddDynamic(this, &AEnemyCharacter::OnHearNoise);
 
-	InputComponent->BindAxis("MoveForward", this, &AEnemyCharacter::MoveForward);
-	InputComponent->BindAxis("MoveRight", this, &AEnemyCharacter::MoveRight);
-	InputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	InputComponent->BindAxis("TurnRate", this, &AEnemyCharacter::TurnAtRate);
-	InputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	InputComponent->BindAxis("LookUpRate", this, &AEnemyCharacter::LookUpAtRate);
+	NavSystem = GetWorld()->GetNavigationSystem();
+	AIController = Cast<AAIController>(GetController());
+
+	if (AIController == NULL)
+		UE_LOG(DebugError, Fatal, TEXT("AIController Not found!"));
+}
+
+void AEnemyCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
+{
+	const FString VolumeDesc = FString::Printf(TEXT(" at volume %f"), Volume);
+	FString message = TEXT("Heard Actor ") + OtherActor->GetName() + VolumeDesc;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+
+	// TODO: game-specific logic
+}
+
+void AEnemyCharacter::OnSeePawn(APawn *OtherPawn)
+{
+	if (!bIsChasingPlayer)
+	{
+		NavSystem->SimpleMoveToActor(GetController(), OtherPawn);
+		bIsChasingPlayer = true;
+	}
 }
 
 void AEnemyCharacter::TurnAtRate(float Rate)
