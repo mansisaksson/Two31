@@ -16,6 +16,13 @@ Two31/Two31.VC.db
 SourceArt/**/*.png
 SourceArt/**/*.tga
 
+//FMOD Filer
+*.generated.h
+*.generated.cpp
+*.generated.dep.h
+*.pdb
+Two31/Plugins/FMODStudio/Intermediate/Build/Android/UE4/Inc/FMODStudio/TimeStamp
+
 // Compiled Object files
 *.slo
 *.lo
