@@ -22,6 +22,7 @@ SourceArt/**/*.tga
 *.generated.dep.h
 *.pdb
 Two31/Plugins/FMODStudio/Intermediate/Build/Android/UE4/Inc/FMODStudio/TimeStamp
+!Two31/Plugins/FMODStudio/Binaries/Win64/*
 
 // Compiled Object files
 *.slo
