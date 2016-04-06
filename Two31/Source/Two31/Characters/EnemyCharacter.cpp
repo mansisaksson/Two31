@@ -10,7 +10,7 @@ AEnemyCharacter::AEnemyCharacter()
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
-	Health = 100.f;
+	CurrentHealth = 100.f;
 	bIsChasingPlayer = false;
 
 	bUseControllerRotationPitch = false;
@@ -116,5 +116,5 @@ void AEnemyCharacter::MoveRight(float Value)
 
 float AEnemyCharacter::GetHealth()
 {
-	return Health;
+	return CurrentHealth;
 }

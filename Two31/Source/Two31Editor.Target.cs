@@ -21,5 +21,5 @@ public class Two31EditorTarget : TargetRules
 		)
 	{
 		OutExtraModuleNames.Add("Two31");
-	}
+    }
 }
