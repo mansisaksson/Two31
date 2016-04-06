@@ -15,15 +15,21 @@ class AEnemyCharacter : public ACharacter
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Sensor, meta = (AllowPrivateAccess = "true"))
 	class UPawnSensingComponent* PawnSensor;
+
 public:
 	AEnemyCharacter();
 
 	void PostInitializeComponents() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseTurnRate;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseLookUpRate;
+	void BeginPlay();
+	void Tick(float DeltaTime);
+
+	void InflictDamage(float Damage);
+
+	float GetHealth();
+
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 protected:
 	UFUNCTION()
@@ -37,16 +43,20 @@ protected:
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 
-public:
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float BaseTurnRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float BaseLookUpRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay)
+	float MaxHealth;
 
 private:
 	UNavigationSystem* NavSystem;
 	class AAIController* AIController;
 
-	bool bIsChasingPlayer;
+	float CurrentHealth;
 
-	float timeSinceSeenPlayer;
+	bool bIsChasingPlayer;
+	bool bIsAlive;
 };
 

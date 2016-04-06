@@ -10,6 +10,7 @@ AEnemyCharacter::AEnemyCharacter()
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
+	Health = 100.f;
 	bIsChasingPlayer = false;
 
 	bUseControllerRotationPitch = false;
@@ -44,6 +45,21 @@ void AEnemyCharacter::PostInitializeComponents()
 
 	if (AIController == NULL)
 		UE_LOG(DebugError, Fatal, TEXT("AIController Not found!"));
+}
+
+void AEnemyCharacter::BeginPlay()
+{
+
+}
+
+void AEnemyCharacter::Tick(float DeltaTime)
+{
+
+}
+
+void AEnemyCharacter::InflictDamage(float Damage)
+{
+	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, 100.f);
 }
 
 void AEnemyCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
@@ -96,4 +112,9 @@ void AEnemyCharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Value);
 	}
+}
+
+float AEnemyCharacter::GetHealth()
+{
+	return Health;
 }
