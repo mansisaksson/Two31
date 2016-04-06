@@ -10,7 +10,6 @@ Two31/Binaries/*
 Two31/Saved/*
 Two31/Build/*
 !Two31/Build/**/*.ico		//Don't ignore icon files in Build
-Two31/Two31.VC.db
 
 #Don't know what these are but I'll let them be for now
 SourceArt/**/*.png
@@ -55,6 +54,7 @@ SourceArt/**/*.tga
 *.opensdf
 *.sdf
 *.pdb
+*.VC.db
 
 //FMOD Filer
 *.generated.h
@@ -62,6 +62,16 @@ SourceArt/**/*.tga
 *.generated.dep.h
 *.pdb
 *.exp
+
+// FMOD Files
+Two31/Plugins/FMODStudio/Binaries/Win64/UE4Editor-FMODStudio.pdb
+Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/FMODStudioPrivatePCH.h
+Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/FMODStudioEditorPrivatePCH.h
+Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/FMODStudioOculusPrivatePCH.h
+Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudio.exp
+Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudioEditor.exp
+Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudioOculus.exp
+
 Two31/Plugins/FMODStudio/Intermediate/Build/Android/UE4/Inc/FMODStudio/TimeStamp
 !Two31/Plugins/FMODStudio/Binaries/Win64/fmod64.dll
 !Two31/Plugins/FMODStudio/Binaries/Win64/fmod64_vc.lib
@@ -73,3 +83,4 @@ Two31/Plugins/FMODStudio/Intermediate/Build/Android/UE4/Inc/FMODStudio/TimeStamp
 !Two31/Plugins/FMODStudio/Binaries/Win64/fmodstudioL64_vc.lib
 !Two31/Plugins/FMODStudio/Binaries/Win64/ovrfmod.dll
 !Two31/Plugins/FMODStudio/Binaries/Win64/ovrfmod.lib
+
