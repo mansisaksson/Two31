@@ -33,7 +33,7 @@ void AProjectile::BeginPlay()
 
 void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if ((OtherActor != NULL) && (OtherComp != NULL) && OtherComp->Mobility == EComponentMobility::Movable)
+	if ((OtherActor != NULL) && (OtherComp != NULL) && OtherComp->Mobility == EComponentMobility::Movable && OtherComp->IsSimulatingPhysics())
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 
 	if (ExplosionSound != NULL)

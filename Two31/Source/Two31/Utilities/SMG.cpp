@@ -50,7 +50,7 @@ void ASMG::FireShot(FVector TowardsLocation)
 			if (MuzzeFlash != NULL)
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
 
-			if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable)
+			if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
 			{
 				FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
 				Angle.Normalize();
