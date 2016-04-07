@@ -1,6 +1,7 @@
 #include "Two31.h"
 #include "EnemyCharacter.h"
 #include "Perception/PawnSensingComponent.h"
+#include "../Characters/PlayerCharacter.h"
 #include "AIController.h"
 #include "Engine.h"
 
@@ -11,9 +12,16 @@ AEnemyCharacter::AEnemyCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 	MaxHealth = 100.f;
+	AttackDamage = 10.f;
 	CurrentHealth = MaxHealth;
 	bIsChasingPlayer = false;
 	bIsAlive = true;
+	bAttackOnCooldown = false;
+
+	AttackCooldown = 3.f;
+	TimeSinceLastAttack = 0.f;
+	DespawnTimer = 3.f;
+	TimeSinceDeath = 0.f;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -35,6 +43,7 @@ AEnemyCharacter::AEnemyCharacter()
 	
 	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
 
+	AttackRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRadius"));
 }
 
 void AEnemyCharacter::PostInitializeComponents()
@@ -42,6 +51,10 @@ void AEnemyCharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	PawnSensor->OnSeePawn.AddDynamic(this, &AEnemyCharacter::OnSeePawn);
 	PawnSensor->OnHearNoise.AddDynamic(this, &AEnemyCharacter::OnHearNoise);
+
+	AttackRadius->AttachParent = RootComponent;
+	AttackRadius->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	AttackRadius->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnActorOverlapBegin);
 
 	NavSystem = GetWorld()->GetNavigationSystem();
 	AIController = Cast<AAIController>(GetController());
@@ -58,7 +71,22 @@ void AEnemyCharacter::BeginPlay()
 void AEnemyCharacter::Tick(float DeltaTime)
 {
 	if (!bIsAlive)
-		Destroy();
+	{
+		Death();
+		TimeSinceDeath += DeltaTime;
+		if (TimeSinceDeath > DespawnTimer)
+			Destroy();
+	}
+	if (bAttackOnCooldown)
+	{
+		TimeSinceLastAttack += DeltaTime;
+		if (TimeSinceLastAttack > AttackCooldown)
+		{
+			bIsChasingPlayer = false;
+			bAttackOnCooldown = false;
+			TimeSinceLastAttack = 0.f;
+		}
+	}
 }
 
 void AEnemyCharacter::InflictDamage(float Damage)
@@ -83,6 +111,22 @@ void AEnemyCharacter::OnSeePawn(APawn *OtherPawn)
 	{
 		NavSystem->SimpleMoveToActor(GetController(), OtherPawn);
 		bIsChasingPlayer = true;
+		//Attack(OtherPawn);
+	}
+}
+
+void AEnemyCharacter::OnActorOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Enemy inrange of something"));
+	if (Cast<APlayerCharacter>(OtherActor))
+	{
+		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
+		if (!bAttackOnCooldown)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Enemy attacking Player"));
+			Player->TakeDamage(AttackDamage);
+			bAttackOnCooldown = true;
+		}
 	}
 }
 
@@ -123,4 +167,12 @@ void AEnemyCharacter::MoveRight(float Value)
 float AEnemyCharacter::GetHealth()
 {
 	return CurrentHealth;
+}
+
+void AEnemyCharacter::Death()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	AttackRadius->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

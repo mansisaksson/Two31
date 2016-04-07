@@ -55,6 +55,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	class AWeapon* GetCurrentWeapon();
 
+	void TakeDamageTest();
+	void TakeDamage(float Damage);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -86,7 +89,8 @@ protected:
 	int GetIndex();
 
 	void UseHealthPack();
-	void TakeDamageTest();
+
+	void SpawnEnemyTest();
 
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);

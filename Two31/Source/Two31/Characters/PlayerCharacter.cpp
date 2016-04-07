@@ -5,6 +5,7 @@
 #include "../Utilities/Pickups/HealthPickup.h"
 #include "../Utilities/Pickups/ArmorPickup.h"
 #include "../Utilities/Pickups/AmmoPickup.h"
+#include "../Characters/EnemyCharacter.h"
 #include "Utilities/Weapon.h"
 #include "GameFramework/InputSettings.h"
 #include "Engine.h"
@@ -154,6 +155,7 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 
 	InputComponent->BindAction("UseHealthPack", IE_Pressed, this, &APlayerCharacter::UseHealthPack);
 	InputComponent->BindAction("TakeDamageTest", IE_Pressed, this, &APlayerCharacter::TakeDamageTest);
+	InputComponent->BindAction("SpawnEnemyTest", IE_Pressed, this, &APlayerCharacter::SpawnEnemyTest);
 
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveSideways);
@@ -326,6 +328,11 @@ void APlayerCharacter::TakeDamageTest()
 	if (CurrentHealth > 0)
 		CurrentHealth -= 20;
 }
+void APlayerCharacter::TakeDamage(float Damage)
+{
+	if (CurrentHealth > 0)
+		CurrentHealth = FMath::Clamp((CurrentHealth - Damage), 0.f, MaxHealth);
+}
 
 void APlayerCharacter::TurnAtRate(float Rate)
 {
@@ -403,4 +410,12 @@ int32 APlayerCharacter::GetMaxAmmo()
 AWeapon* APlayerCharacter::GetCurrentWeapon()
 {
 	return CurrentWeapon;
+}
+
+void APlayerCharacter::SpawnEnemyTest()
+{
+	const FRotator SpawnRotation = GetActorRotation();
+	const FVector SpawnLocation = GetActorLocation() - FVector(100.f, 100.f, 0.f);
+	//GetWorld()->SpawnActor<AEnemyCharacter>(SpawnLocation, SpawnRotation);
+	//GetWorld()->SpawnActorAbsolute<AEnemyCharacter>(SpawnLocation, SpawnRotation);
 }

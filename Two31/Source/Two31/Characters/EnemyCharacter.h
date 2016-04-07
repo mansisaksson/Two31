@@ -16,6 +16,9 @@ class AEnemyCharacter : public ACharacter
 	UPROPERTY(VisibleDefaultsOnly, Category = Sensor, meta = (AllowPrivateAccess = "true"))
 	class UPawnSensingComponent* PawnSensor;
 
+	UPROPERTY(VisibleAnywhere, Category = Collision)
+	class USphereComponent* AttackRadius;
+
 public:
 	AEnemyCharacter();
 
@@ -36,8 +39,8 @@ protected:
 	void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
 	UFUNCTION()
 	void OnSeePawn(APawn *OtherPawn);
-	//UFUNCTION()
-	//void OnComponentHit(APawn *OtherActor);
+	UFUNCTION()
+	void OnActorOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -45,12 +48,20 @@ protected:
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	void Death();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
 	float BaseTurnRate;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
 	float BaseLookUpRate;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float DespawnTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float AttackCooldown;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float AttackDamage;
 
 private:
 	UNavigationSystem* NavSystem;
@@ -60,5 +71,9 @@ private:
 
 	bool bIsChasingPlayer;
 	bool bIsAlive;
+	bool bAttackOnCooldown;
+
+	float TimeSinceDeath;
+	float TimeSinceLastAttack;
 };
 
