@@ -36,6 +36,8 @@ protected:
 	void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
 	UFUNCTION()
 	void OnSeePawn(APawn *OtherPawn);
+	//UFUNCTION()
+	//void OnComponentHit(APawn *OtherActor);
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);

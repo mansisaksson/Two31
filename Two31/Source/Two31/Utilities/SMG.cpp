@@ -1,5 +1,6 @@
 #include "Two31.h"
 #include "SMG.h"
+#include "../Characters/EnemyCharacter.h"
 #include "Engine.h"
 
 ASMG::ASMG()
@@ -55,6 +56,15 @@ void ASMG::FireShot(FVector TowardsLocation)
 				FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
 				Angle.Normalize();
 				result.GetComponent()->AddImpulseAtLocation(Angle * 50000.0f, result.Location);
+			}
+			if (result.GetActor() != NULL)
+			{
+				if (Cast<AEnemyCharacter>(result.GetActor()))
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Damaging Enemy"));
+					AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
+					Enemy->InflictDamage(WeaponDamage);
+				}
 			}
 		}
 

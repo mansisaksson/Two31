@@ -14,6 +14,8 @@ AWeapon::AWeapon()
 	timeSinceFire = 0.f;
 	timeSinceReloadStart = 0.f;
 
+	WeaponDamage = 10;
+
 	bReload = false;
 	bIsFiring = false;
 	bCanFire = true;

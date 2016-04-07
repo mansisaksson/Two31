@@ -66,6 +66,8 @@ protected:
 	float ReloadTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float RPM;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float WeaponDamage;
 	
 	USkeletalMeshComponent* ArmMesh;
 

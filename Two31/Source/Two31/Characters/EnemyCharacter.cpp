@@ -10,8 +10,10 @@ AEnemyCharacter::AEnemyCharacter()
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
-	CurrentHealth = 100.f;
+	MaxHealth = 100.f;
+	CurrentHealth = MaxHealth;
 	bIsChasingPlayer = false;
+	bIsAlive = true;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -32,6 +34,7 @@ AEnemyCharacter::AEnemyCharacter()
 	FollowCamera->bUsePawnControlRotation = false;
 	
 	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
+
 }
 
 void AEnemyCharacter::PostInitializeComponents()
@@ -54,12 +57,15 @@ void AEnemyCharacter::BeginPlay()
 
 void AEnemyCharacter::Tick(float DeltaTime)
 {
-
+	if (!bIsAlive)
+		Destroy();
 }
 
 void AEnemyCharacter::InflictDamage(float Damage)
 {
 	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, 100.f);
+	if (CurrentHealth == 0)
+		bIsAlive = false;
 }
 
 void AEnemyCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
