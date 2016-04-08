@@ -52,7 +52,8 @@ void AEnemyCharacter::PostInitializeComponents()
 	PawnSensor->OnSeePawn.AddDynamic(this, &AEnemyCharacter::OnSeePawn);
 	PawnSensor->OnHearNoise.AddDynamic(this, &AEnemyCharacter::OnHearNoise);
 
-	AttackRadius->AttachParent = RootComponent;
+	//AttackRadius->AttachParent = RootComponent;
+	AttackRadius->AttachTo(RootComponent);
 	AttackRadius->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	AttackRadius->OnComponentBeginOverlap.AddDynamic(this, &AEnemyCharacter::OnActorOverlapBegin);
 
@@ -65,7 +66,8 @@ void AEnemyCharacter::PostInitializeComponents()
 
 void AEnemyCharacter::BeginPlay()
 {
-
+	Super::BeginPlay();
+	AttackRadius->SetRelativeLocation(FVector::ZeroVector);
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)
