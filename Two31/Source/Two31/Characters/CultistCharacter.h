@@ -12,4 +12,20 @@ class TWO31_API ACultistCharacter : public AEnemyCharacter
 public:
 	ACultistCharacter();
 	
+protected:
+	UFUNCTION()
+	virtual void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
+	UFUNCTION()
+	virtual void OnSeePawn(APawn *OtherPawn);
+
+private:
+
+	float Shoot;
+	
+	float StepRight;
+	float StepLeft;
+	float BackUp;
+	float MoveForward;
+
+	float LookForPlayer;
 };
