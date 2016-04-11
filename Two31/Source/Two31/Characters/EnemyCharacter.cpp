@@ -109,12 +109,14 @@ void AEnemyCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, fl
 
 void AEnemyCharacter::OnSeePawn(APawn *OtherPawn)
 {
-	if (!bIsChasingPlayer)
-	{
-		NavSystem->SimpleMoveToActor(GetController(), OtherPawn);
-		bIsChasingPlayer = true;
-		//Attack(OtherPawn);
-	}
+	NavSystem->SimpleMoveToLocation(GetController(), OtherPawn->GetActorLocation());
+	//if (!bIsChasingPlayer)
+	//{
+	//	
+	//	//NavSystem->SimpleMoveToActor(GetController(), OtherPawn);
+	//	bIsChasingPlayer = true;
+	//	//Attack(OtherPawn);
+	//}
 }
 
 void AEnemyCharacter::OnActorOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
@@ -176,5 +178,6 @@ void AEnemyCharacter::Death()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	//GetMesh()->AddImpulse();
 	AttackRadius->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
