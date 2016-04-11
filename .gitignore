@@ -71,8 +71,11 @@ Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStud
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudio.exp
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudioEditor.exp
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudioOculus.exp
+Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/PCH.FMODStudioPrivatePCH.h.cpp
+Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/PCH.FMODStudioEditorPrivatePCH.h.cpp
+Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/PCH.FMODStudioOculusPrivatePCH.h.cpp
 
-Two31/Plugins/FMODStudio/Intermediate/Build/Android/UE4/Inc/FMODStudio/TimeStamp
+*/TimeStamp
 !Two31/Plugins/FMODStudio/Binaries/Win64/fmod64.dll
 !Two31/Plugins/FMODStudio/Binaries/Win64/fmod64_vc.lib
 !Two31/Plugins/FMODStudio/Binaries/Win64/fmodL64.dll
