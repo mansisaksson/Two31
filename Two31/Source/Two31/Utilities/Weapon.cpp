@@ -1,6 +1,8 @@
 #include "Two31.h"
 #include "Weapon.h"
 #include "Engine.h"
+#include "../Characters/PlayerCharacter.h"
+#include "../Characters/CultistCharacter.h"
 
 AWeapon::AWeapon()
 {
@@ -76,25 +78,48 @@ void AWeapon::Tick(float DeltaTime)
 	}
 }
 
-void AWeapon::EquipWeapon(USkeletalMeshComponent* ArmMesh, int* AmmoPool)
+void AWeapon::EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* AmmoPool)
 {
-	SetArmAnimations(ArmMesh);
+	if (Cast<APlayerCharacter>(SkeletalMesh->GetAttachmentRootActor()))
+	{
+		SetPlayerAnimations(SkeletalMesh);
+		WeaponMesh->SetRelativeRotation(FRotator(0.f, 0.f, 0.f));
+		WeaponMesh->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	}
+	else if (Cast<ACultistCharacter>(SkeletalMesh->GetAttachmentRootActor()))
+	{
+		SetCultistAnimations(SkeletalMesh);
+		WeaponMesh->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+		WeaponMesh->SetRelativeLocation(FVector(-9.f, 5.f, -2.f));
+	}
+
 	SetAmmoPool(AmmoPool);
 
 	if (bFirstTimeEquiped)
 		FillClip();
+
 	bFirstTimeEquiped = false;
 	timeSinceReloadStart = 0.f;
 }
 
-void AWeapon::SetArmAnimations(USkeletalMeshComponent* ArmMesh)
+void AWeapon::SetPlayerAnimations(USkeletalMeshComponent* PlayerMesh)
 {
-	this->ArmMesh = ArmMesh;
-	if (ArmAnimationBlueprint != NULL && ArmMesh != NULL)
+	OwnerMesh = PlayerMesh;
+	if (PlayerAnimationBlueprint != NULL && OwnerMesh != NULL)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Animations")));
-		ArmMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-		ArmMesh->SetAnimInstanceClass(ArmAnimationBlueprint);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Player Animations")));
+		OwnerMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		OwnerMesh->SetAnimInstanceClass(PlayerAnimationBlueprint);
+	}
+}
+void AWeapon::SetCultistAnimations(USkeletalMeshComponent* CultistMesh)
+{
+	OwnerMesh = CultistMesh;
+	if (PlayerAnimationBlueprint != NULL && OwnerMesh != NULL)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Cultist Animations")));
+		OwnerMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		OwnerMesh->SetAnimInstanceClass(CultistAnimationBlueprint);
 	}
 }
 

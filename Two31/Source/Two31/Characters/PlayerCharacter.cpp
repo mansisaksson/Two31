@@ -266,7 +266,7 @@ void APlayerCharacter::StopSprint()
 
 void APlayerCharacter::NextWeapon()
 {
-	int index = GetIndex() + 1;
+	int index = GetWeaponIndex() + 1;
 	if (index > WeaponSlots.Num() - 1)
 		index = 0;
 
@@ -284,7 +284,7 @@ void APlayerCharacter::NextWeapon()
 }
 void APlayerCharacter::PreviousWeapon()
 {
-	int index = GetIndex() - 1;
+	int index = GetWeaponIndex() - 1;
 	if (index < 0)
 		index = WeaponSlots.Num() - 1;
 
@@ -300,7 +300,7 @@ void APlayerCharacter::PreviousWeapon()
 
 	SelectWeaponSlot(tempIndex);
 }
-int APlayerCharacter::GetIndex()
+int APlayerCharacter::GetWeaponIndex()
 {
 	int index = -1;
 	for (size_t i = 0; i < WeaponSlots.Num(); i++)

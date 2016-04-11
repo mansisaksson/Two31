@@ -37,6 +37,7 @@ protected:
 
 	UNavigationSystem* NavSystem;
 	class AAIController* AIController;
+	class APlayerCharacter* PlayerReferense;
 
 	float CurrentHealth;
 	float TimeSinceDeath;

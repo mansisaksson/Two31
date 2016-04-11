@@ -86,7 +86,7 @@ protected:
 
 	void NextWeapon();
 	void PreviousWeapon();
-	int GetIndex();
+	int GetWeaponIndex();
 
 	void UseHealthPack();
 
