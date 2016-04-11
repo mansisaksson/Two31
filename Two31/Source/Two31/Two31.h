@@ -2,6 +2,7 @@
 #define __TWO31_H__
 
 #include "EngineMinimal.h"
+#include "Engine.h"
 
 //General Log
 DECLARE_LOG_CATEGORY_EXTERN(DebugLog, Log, All);

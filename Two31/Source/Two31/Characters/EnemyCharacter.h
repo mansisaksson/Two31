@@ -7,73 +7,40 @@ class AEnemyCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FollowCamera;
-
 	UPROPERTY(VisibleDefaultsOnly, Category = Sensor, meta = (AllowPrivateAccess = "true"))
 	class UPawnSensingComponent* PawnSensor;
-
-	UPROPERTY(VisibleAnywhere, Category = Collision)
-	class USphereComponent* AttackRadius;
 
 public:
 	AEnemyCharacter();
 
-	void PostInitializeComponents() override;
+	virtual void PostInitializeComponents() override;
 
-	void BeginPlay();
-	void Tick(float DeltaTime);
+	virtual void BeginPlay();
+	virtual void Tick(float DeltaTime);
 
-	void InflictDamage(float Damage);
+	virtual void Take_Damage(float Damage);
 
-	float GetHealth();
-
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	virtual float GetHealth();
 
 protected:
 	UFUNCTION()
-	void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
+	virtual void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
 	UFUNCTION()
-	void OnSeePawn(APawn *OtherPawn);
-	UFUNCTION()
-	void OnActorOverlapBegin(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	virtual void OnSeePawn(APawn *OtherPawn);
 
-	void MoveForward(float Value);
-	void MoveRight(float Value);
+	virtual void Death();
 
-	void TurnAtRate(float Rate);
-	void LookUpAtRate(float Rate);
-
-	void Death();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
-	float BaseTurnRate;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera)
-	float BaseLookUpRate;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float DespawnTimer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float AttackCooldown;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float AttackDamage;
 
-private:
 	UNavigationSystem* NavSystem;
 	class AAIController* AIController;
 
 	float CurrentHealth;
-
-	bool bIsChasingPlayer;
-	bool bIsAlive;
-	bool bAttackOnCooldown;
-
 	float TimeSinceDeath;
-	float TimeSinceLastAttack;
+
+	bool bIsAlive;
 };
 

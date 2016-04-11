@@ -56,7 +56,7 @@ public:
 	class AWeapon* GetCurrentWeapon();
 
 	void TakeDamageTest();
-	void TakeDamage(float Damage);
+	void Take_Damage(float Damage);
 
 protected:
 	virtual void BeginPlay() override;

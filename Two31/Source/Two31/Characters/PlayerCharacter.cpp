@@ -328,7 +328,7 @@ void APlayerCharacter::TakeDamageTest()
 	if (CurrentHealth > 0)
 		CurrentHealth -= 20;
 }
-void APlayerCharacter::TakeDamage(float Damage)
+void APlayerCharacter::Take_Damage(float Damage)
 {
 	if (CurrentHealth > 0)
 		CurrentHealth = FMath::Clamp((CurrentHealth - Damage), 0.f, MaxHealth);

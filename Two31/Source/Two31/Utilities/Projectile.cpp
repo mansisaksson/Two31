@@ -41,7 +41,7 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Damaging Enemy"));
 			AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(OtherActor);
-			Enemy->InflictDamage(50.f);
+			Enemy->Take_Damage(50.f);
 		}
 		if ((OtherActor != NULL) && (OtherComp != NULL) && OtherComp->Mobility == EComponentMobility::Movable && OtherComp->IsSimulatingPhysics())
 			OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());	

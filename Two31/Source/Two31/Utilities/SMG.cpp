@@ -63,7 +63,7 @@ void ASMG::FireShot(FVector TowardsLocation)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Damaging Enemy"));
 					AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
-					Enemy->InflictDamage(WeaponDamage);
+					Enemy->Take_Damage(WeaponDamage);
 				}
 			}
 		}
