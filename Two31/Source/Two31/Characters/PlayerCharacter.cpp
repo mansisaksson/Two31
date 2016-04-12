@@ -47,6 +47,18 @@ APlayerCharacter::APlayerCharacter()
 	FPArmMesh->CastShadow = false;
 
 	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("Noise Emitter"));
+
+	LineOfSight_Chest = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Chest"));
+	LineOfSight_Chest->AttachTo(RootComponent);
+	LineOfSight_Chest->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
+
+	LineOfSight_Shoulder_Right = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Right"));
+	LineOfSight_Shoulder_Right->AttachTo(RootComponent);
+	LineOfSight_Shoulder_Right->SetRelativeLocation(FVector(0.f, 40.f, 60.f));
+
+	LineOfSight_Shoulder_Left = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Left"));
+	LineOfSight_Shoulder_Left->AttachTo(RootComponent);
+	LineOfSight_Shoulder_Left->SetRelativeLocation(FVector(0.f, -40.f, 60.f));
 }
 
 void APlayerCharacter::BeginPlay()

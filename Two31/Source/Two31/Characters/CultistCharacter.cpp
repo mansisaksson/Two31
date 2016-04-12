@@ -6,6 +6,7 @@
 ACultistCharacter::ACultistCharacter()
 	: AEnemyCharacter()
 {
+	bHasLineOfSight = false;
 	WeaponSlots.SetNum(1);
 }
 
@@ -25,6 +26,7 @@ void ACultistCharacter::Tick(float DeltaTime)
 {
 	AEnemyCharacter::Tick(DeltaTime);
 
+
 	//AddMovementInput(GetActorForwardVector(), 10 * DeltaTime);
 
 	// Look toward focus
@@ -36,6 +38,16 @@ void ACultistCharacter::Tick(float DeltaTime)
 		NewControlRotation.Yaw = FRotator::ClampAxis(NewControlRotation.Yaw);
 		FaceRotation(NewControlRotation, DeltaTime);
 	}
+}
+
+void ACultistCharacter::TryGetLineOfSight()
+{
+
+}
+
+void ACultistCharacter::UpdateLocationIfNeeded()
+{
+
 }
 
 void ACultistCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)

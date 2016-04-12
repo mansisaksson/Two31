@@ -19,6 +19,13 @@ class TWO31_API APlayerCharacter : public ACharacter
 	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UPawnNoiseEmitterComponent* NoiseEmitter;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USceneComponent* LineOfSight_Chest;
+	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USceneComponent* LineOfSight_Shoulder_Right;
+	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USceneComponent* LineOfSight_Shoulder_Left;
+
 public:
 	APlayerCharacter();
 

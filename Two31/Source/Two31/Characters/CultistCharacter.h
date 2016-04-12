@@ -38,14 +38,12 @@ protected:
 	FAmmo ExplosiveAmmo;
 
 private:
-	float Shoot;
-	float StepRight;
-	float StepLeft;
-	float BackUp;
-	float MoveForward;
-	float LookForPlayer;
+	void TryGetLineOfSight();
+	void UpdateLocationIfNeeded();
 
+	bool bHasLineOfSight;
 	bool bFire;
+	bool bHasSeenPlayer;
 
 	FAmmo* CurrentAmmo;
 	class AWeapon* CurrentWeapon;
