@@ -24,8 +24,9 @@ public:
 	virtual void Tick(float DeltaSeconds) override;	
 
 	/* These are all called from the PlayerCharacter */
-	virtual void EquipWeapon(USkeletalMeshComponent* ArmMesh, int* AmmoPool);
-	virtual void SetArmAnimations(USkeletalMeshComponent* ArmMesh);
+	virtual void EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* AmmoPool);
+	virtual void SetPlayerAnimations(USkeletalMeshComponent* PlayerMesh);
+	virtual void SetCultistAnimations(USkeletalMeshComponent* CultistMesh);
 
 	virtual void StartFire(FVector TowardsLocation);
 	virtual void UpdateFire(FVector TowardsLocation);
@@ -50,8 +51,10 @@ public:
 	float GetTimeSinceReload();
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimBlueprintGeneratedClass* ArmAnimationBlueprint;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UAnimBlueprintGeneratedClass* PlayerAnimationBlueprint;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UAnimBlueprintGeneratedClass* CultistAnimationBlueprint;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	EAmmoType AmmoType;
@@ -69,7 +72,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float WeaponDamage;
 	
-	USkeletalMeshComponent* ArmMesh;
+	USkeletalMeshComponent* OwnerMesh;
 
 	int AmmoInClip;
 	int* AmmoPool;

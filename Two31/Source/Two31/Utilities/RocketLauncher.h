@@ -21,6 +21,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MuzzeFlash;
 
-	UPROPERTY(EditDefaultsOnly, Category = Gameplay)
+	UPROPERTY(EditAnywhere, Category = Gameplay)
 	TSubclassOf<class AProjectile> ProjectileClass;
 };

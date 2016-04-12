@@ -47,6 +47,18 @@ APlayerCharacter::APlayerCharacter()
 	FPArmMesh->CastShadow = false;
 
 	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("Noise Emitter"));
+
+	LineOfSight_Chest = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Chest"));
+	LineOfSight_Chest->AttachTo(RootComponent);
+	LineOfSight_Chest->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
+
+	LineOfSight_Shoulder_Right = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Right"));
+	LineOfSight_Shoulder_Right->AttachTo(RootComponent);
+	LineOfSight_Shoulder_Right->SetRelativeLocation(FVector(0.f, 40.f, 60.f));
+
+	LineOfSight_Shoulder_Left = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Left"));
+	LineOfSight_Shoulder_Left->AttachTo(RootComponent);
+	LineOfSight_Shoulder_Left->SetRelativeLocation(FVector(0.f, -40.f, 60.f));
 }
 
 void APlayerCharacter::BeginPlay()
@@ -266,7 +278,7 @@ void APlayerCharacter::StopSprint()
 
 void APlayerCharacter::NextWeapon()
 {
-	int index = GetIndex() + 1;
+	int index = GetWeaponIndex() + 1;
 	if (index > WeaponSlots.Num() - 1)
 		index = 0;
 
@@ -284,7 +296,7 @@ void APlayerCharacter::NextWeapon()
 }
 void APlayerCharacter::PreviousWeapon()
 {
-	int index = GetIndex() - 1;
+	int index = GetWeaponIndex() - 1;
 	if (index < 0)
 		index = WeaponSlots.Num() - 1;
 
@@ -300,7 +312,7 @@ void APlayerCharacter::PreviousWeapon()
 
 	SelectWeaponSlot(tempIndex);
 }
-int APlayerCharacter::GetIndex()
+int APlayerCharacter::GetWeaponIndex()
 {
 	int index = -1;
 	for (size_t i = 0; i < WeaponSlots.Num(); i++)

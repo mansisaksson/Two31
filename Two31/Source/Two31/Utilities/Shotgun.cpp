@@ -79,9 +79,9 @@ void AShotgun::FireShot(FVector TowardsLocation)
 		if (FireSound != NULL)
 			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 
-		if (ArmFireAnimation != NULL && ArmMesh != NULL)
+		if (ArmFireAnimation != NULL && OwnerMesh != NULL)
 		{
-			UAnimInstance* AnimInstance = ArmMesh->GetAnimInstance();
+			UAnimInstance* AnimInstance = OwnerMesh->GetAnimInstance();
 			if (AnimInstance != NULL)
 				AnimInstance->Montage_Play(ArmFireAnimation, 1.f);
 		}
