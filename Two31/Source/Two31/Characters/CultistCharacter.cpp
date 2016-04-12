@@ -6,7 +6,17 @@
 ACultistCharacter::ACultistCharacter()
 	: AEnemyCharacter()
 {
+	TimeToLooseLineOfSight = 1.f;
+	TimeSinceSeenPlayer = 0;
+
+	TurnRate = 100.f;
+
+	AmmoPool = 2147483647; // Sätter ammo till max så att den inte tar slut
 	bHasLineOfSight = false;
+	bCanSeePlayerChest = false;
+	bCanSeePlayerShoulder_Left = false;
+	bCanSeePlayerShoulder_Right = false;
+
 	WeaponSlots.SetNum(1);
 }
 
@@ -26,28 +36,110 @@ void ACultistCharacter::Tick(float DeltaTime)
 {
 	AEnemyCharacter::Tick(DeltaTime);
 
+	if (bIsAlive)
+	{
+		CheckLineOfSight();
+		if (bHasLineOfSight)
+		{
+			FireTowardsPlayer();
+			ReactToPlayerMovement(DeltaTime);
+			FocusOnPlayer(DeltaTime);
+		}
+		else
+		{
+			//TryGetLineOfSight();
+		}
+	}
+}
 
-	//AddMovementInput(GetActorForwardVector(), 10 * DeltaTime);
+void ACultistCharacter::CheckLineOfSight()
+{
+	FHitResult result;
+	ECollisionChannel collisionChannel;
+	collisionChannel = ECC_WorldDynamic;
+	FCollisionQueryParams collisionQuery;
+	collisionQuery.bTraceComplex = true;
+	FCollisionObjectQueryParams objectCollisionQuery;
+	objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
+	FCollisionResponseParams collisionResponse;
+	collisionResponse = ECR_Block;
+	collisionQuery.AddIgnoredActor(this);
+	collisionQuery.AddIgnoredActor(CurrentWeapon);
 
-	// Look toward focus
+	for (size_t i = 0; i < 3; i++)
+	{
+		if (i == 0)
+		{
+			GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Chest()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
+			if (Cast<APlayerCharacter>(result.GetActor()))
+				bCanSeePlayerChest = true;
+			else
+				bCanSeePlayerChest = false;
+		}
+		else if (i == 1)
+		{
+			GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Shoulder_Left()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
+			if (Cast<APlayerCharacter>(result.GetActor()))
+				bCanSeePlayerShoulder_Left = true;
+			else
+				bCanSeePlayerShoulder_Left = false;
+		}
+		else if (i == 2)
+		{
+			GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Shoulder_Right()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
+			if (Cast<APlayerCharacter>(result.GetActor()))
+				bCanSeePlayerShoulder_Right = true;
+			else
+				bCanSeePlayerShoulder_Right = false;
+		}
+	}
+
+	if (bCanSeePlayerChest || bCanSeePlayerShoulder_Left || bCanSeePlayerShoulder_Right)
+		bHasLineOfSight = true;
+	else if (TimeSinceSeenPlayer > TimeToLooseLineOfSight)
+		bHasLineOfSight = false;
+
+	//if (bCanSeePlayerChest)
+	//	UE_LOG(DebugLog, Log, TEXT("Can See Chest"));
+	//if (bCanSeePlayerShoulder_Left)
+	//	UE_LOG(DebugLog, Log, TEXT("Can See PlayerShoulder_Left"));
+	//if (bCanSeePlayerShoulder_Right)
+	//	UE_LOG(DebugLog, Log, TEXT("Can See PlayerShoulder_Right"));
+}
+
+void ACultistCharacter::FireTowardsPlayer()
+{
+	if (PlayerReferense != NULL && CurrentWeapon != NULL)
+	{
+		FVector Direction = PlayerReferense->GetActorLocation() - GetActorLocation();
+
+		//CurrentWeapon->StartFire(Direction * 5000.f);
+		//CurrentWeapon->StopFire(Direction * 5000.f);
+	}
+}
+
+void ACultistCharacter::FocusOnPlayer(float DeltaTime)
+{
 	if (PlayerReferense != NULL)
 	{
 		FVector Direction = PlayerReferense->GetActorLocation() - GetActorLocation();
 		FRotator NewControlRotation = Direction.Rotation();
 
 		NewControlRotation.Yaw = FRotator::ClampAxis(NewControlRotation.Yaw);
-		FaceRotation(NewControlRotation, DeltaTime);
+		FaceRotation(NewControlRotation);
 	}
 }
 
-void ACultistCharacter::TryGetLineOfSight()
+void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 {
-
-}
-
-void ACultistCharacter::UpdateLocationIfNeeded()
-{
-
+	if (bCanSeePlayerChest && bCanSeePlayerShoulder_Left && bCanSeePlayerShoulder_Right)
+	{
+		// No need to move as of now
+	}
+	else if (bCanSeePlayerShoulder_Left && !bCanSeePlayerShoulder_Right)
+		AddMovementInput(GetActorRightVector(), DeltaTime * 50.f);
+	else if (bCanSeePlayerShoulder_Right && !bCanSeePlayerShoulder_Left)
+		AddMovementInput(-GetActorRightVector(), DeltaTime * 50.f);
 }
 
 void ACultistCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
@@ -93,27 +185,7 @@ void ACultistCharacter::SelectWeaponSlot(int index)
 		CurrentWeapon = WeaponSlots[index];
 		CurrentWeapon->SetActorHiddenInGame(false);
 
-		switch ((EAmmoType)CurrentWeapon->GetAmmoType())
-		{
-		case EAmmoType::BulletAmmo:
-			CurrentAmmo = &BulletAmmo;
-			break;
-		case EAmmoType::ShotgunAmmo:
-			CurrentAmmo = &ShotgunAmmo;
-			break;
-		case EAmmoType::ExplosiveAmmo:
-			CurrentAmmo = &ExplosiveAmmo;
-			break;
-		case EAmmoType::PlasmaAmmo:
-			CurrentAmmo = &PlasmaAmmo;
-			break;
-		default:
-			CurrentAmmo = NULL;
-			break;
-		}
-
-		if (CurrentAmmo != NULL)
-			CurrentWeapon->EquipWeapon(GetMesh(), &CurrentAmmo->AmmoPool);
+		CurrentWeapon->EquipWeapon(GetMesh(), &AmmoPool);
 	}
 }
 

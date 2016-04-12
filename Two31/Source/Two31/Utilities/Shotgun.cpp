@@ -1,9 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Two31.h"
 #include "Shotgun.h"
 #include "../Characters/EnemyCharacter.h"
-#include "Engine.h"
+#include "../Characters/PlayerCharacter.h"
+#include "../Characters/CultistCharacter.h"
 
 
 AShotgun::AShotgun()
@@ -81,9 +80,16 @@ void AShotgun::FireShot(FVector TowardsLocation)
 
 		if (ArmFireAnimation != NULL && OwnerMesh != NULL)
 		{
-			UAnimInstance* AnimInstance = OwnerMesh->GetAnimInstance();
-			if (AnimInstance != NULL)
-				AnimInstance->Montage_Play(ArmFireAnimation, 1.f);
+			if (Cast<APlayerCharacter>(OwnerMesh->GetAttachmentRootActor()))
+			{
+				UAnimInstance* AnimInstance = OwnerMesh->GetAnimInstance();
+				if (AnimInstance != NULL)
+					AnimInstance->Montage_Play(ArmFireAnimation, 1.f);
+			}
+			else if (Cast<ACultistCharacter>(OwnerMesh->GetAttachmentRootActor()))
+			{
+				// Play Animation
+			}
 		}
 	}
 }

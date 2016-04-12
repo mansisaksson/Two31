@@ -27,25 +27,25 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	TSubclassOf<class AWeapon> Weapon;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	FAmmo BulletAmmo;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	FAmmo ShotgunAmmo;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	FAmmo PlasmaAmmo;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	FAmmo ExplosiveAmmo;
+	float TurnRate;
 
 private:
-	void TryGetLineOfSight();
-	void UpdateLocationIfNeeded();
-
+	void CheckLineOfSight();
+	void FireTowardsPlayer();
+	void FocusOnPlayer(float DeltaTime);
+	void ReactToPlayerMovement(float DeltaTime);
+	
 	bool bHasLineOfSight;
-	bool bFire;
-	bool bHasSeenPlayer;
+	bool bCanSeePlayerChest;
+	bool bCanSeePlayerShoulder_Left;
+	bool bCanSeePlayerShoulder_Right;
 
-	FAmmo* CurrentAmmo;
+	float TimeSinceSeenPlayer;
+	float TimeToLooseLineOfSight;
+
+	int AmmoPool;
 	class AWeapon* CurrentWeapon;
 	TArray<class AWeapon*> WeaponSlots;
+
 };
