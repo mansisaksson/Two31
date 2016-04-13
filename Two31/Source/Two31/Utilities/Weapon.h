@@ -37,8 +37,8 @@ public:
 	void SetAmmoPool(int* ReserveAmmo);
 	void FillClip();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	bool GetIsFiring();
-
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetClipSize();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
@@ -49,7 +49,9 @@ public:
 	float GetTotalReloadTime();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetTimeSinceReload();
-	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	AActor* GetOwner();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* PlayerAnimationBlueprint;

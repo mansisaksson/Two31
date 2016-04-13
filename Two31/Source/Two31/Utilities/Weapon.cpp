@@ -199,3 +199,9 @@ float AWeapon::GetTimeSinceReload()
 {
 	return timeSinceReloadStart;
 }
+AActor* AWeapon::GetOwner()
+{
+	if (OwnerMesh != NULL)
+		return OwnerMesh->GetAttachmentRootActor();
+	return NULL;
+}
