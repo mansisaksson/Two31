@@ -63,7 +63,11 @@ void ASMG::FireShot(FVector TowardsLocation)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Damaging Enemy"));
 					AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
-					Enemy->Take_Damage(WeaponDamage);
+					//AEnemyCharacter* EnemyController = Cast<AEnemyCharacter>(result.GetActor()->GetInstigatorController());
+					APlayerController* PlayerController = Cast<APlayerController>(result.GetActor()->GetInstigatorController());
+					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+					FDamageEvent DamageEvent(ValidDamageTypeClass);
+					Enemy->TakeDamage(WeaponDamage, DamageEvent, PlayerController, this);
 				}
 			}
 		}

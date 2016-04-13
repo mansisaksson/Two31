@@ -48,10 +48,11 @@ void AImpCharacter::Tick(float DeltaTime)
 
 void AImpCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
 {
-	const FString VolumeDesc = FString::Printf(TEXT(" at volume %f"), Volume);
-	FString message = TEXT("Heard Actor ") + OtherActor->GetName() + VolumeDesc;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
-
+	AEnemyCharacter::OnHearNoise(OtherActor, Location, Volume);
+	//const FString VolumeDesc = FString::Printf(TEXT(" at volume %f"), Volume);
+	//FString message = TEXT("Heard Actor ") + OtherActor->GetName() + VolumeDesc;
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+	//NavSystem->SimpleMoveToLocation(GetController(), OtherActor->GetActorLocation());
 	// TODO: game-specific logic
 }
 

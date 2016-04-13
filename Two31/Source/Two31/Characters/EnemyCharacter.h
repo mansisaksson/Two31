@@ -22,6 +22,9 @@ public:
 
 	virtual float GetHealth();
 
+	UFUNCTION()
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+
 protected:
 	UFUNCTION()
 	virtual void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
@@ -34,6 +37,9 @@ protected:
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float DespawnTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Enemies)
+	float RotationTimer;
+
 
 	UNavigationSystem* NavSystem;
 	class AAIController* AIController;
@@ -41,7 +47,11 @@ protected:
 
 	float CurrentHealth;
 	float TimeSinceDeath;
+	float TimeSinceRotationStart;
 
+	FVector TargetLocation;
+
+	bool bAggro;
 	bool bIsAlive;
 };
 

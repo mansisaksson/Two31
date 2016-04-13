@@ -185,6 +185,7 @@ void APlayerCharacter::OnFire()
 	bFireIsPressed = true;
 	if (CurrentWeapon != NULL)
 		CurrentWeapon->StartFire(FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
+
 }
 void APlayerCharacter::OnReleaseFire()
 {

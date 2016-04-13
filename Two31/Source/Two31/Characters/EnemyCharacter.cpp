@@ -12,9 +12,15 @@ AEnemyCharacter::AEnemyCharacter()
 	MaxHealth = 100.f;
 	CurrentHealth = MaxHealth;
 	bIsAlive = true;
+	bAggro = false;
+
+	RotationTimer = 2.f;
+
+	TargetLocation = FVector::ZeroVector;
 
 	DespawnTimer = 3.f;
 	TimeSinceDeath = 0.f;
+	TimeSinceRotationStart = 0.f;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -53,6 +59,27 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		if (TimeSinceDeath > DespawnTimer)
 			Destroy();
 	}
+	if (bAggro)
+	{
+		// mult is used to mask the Z-Vector during rotation.
+		FVector mult = FVector(1, 1, 0);
+		FVector MyLocation = GetMesh()->GetComponentLocation();
+		
+		FVector TargetRotation = (TargetLocation - MyLocation);
+		TargetRotation *= mult;
+		TargetRotation.Normalize();
+
+		SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation.Rotation(), 0.05f));
+		
+		TimeSinceRotationStart += DeltaTime;
+		if (TimeSinceRotationStart > RotationTimer)
+		{
+			bAggro = false;
+			TimeSinceRotationStart = 0;
+		}
+
+
+	}
 }
 
 void AEnemyCharacter::Take_Damage(float Damage)
@@ -73,6 +100,20 @@ void AEnemyCharacter::OnSeePawn(APawn *OtherPawn)
 {
 	FString message = TEXT("Saw Pawn ") + OtherPawn->GetName();
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+}
+
+float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
+	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
+	if (CurrentHealth == 0)
+		bIsAlive = false;
+
+	TargetLocation = DamageCauser->GetActorLocation();
+	if(!bAggro)
+		bAggro = true;
+
+	return DamageAmount;
 }
 
 float AEnemyCharacter::GetHealth()
