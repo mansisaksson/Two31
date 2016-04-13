@@ -205,3 +205,8 @@ AActor* AWeapon::GetOwner()
 		return OwnerMesh->GetAttachmentRootActor();
 	return NULL;
 }
+
+void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
+{
+	
+}

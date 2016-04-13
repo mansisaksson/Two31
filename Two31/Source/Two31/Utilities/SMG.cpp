@@ -48,6 +48,9 @@ void ASMG::FireShot(FVector TowardsLocation)
 
 		if (hitObject)
 		{
+			//AWeapon::OnWeaponHit_Implementation(result);
+			//AWeapon::OnWeaponHit(result);
+			//OnWeaponHit_Implementation(result);
 			OnWeaponHit(result);
 			if (MuzzeFlash != NULL)
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
@@ -90,11 +93,12 @@ void ASMG::FireShot(FVector TowardsLocation)
 		}
 	}
 }
-
+/*
 void ASMG::OnWeaponHit(FHitResult HitResult)
 {
 
-	
+	OnWeaponHit2(HitResult);
+
 	if (HitResult.GetComponent() != NULL)
 	{
 		UDestructibleComponent* DstrComp = Cast<UDestructibleComponent>(HitResult.GetComponent());
@@ -105,3 +109,4 @@ void ASMG::OnWeaponHit(FHitResult HitResult)
 	}
 
 }
+*/

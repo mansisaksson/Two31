@@ -57,17 +57,3 @@ void ARocketLauncher::FireShot(FVector TowardsLocation)
 		}
 	}
 }
-
-
-void ARocketLauncher::OnWeaponHit(FHitResult HitResult)
-{
-
-	if (HitResult.GetComponent() != NULL)
-	{
-		if (Cast<UDestructibleComponent>(HitResult.GetComponent()))
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("EXPLODE!!!!!!!!!!!!!"));
-		}
-	}
-
-}

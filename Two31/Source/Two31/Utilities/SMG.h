@@ -21,8 +21,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MuzzeFlash;
 
-	void OnWeaponHit(FHitResult HitResult) override;
-
 private:
 	
 

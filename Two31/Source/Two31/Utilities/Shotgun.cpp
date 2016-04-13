@@ -96,16 +96,3 @@ void AShotgun::FireShot(FVector TowardsLocation)
 		}
 	}
 }
-
-void AShotgun::OnWeaponHit(FHitResult HitResult)
-{
-
-	if (HitResult.GetComponent() != NULL)
-	{
-		if (Cast<UDestructibleComponent>(HitResult.GetComponent()))
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("EXPLODE!!!!!!!!!!!!!"));
-		}
-	}
-
-}

@@ -86,7 +86,10 @@ protected:
 	bool bIsFiring;
 	bool bFirstTimeEquiped;
 
-	virtual void OnWeaponHit(FHitResult HitResult) { }
+	UFUNCTION(BlueprintNativeEvent)
+		void OnWeaponHit(FHitResult HitResult);
+
+	void OnWeaponHit_Implementation(FHitResult HitResult);
 
 private:
 	bool bReload;
