@@ -166,7 +166,6 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 	InputComponent->BindAction("PreviousWeapon", IE_Pressed, this, &APlayerCharacter::PreviousWeapon);
 
 	InputComponent->BindAction("UseHealthPack", IE_Pressed, this, &APlayerCharacter::UseHealthPack);
-	InputComponent->BindAction("TakeDamageTest", IE_Pressed, this, &APlayerCharacter::TakeDamageTest);
 	InputComponent->BindAction("SpawnEnemyTest", IE_Pressed, this, &APlayerCharacter::SpawnEnemyTest);
 
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
@@ -336,15 +335,14 @@ int32 APlayerCharacter::GetHealthPacks()
 {
 	return HealthPacks.Num();
 }
-void APlayerCharacter::TakeDamageTest()
+float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	if (CurrentHealth > 0)
-		CurrentHealth -= 20;
-}
-void APlayerCharacter::Take_Damage(float Damage)
-{
-	if (CurrentHealth > 0)
-		CurrentHealth = FMath::Clamp((CurrentHealth - Damage), 0.f, MaxHealth);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
+	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
+	//if (CurrentHealth == 0)
+	//	bIsAlive = false;
+
+	return DamageAmount;
 }
 
 void APlayerCharacter::TurnAtRate(float Rate)

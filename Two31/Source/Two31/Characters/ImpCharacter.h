@@ -19,6 +19,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+
 protected:
 	UFUNCTION()
 	virtual void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
@@ -33,9 +36,17 @@ protected:
 	float AttackCooldown;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float AttackDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Enemies)
+	float RotationTimer;
+
+
 
 	bool bIsChasingPlayer;
 	bool bAttackOnCooldown;
+	bool bAggro;
 
+	float TimeSinceRotationStart;
 	float TimeSinceLastAttack;
+
+	FVector TargetLocation;
 };

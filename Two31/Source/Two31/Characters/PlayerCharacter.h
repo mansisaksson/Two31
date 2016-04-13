@@ -40,6 +40,10 @@ public:
 	bool PickupHealthPack(AHealthPickup* Healthpack);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetHealthPacks();
+
+	UFUNCTION()
+	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetArmor();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
@@ -58,15 +62,13 @@ public:
 	int32 GetAmmoPool();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetMaxAmmo();
+
 	FORCEINLINE class USceneComponent* GetPlayerHitPoint_Chest() { return LineOfSight_Chest; }
 	FORCEINLINE class USceneComponent* GetPlayerHitPoint_Shoulder_Right() { return LineOfSight_Shoulder_Right; }
 	FORCEINLINE class USceneComponent* GetPlayerHitPoint_Shoulder_Left() { return LineOfSight_Shoulder_Left; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	class AWeapon* GetCurrentWeapon();
-
-	void TakeDamageTest();
-	void Take_Damage(float Damage);
 
 protected:
 	virtual void BeginPlay() override;

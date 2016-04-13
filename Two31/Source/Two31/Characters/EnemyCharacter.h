@@ -18,8 +18,6 @@ public:
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaTime);
 
-	virtual void Take_Damage(float Damage);
-
 	virtual float GetHealth();
 
 	UFUNCTION()
@@ -37,9 +35,6 @@ protected:
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float DespawnTimer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Enemies)
-	float RotationTimer;
-
 
 	UNavigationSystem* NavSystem;
 	class AAIController* AIController;
@@ -47,11 +42,7 @@ protected:
 
 	float CurrentHealth;
 	float TimeSinceDeath;
-	float TimeSinceRotationStart;
 
-	FVector TargetLocation;
-
-	bool bAggro;
 	bool bIsAlive;
 };
 

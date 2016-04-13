@@ -41,7 +41,10 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Damaging Enemy"));
 			AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(OtherActor);
-			Enemy->Take_Damage(50.f);
+			APlayerController* PlayerController = Cast<APlayerController>(OtherActor->GetInstigatorController());
+			TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+			FDamageEvent DamageEvent(ValidDamageTypeClass);
+			Enemy->TakeDamage(50, DamageEvent, PlayerController, this);
 		}
 		if ((OtherActor != NULL) && (OtherComp != NULL) && OtherComp->Mobility == EComponentMobility::Movable && OtherComp->IsSimulatingPhysics())
 			OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());	
