@@ -23,4 +23,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = Gameplay)
 	TSubclassOf<class AProjectile> ProjectileClass;
+
+	void OnWeaponHit(FHitResult HitResult) override;
+
 };

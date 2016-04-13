@@ -48,6 +48,7 @@ void ASMG::FireShot(FVector TowardsLocation)
 
 		if (hitObject)
 		{
+			OnWeaponHit(result);
 			if (MuzzeFlash != NULL)
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
 
@@ -90,3 +91,17 @@ void ASMG::FireShot(FVector TowardsLocation)
 	}
 }
 
+void ASMG::OnWeaponHit(FHitResult HitResult)
+{
+
+	
+	if (HitResult.GetComponent() != NULL)
+	{
+		UDestructibleComponent* DstrComp = Cast<UDestructibleComponent>(HitResult.GetComponent());
+		if (DstrComp)
+		{
+			DstrComp->ApplyRadiusDamage(1, HitResult.Location, 1, 5000, false);
+		}
+	}
+
+}

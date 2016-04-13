@@ -86,6 +86,8 @@ protected:
 	bool bIsFiring;
 	bool bFirstTimeEquiped;
 
+	virtual void OnWeaponHit(FHitResult HitResult) { }
+
 private:
 	bool bReload;
 	bool bReadyToFire;
