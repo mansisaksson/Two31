@@ -91,6 +91,8 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 
 void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 {
+	Super::NotifyActorBeginOverlap(OtherActor);
+
 	if (Cast<APickup>(OtherActor))
 	{
 		if (Cast<AWeaponPickup>(OtherActor))
