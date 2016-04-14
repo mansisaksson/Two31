@@ -37,6 +37,7 @@ void AShotgun::FireShot(FVector TowardsLocation)
 		FCollisionResponseParams collisionResponse;
 		collisionResponse = ECR_Block;
 		collisionQuery.AddIgnoredActor(this);
+		collisionQuery.AddIgnoredActor(GetOwner());
 
 		if (MuzzeFlash != NULL)
 		{
@@ -45,15 +46,49 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			particleTransform.SetScale3D(FVector(0.1f, 0.1f, 0.1f));
 			particleComp->SetRelativeTransform(particleTransform);
 		}
-		//for (int i = 0; i < 8; i++)
-		//{
-			int32 random = FMath::Rand();
-			random = FMath::Clamp(random, -5000, 5000);
+		for (int i = 0; i < 3; i++)
+		{
+			//int32 random = FMath::Rand();
+			float random = FMath::FRandRange(-1, 1);
 			
+
+			//FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
+			//Angle.Normalize();
+
+			//FRotator rotation = TowardsLocation.Rotation();
+			//float RandRadius = 0.1f;
+			//float randomRot = FMath::FRandRange(-RandRadius, RandRadius);
+			//float randomRot2 = FMath::FRandRange(-RandRadius, RandRadius);
+			//float randomRot3 = FMath::FRandRange(-RandRadius, RandRadius);
+
+			//FVector center = Angle * 5;
+			//center.Y += randomRot;
+			//center.Z += randomRot2;
+			//center.X += randomRot3;
+			//center.Normalize();
+			//center *= 5000.f;
+			////center.X += 10 + random;
+			//FVector upper = Angle * 500.f;
+			//upper.Z += 10;
+			//FVector lower = Angle * 500.f;
+			//lower.Z -= 10;
+
+
+			/*FVector temp = FMath::VRandCone(TowardsLocation, 100.f);*/
+			//temp = FVector(temp.X * random, temp.Y * random, temp.Z * random);
+
+			//FVector temp = FMath::VRandCone(TowardsLocation, ConeHalf);
+			//FRotator rotation = GetOwner()->GetActorRotation();
+
+			//TowardsLocation = FVector( FMath::Sin(TowardsLocation.X),  FMath::Sin(TowardsLocation.Y ) , TowardsLocation.Z);
+			/*TowardsLocation = FVector(TowardsLocation.X * FMath::Sin(30), TowardsLocation.Y, TowardsLocation.Z * FMath::Sin(30));*/
+			// ha 8 kvadranter, +45 grader vid varje skott - ha en radius på hur långt ut skotten kan komma
+
 			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), TowardsLocation, collisionChannel, collisionQuery, collisionResponse);
 
 			if (hitObject)
 			{
+				Debug::OnScreenMessage((result.GetActor()->GetName()));
 				if (MuzzeFlash != NULL)
 					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
 
@@ -76,7 +111,7 @@ void AShotgun::FireShot(FVector TowardsLocation)
 					}
 				}
 			}
-		//}
+		}
 
 		if (FireSound != NULL)
 			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
