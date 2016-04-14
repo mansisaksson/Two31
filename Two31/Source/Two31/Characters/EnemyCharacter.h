@@ -2,6 +2,15 @@
 #include "GameFramework/Character.h"
 #include "EnemyCharacter.generated.h"
 
+
+UENUM(BlueprintType)
+enum class EEnemyState : uint8
+{
+	Triggered		UMETA(DisplayName = "Triggered"),
+	Search			UMETA(DisplayName = "Search"),
+	Idle			UMETA(DisplayName = "Idle")
+};
+
 UCLASS(config=Game)
 class AEnemyCharacter : public ACharacter
 {
@@ -35,6 +44,8 @@ protected:
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float DespawnTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	EEnemyState EnemyState;
 
 	UNavigationSystem* NavSystem;
 	class AAIController* AIController;
