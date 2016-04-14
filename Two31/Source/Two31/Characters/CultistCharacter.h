@@ -3,6 +3,13 @@
 #include "../Utilities/WeaponGlobals.h"
 #include "CultistCharacter.generated.h"
 
+struct SpottedPositions 
+{
+	bool bCanSeePlayerChest = false;
+	bool bCanSeePlayerShoulder_Left = false;
+	bool bCanSeePlayerShoulder_Right = false;
+};
+
 UCLASS()
 class TWO31_API ACultistCharacter : public AEnemyCharacter
 {
@@ -30,22 +37,27 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float TurnRate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	/* Tiden det tar efter att fienden tappat siken om spelaren innan den går idle */
+	float TimeToIdle;
+
 private:
 	void CheckLineOfSight();
 	void FireTowardsPlayer();
-	void FocusOnPlayer(float DeltaTime);
+	void FocusOnPosition(FVector Position);
 	void ReactToPlayerMovement(float DeltaTime);
-	
-	bool bHasLineOfSight;
-	bool bCanSeePlayerChest;
-	bool bCanSeePlayerShoulder_Left;
-	bool bCanSeePlayerShoulder_Right;
+	void AvoidPlayer();
 
-	float TimeSinceSeenPlayer;
-	float TimeToLooseLineOfSight;
+	void TryGetLineOfSight();
+	void GoCloseToLastKnowPosition();
+	void GuardLastKnownPosition();
+
+	bool bHasLineOfSight;
+	float TimeSinceLostLineOfSight;
+
+	TArray<SpottedPositions> SpottedPlayerPositions;
 
 	int AmmoPool;
 	class AWeapon* CurrentWeapon;
 	TArray<class AWeapon*> WeaponSlots;
-
 };

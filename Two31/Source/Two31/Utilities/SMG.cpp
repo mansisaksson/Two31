@@ -40,10 +40,19 @@ void ASMG::FireShot(FVector TowardsLocation)
 
 		if (MuzzeFlash != NULL)
 		{
-			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, BulletSpawnLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
-			FTransform particleTransform = particleComp->GetRelativeTransform();
-			particleTransform.SetScale3D(FVector(0.1f, 0.1f, 0.1f));
-			particleComp->SetRelativeTransform(particleTransform);
+			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAttached(MuzzeFlash, BulletSpawnLocation);
+			//UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, BulletSpawnLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
+			particleComp->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+		}
+
+		if (BulletTrail != NULL)
+		{
+			FVector BeamEndPoint = TowardsLocation;
+			if (result.GetActor() != NULL)
+				BeamEndPoint = result.Location;
+
+			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BulletTrail, BulletSpawnLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
+			particleComp->SetBeamTargetPoint(0, BeamEndPoint, 0);
 		}
 
 		if (hitObject)
@@ -61,6 +70,7 @@ void ASMG::FireShot(FVector TowardsLocation)
 				Angle.Normalize();
 				result.GetComponent()->AddImpulseAtLocation(Angle * 50000.0f, result.Location);
 			}
+
 			if (result.GetActor() != NULL)
 			{
 				if (Cast<AEnemyCharacter>(result.GetActor()))
@@ -93,6 +103,7 @@ void ASMG::FireShot(FVector TowardsLocation)
 		}
 	}
 }
+
 /*
 void ASMG::OnWeaponHit(FHitResult HitResult)
 {

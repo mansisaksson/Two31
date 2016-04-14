@@ -6,18 +6,15 @@
 ACultistCharacter::ACultistCharacter()
 	: AEnemyCharacter()
 {
-	TimeToLooseLineOfSight = 1.f;
-	TimeSinceSeenPlayer = 0;
-
 	TurnRate = 100.f;
+	TimeToIdle = 20.f;
 
 	AmmoPool = 2147483647; // Sätter ammo till max så att den inte tar slut
 	bHasLineOfSight = false;
-	bCanSeePlayerChest = false;
-	bCanSeePlayerShoulder_Left = false;
-	bCanSeePlayerShoulder_Right = false;
+	TimeSinceLostLineOfSight = 0.f;
 
 	WeaponSlots.SetNum(1);
+	SpottedPlayerPositions.SetNum(5);
 }
 
 void ACultistCharacter::BeginPlay()
@@ -38,19 +35,37 @@ void ACultistCharacter::Tick(float DeltaTime)
 
 	if (bIsAlive)
 	{
-		CheckLineOfSight();
-		if (bHasLineOfSight)
+		if (EnemyState == EEnemyState::Triggered)
 		{
-			FireTowardsPlayer();
-			ReactToPlayerMovement(DeltaTime);
-			FocusOnPlayer(DeltaTime);
-		}
-		else
-		{
-			//TryGetLineOfSight();
+			CheckLineOfSight();
+
+			if (bHasLineOfSight)
+			{
+				if (PlayerReferense != NULL)
+					FocusOnPosition(PlayerReferense->GetActorLocation());
+
+				FireTowardsPlayer();
+				ReactToPlayerMovement(DeltaTime);
+			}
+			else
+			{
+				TimeSinceLostLineOfSight += DeltaTime;
+				if (TimeSinceLostLineOfSight >= TimeToIdle)
+				{
+					if (TimeSinceLostLineOfSight < 1.f)
+						TryGetLineOfSight();
+					else
+						GuardLastKnownPosition();
+				}
+				else
+				{
+					// Go Idle
+				}
+			}
 		}
 	}
 }
+
 
 void ACultistCharacter::CheckLineOfSight()
 {
@@ -66,90 +81,112 @@ void ACultistCharacter::CheckLineOfSight()
 	collisionQuery.AddIgnoredActor(this);
 	collisionQuery.AddIgnoredActor(CurrentWeapon);
 
+	SpottedPositions spottedPositions;
 	for (size_t i = 0; i < 3; i++)
 	{
 		if (i == 0)
 		{
 			GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Chest()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
 			if (Cast<APlayerCharacter>(result.GetActor()))
-				bCanSeePlayerChest = true;
-			else
-				bCanSeePlayerChest = false;
+				spottedPositions.bCanSeePlayerChest = true;
 		}
 		else if (i == 1)
 		{
 			GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Shoulder_Left()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
 			if (Cast<APlayerCharacter>(result.GetActor()))
-				bCanSeePlayerShoulder_Left = true;
-			else
-				bCanSeePlayerShoulder_Left = false;
+				spottedPositions.bCanSeePlayerShoulder_Left = true;
 		}
 		else if (i == 2)
 		{
 			GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Shoulder_Right()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
 			if (Cast<APlayerCharacter>(result.GetActor()))
-				bCanSeePlayerShoulder_Right = true;
-			else
-				bCanSeePlayerShoulder_Right = false;
+				spottedPositions.bCanSeePlayerShoulder_Right = true;
 		}
 	}
 
-	if (bCanSeePlayerChest || bCanSeePlayerShoulder_Left || bCanSeePlayerShoulder_Right)
+	if (spottedPositions.bCanSeePlayerChest || spottedPositions.bCanSeePlayerShoulder_Left || spottedPositions.bCanSeePlayerShoulder_Right)
+	{
 		bHasLineOfSight = true;
-	else if (TimeSinceSeenPlayer > TimeToLooseLineOfSight)
+		TimeSinceLostLineOfSight = true;
+	}
+	else
 		bHasLineOfSight = false;
 
-	//if (bCanSeePlayerChest)
-	//	UE_LOG(DebugLog, Log, TEXT("Can See Chest"));
-	//if (bCanSeePlayerShoulder_Left)
-	//	UE_LOG(DebugLog, Log, TEXT("Can See PlayerShoulder_Left"));
-	//if (bCanSeePlayerShoulder_Right)
-	//	UE_LOG(DebugLog, Log, TEXT("Can See PlayerShoulder_Right"));
+	SpottedPlayerPositions.RemoveAt(0);
+	SpottedPlayerPositions.Add(spottedPositions);
 }
 
 void ACultistCharacter::FireTowardsPlayer()
 {
 	if (PlayerReferense != NULL && CurrentWeapon != NULL)
 	{
-		FVector Direction = PlayerReferense->GetActorLocation() - GetActorLocation();
+		FVector Direction = (PlayerReferense->GetActorLocation() + FVector(FMath::FRandRange(-100, 100.f), FMath::FRandRange(-100, 100.f), FMath::FRandRange(-100, 100.f))) - GetActorLocation();
 
-		//CurrentWeapon->StartFire(Direction * 5000.f);
-		//CurrentWeapon->StopFire(Direction * 5000.f);
+		CurrentWeapon->StartFire(Direction * 5000.f);
+		CurrentWeapon->StopFire(Direction * 5000.f);
 	}
 }
-
-void ACultistCharacter::FocusOnPlayer(float DeltaTime)
+void ACultistCharacter::FocusOnPosition(FVector Position)
 {
-	if (PlayerReferense != NULL)
-	{
-		FVector Direction = PlayerReferense->GetActorLocation() - GetActorLocation();
-		FRotator NewControlRotation = Direction.Rotation();
+	FVector Direction = Position - GetActorLocation();
+	FRotator NewControlRotation = Direction.Rotation();
 
-		NewControlRotation.Yaw = FRotator::ClampAxis(NewControlRotation.Yaw);
-		FaceRotation(NewControlRotation);
-	}
+	// Gör en lerp här
+	NewControlRotation.Yaw = FRotator::ClampAxis(NewControlRotation.Yaw);
+	FaceRotation(NewControlRotation);
 }
-
 void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 {
-	if (bCanSeePlayerChest && bCanSeePlayerShoulder_Left && bCanSeePlayerShoulder_Right)
-	{
-		// No need to move as of now
-	}
-	else if (bCanSeePlayerShoulder_Left && !bCanSeePlayerShoulder_Right)
+	// if (player is getting too close)
+		AvoidPlayer();
+	
+	if (SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Left && !SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Right)
 		AddMovementInput(GetActorRightVector(), DeltaTime * 50.f);
-	else if (bCanSeePlayerShoulder_Right && !bCanSeePlayerShoulder_Left)
+	else if (SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Right && !SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Left)
 		AddMovementInput(-GetActorRightVector(), DeltaTime * 50.f);
+
+	// Save Player Position
+}
+void ACultistCharacter::AvoidPlayer()
+{
+	//	Try To move away from enemy:
+	//		Try to move back
+	//		else: Try to move left
+	//		else: Try to move right
+	//		else: Stand Still and shoot player
+}
+
+void ACultistCharacter::TryGetLineOfSight()
+{
+	// Sidestep to the most recent know position
+}
+void ACultistCharacter::GoCloseToLastKnowPosition()
+{
+	// gå nära den senaste kända positionen av spelaren
+}
+void ACultistCharacter::GuardLastKnownPosition()
+{
+	if (true)
+		GoCloseToLastKnowPosition();
+	else
+	{
+		// To till en random position runt sig
+		// FaceLocation(last knownLocation)
+
+		// if (x time has passed)
+		//		move too location(spawn location)
+		//		go idle;
+	}
 }
 
 void ACultistCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
 {
 	
 }
-
 void ACultistCharacter::OnSeePawn(APawn *OtherPawn)
 {
-
+	if (Cast<APlayerCharacter>(OtherPawn))
+		EnemyState = EEnemyState::Triggered;
 }
 
 bool ACultistCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
@@ -174,7 +211,6 @@ bool ACultistCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 	}
 	return false;
 }
-
 void ACultistCharacter::SelectWeaponSlot(int index)
 {
 	if (WeaponSlots[index] != NULL && CurrentWeapon != WeaponSlots[index])
@@ -188,7 +224,6 @@ void ACultistCharacter::SelectWeaponSlot(int index)
 		CurrentWeapon->EquipWeapon(GetMesh(), &AmmoPool);
 	}
 }
-
 int ACultistCharacter::GetWeaponIndex()
 {
 	int index = -1;

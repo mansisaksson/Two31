@@ -16,6 +16,8 @@ AEnemyCharacter::AEnemyCharacter()
 	DespawnTimer = 3.f;
 	TimeSinceDeath = 0.f;
 
+	EnemyState = EEnemyState::Idle;
+
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
