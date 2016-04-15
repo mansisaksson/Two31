@@ -160,10 +160,6 @@ void ACultistCharacter::TryGetLineOfSight()
 {
 	// Sidestep to the most recent know position
 }
-void ACultistCharacter::GoCloseToLastKnowPosition()
-{
-	// gå nära den senaste kända positionen av spelaren
-}
 void ACultistCharacter::GuardLastKnownPosition()
 {
 	if (true)
@@ -177,6 +173,10 @@ void ACultistCharacter::GuardLastKnownPosition()
 		//		move too location(spawn location)
 		//		go idle;
 	}
+}
+void ACultistCharacter::GoCloseToLastKnowPosition()
+{
+	// gå nära den senaste kända positionen av spelaren
 }
 
 void ACultistCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
