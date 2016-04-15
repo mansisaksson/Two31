@@ -54,13 +54,14 @@ void AShotgun::FireShot(FVector TowardsLocation)
 		}
 
 		// Make Sliders
-		int NumberOfShots = 36;
+		int NumberOfShots = 1;
 		float RadiusMax = 10.f;
-		float RadiusMin = 0.f;
+		float RadiusMin = 10.f;
+		float Distance = 5000.f;
 
 		for (int i = 0; i < NumberOfShots; i++)
 		{
-			// ha 8 kvadranter, +45 grader vid varje skott - ha en radius på hur långt ut skotten kan komma
+
 			float Step = (360.f / (float)NumberOfShots);
 			float AngleMin = i * Step;
 			float AngleMax = (i + 1) * Step;
@@ -68,21 +69,43 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			float Angle = FMath::FRandRange(AngleMin, AngleMax);
 			float Radius = FMath::FRandRange(RadiusMin, RadiusMax);
 
+			Angle = 0;
+
 			float Horizontal = Radius * FMath::Cos(FMath::DegreesToRadians(Angle));
 			float Vertical = Radius * FMath::Sin(FMath::DegreesToRadians(Angle));
-
-			float playerRotationZ = GetOwner()->GetActorRotation().Yaw + 180;
-			float angleRadiants = FMath::DegreesToRadians(playerRotationZ);
 
 			FVector DirectionVector = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
 			DirectionVector.Normalize();
 
-			FRotator Rotation = FRotator(Vertical * -FMath::Cos(angleRadiants), Horizontal, Vertical * FMath::Sin(angleRadiants));
-			FVector RotatedDirVector = Rotation.RotateVector(DirectionVector);
-			RotatedDirVector *= 5000.f;
+			FVector FinalDirection;
 
+			FVector Forward = DirectionVector;
+			Forward.Normalize();
+			FVector WorldUp = FVector(0, 0, 1);
+			FVector Left = FVector::CrossProduct(Forward, WorldUp);
+			Left.Normalize();
+			FVector LocalUp = FVector::CrossProduct(Forward, Left);
+			LocalUp.Normalize();
+			FVector New = Forward.RotateAngleAxis(Horizontal, LocalUp);
+			New.Normalize();
+			FinalDirection = New;
 
-			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), BulletSpawnLocation->GetComponentLocation() + RotatedDirVector, collisionChannel, collisionQuery, collisionResponse);
+			std::ostringstream ss;
+			ss << "Left: " << Left.X << ", " << Left.Y << ", " << Left.Z;
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, UTF8_TO_TCHAR(ss.str().c_str()));
+
+			Forward = FinalDirection;
+			Forward.Normalize();
+			WorldUp = FVector(0, 0, 1);
+			Left = FVector::CrossProduct(Forward, WorldUp);
+			Left.Normalize();
+			LocalUp = FVector::CrossProduct(Forward, Left);
+			LocalUp.Normalize();
+			New = Forward.RotateAngleAxis(Vertical, Left);
+			New.Normalize();
+			FinalDirection = New * Distance;
+
+			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), BulletSpawnLocation->GetComponentLocation() + FinalDirection, collisionChannel, collisionQuery, collisionResponse);
 
 			if (hitObject)
 			{
