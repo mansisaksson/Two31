@@ -1,5 +1,7 @@
 #include "Two31.h"
 #include "Shotgun.h"
+#include <iostream>
+#include <sstream>
 #include "../Characters/EnemyCharacter.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
@@ -50,8 +52,12 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			particleTransform.SetScale3D(FVector(0.1f, 0.1f, 0.1f));
 			particleComp->SetRelativeTransform(particleTransform);
 		}
-		int NumberOfShots = 8;
+
+		// Make Sliders
+		int NumberOfShots = 36;
 		float RadiusMax = 10.f;
+		float RadiusMin = 0.f;
+
 		for (int i = 0; i < NumberOfShots; i++)
 		{
 			// ha 8 kvadranter, +45 grader vid varje skott - ha en radius på hur långt ut skotten kan komma
@@ -60,27 +66,18 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			float AngleMax = (i + 1) * Step;
 
 			float Angle = FMath::FRandRange(AngleMin, AngleMax);
-			//float Radius = FMath::FRandRange(-RadiusMax, RadiusMax);
+			float Radius = FMath::FRandRange(RadiusMin, RadiusMax);
 
-			float Radius = 5.f;
+			float Horizontal = Radius * FMath::Cos(FMath::DegreesToRadians(Angle));
+			float Vertical = Radius * FMath::Sin(FMath::DegreesToRadians(Angle));
 
-			float playerRotationZ = GetOwner()->GetActorRotation().Yaw;
-			float angleRadiants = FMath::DegreesToRadians(Angle);
-
-			//TowardsLocation.Normalize();
+			float playerRotationZ = GetOwner()->GetActorRotation().Yaw + 180;
+			float angleRadiants = FMath::DegreesToRadians(playerRotationZ);
 
 			FVector DirectionVector = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
 			DirectionVector.Normalize();
-			//DirectionVector *= 5000.f;
-			//FVector RelativeDirectionVector = GetTransform().TransformVectorNoScale(DirectionVector);
-			
-			FRotator Rotation = FRotator(Radius * FMath::Sin(angleRadiants), Radius * FMath::Sin(angleRadiants),0);
-			FRotationMatrix RotationMatrix(Rotation);
-			FTransform testTransform = FTransform();
-			testTransform.SetToRelativeTransform(GetOwner()->GetTransform());
-			
-			//FVector RotatedDirVector = GetOwner()->GetTransform().TransformVector(DirectionVector);
-			//FVector RotatedDirVector = RotationMatrix.TransformVector(DirectionVector);
+
+			FRotator Rotation = FRotator(Vertical * -FMath::Cos(angleRadiants), Horizontal, Vertical * FMath::Sin(angleRadiants));
 			FVector RotatedDirVector = Rotation.RotateVector(DirectionVector);
 			RotatedDirVector *= 5000.f;
 
