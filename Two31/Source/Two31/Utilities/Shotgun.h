@@ -5,9 +5,7 @@
 #include "Utilities/Weapon.h"
 #include "Shotgun.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class TWO31_API AShotgun : public AWeapon
 {

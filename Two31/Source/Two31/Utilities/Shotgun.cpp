@@ -27,10 +27,14 @@ void AShotgun::FireShot(FVector TowardsLocation)
 		AmmoInClip--;
 		(*AmmoPool)--;
 
+		const FName TraceTag("Debug Trace");
+
 		FHitResult result;
 		ECollisionChannel collisionChannel;
 		collisionChannel = ECC_WorldDynamic;
 		FCollisionQueryParams collisionQuery;
+		collisionQuery.TraceTag = TraceTag;
+		GetWorld()->DebugDrawTraceTag = TraceTag;
 		collisionQuery.bTraceComplex = true;
 		FCollisionObjectQueryParams objectCollisionQuery;
 		objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
@@ -46,45 +50,42 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			particleTransform.SetScale3D(FVector(0.1f, 0.1f, 0.1f));
 			particleComp->SetRelativeTransform(particleTransform);
 		}
-		for (int i = 0; i < 3; i++)
+		int NumberOfShots = 8;
+		float RadiusMax = 10.f;
+		for (int i = 0; i < NumberOfShots; i++)
 		{
-			//int32 random = FMath::Rand();
-			float random = FMath::FRandRange(-1, 1);
-			
-
-			//FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-			//Angle.Normalize();
-
-			//FRotator rotation = TowardsLocation.Rotation();
-			//float RandRadius = 0.1f;
-			//float randomRot = FMath::FRandRange(-RandRadius, RandRadius);
-			//float randomRot2 = FMath::FRandRange(-RandRadius, RandRadius);
-			//float randomRot3 = FMath::FRandRange(-RandRadius, RandRadius);
-
-			//FVector center = Angle * 5;
-			//center.Y += randomRot;
-			//center.Z += randomRot2;
-			//center.X += randomRot3;
-			//center.Normalize();
-			//center *= 5000.f;
-			////center.X += 10 + random;
-			//FVector upper = Angle * 500.f;
-			//upper.Z += 10;
-			//FVector lower = Angle * 500.f;
-			//lower.Z -= 10;
-
-
-			/*FVector temp = FMath::VRandCone(TowardsLocation, 100.f);*/
-			//temp = FVector(temp.X * random, temp.Y * random, temp.Z * random);
-
-			//FVector temp = FMath::VRandCone(TowardsLocation, ConeHalf);
-			//FRotator rotation = GetOwner()->GetActorRotation();
-
-			//TowardsLocation = FVector( FMath::Sin(TowardsLocation.X),  FMath::Sin(TowardsLocation.Y ) , TowardsLocation.Z);
-			/*TowardsLocation = FVector(TowardsLocation.X * FMath::Sin(30), TowardsLocation.Y, TowardsLocation.Z * FMath::Sin(30));*/
 			// ha 8 kvadranter, +45 grader vid varje skott - ha en radius på hur långt ut skotten kan komma
+			float Step = (360.f / (float)NumberOfShots);
+			float AngleMin = i * Step;
+			float AngleMax = (i + 1) * Step;
 
-			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), TowardsLocation, collisionChannel, collisionQuery, collisionResponse);
+			float Angle = FMath::FRandRange(AngleMin, AngleMax);
+			//float Radius = FMath::FRandRange(-RadiusMax, RadiusMax);
+
+			float Radius = 5.f;
+
+			float playerRotationZ = GetOwner()->GetActorRotation().Yaw;
+			float angleRadiants = FMath::DegreesToRadians(Angle);
+
+			//TowardsLocation.Normalize();
+
+			FVector DirectionVector = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
+			DirectionVector.Normalize();
+			//DirectionVector *= 5000.f;
+			//FVector RelativeDirectionVector = GetTransform().TransformVectorNoScale(DirectionVector);
+			
+			FRotator Rotation = FRotator(Radius * FMath::Sin(angleRadiants), Radius * FMath::Sin(angleRadiants),0);
+			FRotationMatrix RotationMatrix(Rotation);
+			FTransform testTransform = FTransform();
+			testTransform.SetToRelativeTransform(GetOwner()->GetTransform());
+			
+			//FVector RotatedDirVector = GetOwner()->GetTransform().TransformVector(DirectionVector);
+			//FVector RotatedDirVector = RotationMatrix.TransformVector(DirectionVector);
+			FVector RotatedDirVector = Rotation.RotateVector(DirectionVector);
+			RotatedDirVector *= 5000.f;
+
+
+			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), BulletSpawnLocation->GetComponentLocation() + RotatedDirVector, collisionChannel, collisionQuery, collisionResponse);
 
 			if (hitObject)
 			{
@@ -94,9 +95,9 @@ void AShotgun::FireShot(FVector TowardsLocation)
 
 				if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
 				{
-					FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-					Angle.Normalize();
-					result.GetComponent()->AddImpulseAtLocation(Angle * 50000.0f, result.Location);
+					FVector HitAngle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
+					HitAngle.Normalize();
+					result.GetComponent()->AddImpulseAtLocation(HitAngle * 50000.0f, result.Location);
 				}
 				if (result.GetActor() != NULL)
 				{
