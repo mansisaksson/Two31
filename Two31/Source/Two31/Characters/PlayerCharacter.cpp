@@ -136,7 +136,6 @@ bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 				//WeaponSlots[i]->AttachRootComponentTo(FPArmMesh, TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
 				WeaponSlots[i]->AttachRootComponentTo(FPArmMesh);
 				WeaponSlots[i]->SetActorRelativeLocation(FVector(-24.57f, 23.6f, 136.26f));
-				//WeaponSlots[i]->SetActorRelativeRotation(FRotator(0, 0, 0));
 				WeaponSlots[i]->SetActorHiddenInGame(true);
 
 				if (CurrentWeapon == NULL)

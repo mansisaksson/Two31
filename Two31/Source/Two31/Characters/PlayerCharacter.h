@@ -29,8 +29,10 @@ class TWO31_API APlayerCharacter : public ACharacter
 public:
 	APlayerCharacter();
 
-	FORCEINLINE USkeletalMeshComponent* GetFPMeshArmMesh() const { return FPArmMesh; }
-	FORCEINLINE UCameraComponent* GetFirstPersonCameraComponent() const { return FPCamera; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	USkeletalMeshComponent* GetFPMeshArmMesh() const { return FPArmMesh; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	UCameraComponent* GetFirstPersonCameraComponent() const { return FPCamera; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetHealth();

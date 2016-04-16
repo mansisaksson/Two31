@@ -87,20 +87,6 @@ void ASMG::FireShot(FVector TowardsLocation)
 
 		if (FireSound != NULL)
 			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
-
-		if (ArmFireAnimation != NULL && OwnerMesh != NULL)
-		{
-			if (Cast<APlayerCharacter>(OwnerMesh->GetAttachmentRootActor()))
-			{
-				UAnimInstance* AnimInstance = OwnerMesh->GetAnimInstance();
-				if (AnimInstance != NULL)
-					AnimInstance->Montage_Play(ArmFireAnimation, 1.f);
-			}
-			else if (Cast<ACultistCharacter>(OwnerMesh->GetAttachmentRootActor()))
-			{
-				// Play Animation
-			}
-		}
 	}
 }
 

@@ -18,11 +18,9 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-		UAnimMontage* ArmFireAnimation;
+	USoundBase* FireSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-		USoundBase* FireSound;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-		UParticleSystem* MuzzeFlash;
+	UParticleSystem* MuzzeFlash;
 
 private:
 

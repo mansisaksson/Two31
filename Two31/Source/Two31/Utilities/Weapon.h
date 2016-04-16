@@ -51,6 +51,8 @@ public:
 	float GetTimeSinceReload();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	AActor* GetOwner();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
@@ -87,8 +89,7 @@ protected:
 	bool bFirstTimeEquiped;
 
 	UFUNCTION(BlueprintNativeEvent)
-		void OnWeaponHit(FHitResult HitResult);
-
+	void OnWeaponHit(FHitResult HitResult);
 	void OnWeaponHit_Implementation(FHitResult HitResult);
 
 private:

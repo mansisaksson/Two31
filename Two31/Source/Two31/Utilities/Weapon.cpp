@@ -47,20 +47,6 @@ void AWeapon::Tick(float DeltaTime)
 	if (AmmoPool == NULL)
 		return;
 
-	if (bAutoReload && AmmoInClip <= 0)
-		bReload = true;
-
-	if (bReload && (*AmmoPool) > 0)
-	{
-		timeSinceReloadStart += DeltaTime;
-		if (timeSinceReloadStart >= ReloadTime)
-		{
-			bReload = false;
-			timeSinceReloadStart = 0.f;
-			FillClip();
-		}
-	}
-
 	if (!bCanFire)
 	{
 		timeSinceFire += DeltaTime;
@@ -68,6 +54,23 @@ void AWeapon::Tick(float DeltaTime)
 		{
 			timeSinceFire = 0;
 			bReadyToFire = true;
+		}
+	}
+
+	if (bReadyToFire || timeSinceReloadStart > 0)
+	{
+		if (bAutoReload && AmmoInClip <= 0)
+			bReload = true;
+
+		if (bReload && (*AmmoPool) > 0)
+		{
+			timeSinceReloadStart += DeltaTime;
+			if (timeSinceReloadStart >= ReloadTime)
+			{
+				bReload = false;
+				timeSinceReloadStart = 0.f;
+				FillClip();
+			}
 		}
 	}
 
@@ -177,7 +180,6 @@ bool AWeapon::GetIsFiring()
 {
 	return bIsFiring;
 }
-
 int32 AWeapon::GetClipSize()
 {
 	return ClipSize;
