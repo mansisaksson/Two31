@@ -228,8 +228,9 @@ bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
 		AmmoToRefill = NULL;
 		break;
 	}
-	if (AmmoToRefill != NULL && (AmmoToRefill->AmmoPool > AmmoToRefill->MaxAmmo))
+	if (AmmoToRefill != NULL && (AmmoToRefill->AmmoPool < AmmoToRefill->MaxAmmo))
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Refill ammo"));
 		AmmoToRefill->AmmoPool = FMath::Clamp(AmmoToRefill->AmmoPool + Amount, 0, AmmoToRefill->MaxAmmo);
 		return true;
 	}
