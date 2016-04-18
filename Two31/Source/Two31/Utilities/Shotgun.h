@@ -22,6 +22,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MuzzeFlash;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+		int32 NumberOfShots;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+		float RadiusMax;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+		float RadiusMin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+		float Distance;
+
 private:
 
 };

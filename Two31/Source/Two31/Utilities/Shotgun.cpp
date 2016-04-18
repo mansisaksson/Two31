@@ -14,6 +14,10 @@ AShotgun::AShotgun()
 	RPM = 60;
 	ReloadTime = 1.f;
 	timeSinceFire = 0;
+	RadiusMin = 0.f;
+	RadiusMax = 10.f;
+	Distance = 5000.f;
+	NumberOfShots = 8;
 }
 
 void AShotgun::FireShot(FVector TowardsLocation)
@@ -53,12 +57,6 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			particleComp->SetRelativeTransform(particleTransform);
 		}
 
-		// Make Sliders
-		int NumberOfShots = 1;
-		float RadiusMax = 10.f;
-		float RadiusMin = 10.f;
-		float Distance = 5000.f;
-
 		for (int i = 0; i < NumberOfShots; i++)
 		{
 
@@ -68,8 +66,6 @@ void AShotgun::FireShot(FVector TowardsLocation)
 
 			float Angle = FMath::FRandRange(AngleMin, AngleMax);
 			float Radius = FMath::FRandRange(RadiusMin, RadiusMax);
-
-			Angle = 0;
 
 			float Horizontal = Radius * FMath::Cos(FMath::DegreesToRadians(Angle));
 			float Vertical = Radius * FMath::Sin(FMath::DegreesToRadians(Angle));
@@ -89,10 +85,6 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			FVector New = Forward.RotateAngleAxis(Horizontal, LocalUp);
 			New.Normalize();
 			FinalDirection = New;
-
-			std::ostringstream ss;
-			ss << "Left: " << Left.X << ", " << Left.Y << ", " << Left.Z;
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, UTF8_TO_TCHAR(ss.str().c_str()));
 
 			Forward = FinalDirection;
 			Forward.Normalize();
@@ -128,7 +120,7 @@ void AShotgun::FireShot(FVector TowardsLocation)
 						APlayerController* PlayerController = Cast<APlayerController>(result.GetActor()->GetInstigatorController());
 						TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 						FDamageEvent DamageEvent(ValidDamageTypeClass);
-						Enemy->TakeDamage(WeaponDamage, DamageEvent, PlayerController, this);
+						Enemy->TakeDamage(WeaponDamage * (result.Distance/Distance), DamageEvent, PlayerController, this);
 					}
 				}
 			}
