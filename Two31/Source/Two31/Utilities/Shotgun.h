@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "Utilities/Weapon.h"
@@ -10,6 +8,9 @@ UCLASS()
 class TWO31_API AShotgun : public AWeapon
 {
 	GENERATED_BODY()
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Visual)
+	USceneComponent* MuzzleFlashLocation;
 	
 public:
 	AShotgun();

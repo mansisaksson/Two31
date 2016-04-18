@@ -32,32 +32,58 @@ protected:
 	int GetWeaponIndex();
 	void Death();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
 	TSubclassOf<class AWeapon> Weapon;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
 	float TurnRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
 	/* Tiden det tar efter att fienden tappat siken om spelaren innan den går idle */
 	float TimeToIdle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	float TimeToRandMove;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	/* After this amount of time the RandMove might get overridden by other movement*/
+	float TimeGivenTooMove;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	/* If true, TimeToRandMove will be ignored if a better line of sight is needed */
+	bool bPrioritizeLineOfSight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	bool bInstaReactToCornerPeaking;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	float MinRandMoveRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	float MaxRandMoveRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	float RetreatDistance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	float HuntDistance;
+
 private:
 	void CheckLineOfSight();
-	void FireTowardsPlayer();
-	void FocusOnPosition(FVector Position);
+	void FireTowardsPlayer(float DeltaTime);
+	void FocusOnPosition(float DeltaTime, FVector Position);
 	void ReactToPlayerMovement(float DeltaTime);
-	void AvoidPlayer();
+	void AvoidPlayer(float DeltaTime);
 
-	void TryGetLineOfSight();
-	void GoCloseToLastKnowPosition();
-	void GuardLastKnownPosition();
-
-	bool bHasLineOfSight;
-	float TimeSinceLostLineOfSight;
-
-	TArray<SpottedPositions> SpottedPlayerPositions;
+	void TryGetLineOfSight(float DeltaTime);
+	void GuardLastKnownPosition(float DeltaTime);
+	void GoCloseToLastKnowPosition(float DeltaTime);
 
 	int AmmoPool;
+	bool bHasLineOfSight;
+	bool bOldHasLineOfSight;
+	bool bIsRandMoving;
+	bool bLostLineOfSight;
+
+	float TimeSinceLostLineOfSight;
+	float TimeSinceRandMovement;
+
+	FVector LastKnownPlayerPos;
+
 	class AWeapon* CurrentWeapon;
 	TArray<class AWeapon*> WeaponSlots;
+	TArray<SpottedPositions> SpottedPlayerPositions;
+	SpottedPositions LastKnownSpottedPositions;
 };

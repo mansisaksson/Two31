@@ -31,7 +31,7 @@ AWeapon::AWeapon()
 	RootComponent = WeaponMesh;
 
 	BulletSpawnLocation = CreateDefaultSubobject<USceneComponent>("BulletSpawnLocation");
-	BulletSpawnLocation->AttachTo(WeaponMesh);
+	BulletSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
 }
 
 void AWeapon::BeginPlay()

@@ -6,13 +6,27 @@
 ACultistCharacter::ACultistCharacter()
 	: AEnemyCharacter()
 {
-	TurnRate = 100.f;
+	AmmoPool = 2147483647; // Sätter ammo till max så att den inte tar slut
+
+	TurnRate = 10.f;
 	TimeToIdle = 20.f;
 
-	AmmoPool = 2147483647; // Sätter ammo till max så att den inte tar slut
+	TimeToRandMove = 3.5f;
+	TimeGivenTooMove = 1.f;
+
+	bPrioritizeLineOfSight = false;
+	bInstaReactToCornerPeaking = false;
+
+	MinRandMoveRadius = 300.f;
+	MaxRandMoveRadius = 400.f;
+
+	RetreatDistance = 500.f;
+	HuntDistance = 1500.f;
+
 	bHasLineOfSight = false;
 	TimeSinceLostLineOfSight = 0.f;
-
+	TimeSinceRandMovement = 0.f;
+	
 	WeaponSlots.SetNum(1);
 	SpottedPlayerPositions.SetNum(5);
 }
@@ -42,20 +56,22 @@ void ACultistCharacter::Tick(float DeltaTime)
 			if (bHasLineOfSight)
 			{
 				if (PlayerReferense != NULL)
-					FocusOnPosition(PlayerReferense->GetActorLocation());
+					FocusOnPosition(DeltaTime, PlayerReferense->GetActorLocation());
 
-				FireTowardsPlayer();
+				FireTowardsPlayer(DeltaTime);
 				ReactToPlayerMovement(DeltaTime);
 			}
 			else
 			{
 				TimeSinceLostLineOfSight += DeltaTime;
-				if (TimeSinceLostLineOfSight >= TimeToIdle)
+				if (TimeSinceLostLineOfSight < TimeToIdle)
 				{
-					if (TimeSinceLostLineOfSight < 1.f)
-						TryGetLineOfSight();
+					if (bOldHasLineOfSight && !bHasLineOfSight)
+						bLostLineOfSight = true;
+					if (TimeSinceLostLineOfSight > 1.f && TimeSinceLostLineOfSight < 3.f)
+						TryGetLineOfSight(DeltaTime);
 					else
-						GuardLastKnownPosition();
+						GuardLastKnownPosition(DeltaTime);
 				}
 				else
 				{
@@ -65,7 +81,6 @@ void ACultistCharacter::Tick(float DeltaTime)
 		}
 	}
 }
-
 
 void ACultistCharacter::CheckLineOfSight()
 {
@@ -104,6 +119,7 @@ void ACultistCharacter::CheckLineOfSight()
 		}
 	}
 
+	bOldHasLineOfSight = bHasLineOfSight;
 	if (spottedPositions.bCanSeePlayerChest || spottedPositions.bCanSeePlayerShoulder_Left || spottedPositions.bCanSeePlayerShoulder_Right)
 	{
 		bHasLineOfSight = true;
@@ -116,7 +132,7 @@ void ACultistCharacter::CheckLineOfSight()
 	SpottedPlayerPositions.Add(spottedPositions);
 }
 
-void ACultistCharacter::FireTowardsPlayer()
+void ACultistCharacter::FireTowardsPlayer(float DeltaTime)
 {
 	if (PlayerReferense != NULL && CurrentWeapon != NULL)
 	{
@@ -127,55 +143,126 @@ void ACultistCharacter::FireTowardsPlayer()
 		CurrentWeapon->StopFire(Direction * 5000.f);
 	}
 }
-void ACultistCharacter::FocusOnPosition(FVector Position)
+void ACultistCharacter::FocusOnPosition(float DeltaTime, FVector Position)
 {
 	FVector Direction = Position - GetActorLocation();
 	FRotator NewControlRotation = Direction.Rotation();
 
 	// Gör en lerp här
 	NewControlRotation.Yaw = FRotator::ClampAxis(NewControlRotation.Yaw);
+	//FaceRotation(FMath::Lerp(GetActorRotation(), NewControlRotation, DeltaTime * TurnRate));
 	FaceRotation(NewControlRotation);
 }
 void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 {
-	// if (player is getting too close)
-		AvoidPlayer();
-	
-	if (SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Left && !SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Right)
-		AddMovementInput(GetActorRightVector(), DeltaTime * 50.f);
-	else if (SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Right && !SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Left)
-		AddMovementInput(-GetActorRightVector(), DeltaTime * 50.f);
+	// Notes för framtiden:
+	// Kolla om fienden är åvanför spelaren och agera anorlunda utifrån detta
+	float distanceToPlayer = FVector::Dist(GetActorLocation(), PlayerReferense->GetActorLocation());
+	if (distanceToPlayer < 500.f)
+		AvoidPlayer(DeltaTime);
+	//else if (distanceToPlayer > HuntDistance)
+	//	HuntPlayer();
 
-	// Save Player Position
+	TimeSinceRandMovement += DeltaTime;
+	if (TimeSinceRandMovement > TimeToRandMove)
+	{
+		TimeSinceRandMovement = 0.f;
+		FNavLocation NewPos;
+		NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
+		/*float RandRad = FMath::FRandRange(MinRandMoveRadius, MaxRandMoveRadius);
+		float RandDir = FMath::FRandRange(0.f, 360.f);
+		FVector NewPos = GetActorLocation();
+		NewPos.X += FMath::Cos(RandDir) * RandRad;
+		NewPos.Y += FMath::Sin(RandDir) * RandRad;*/
+		NavSystem->SimpleMoveToLocation(GetController(), NewPos.Location);
+		bIsRandMoving = true;
+	}
+	if (TimeSinceRandMovement > TimeGivenTooMove)
+		bIsRandMoving = false;
+
+	if (bInstaReactToCornerPeaking && (!bIsRandMoving || bPrioritizeLineOfSight))
+	{
+		if (SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Left && !SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Right)
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * 200.f);
+		else if (SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Right && !SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Left)
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * -200.f);
+	}
+	LastKnownPlayerPos = PlayerReferense->GetActorLocation();
 }
-void ACultistCharacter::AvoidPlayer()
+void ACultistCharacter::AvoidPlayer(float DeltaTime)
 {
-	//	Try To move away from enemy:
-	//		Try to move back
-	//		else: Try to move left
-	//		else: Try to move right
-	//		else: Stand Still and shoot player
+	const FName TraceTag("Debug Trace");
+	FHitResult result;
+	ECollisionChannel collisionChannel;
+	collisionChannel = ECC_WorldDynamic;
+	FCollisionQueryParams collisionQuery;
+	collisionQuery.TraceTag = TraceTag;
+	GetWorld()->DebugDrawTraceTag = TraceTag;
+	collisionQuery.bTraceComplex = true;
+	FCollisionObjectQueryParams objectCollisionQuery;
+	objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
+	FCollisionResponseParams collisionResponse;
+	collisionResponse = ECR_Block;
+	collisionQuery.AddIgnoredActor(this);
+
+	float MoveSpeed = 80.f;
+	float NavRadius = 100.f;
+
+	if (!bIsRandMoving)
+	{
+		// If Can Move Backwards
+		if (!GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * -NavRadius), collisionChannel, collisionQuery, collisionResponse))
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorForwardVector() * -MoveSpeed);
+		// Move Left If needed
+		if (GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorRightVector() * -NavRadius), collisionChannel, collisionQuery, collisionResponse))
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * -MoveSpeed);
+		// Move Right If needed
+		else if (GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorRightVector() * NavRadius), collisionChannel, collisionQuery, collisionResponse))
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * MoveSpeed);
+	}
 }
 
-void ACultistCharacter::TryGetLineOfSight()
+void ACultistCharacter::TryGetLineOfSight(float DeltaTime)
 {
+	FocusOnPosition(DeltaTime, LastKnownPlayerPos);
+	// If We just lost line of sight
+	if (bLostLineOfSight)
+	{
+		// Find the most recent known angle of the player
+		for (size_t i = SpottedPlayerPositions.Num() - 1; i > 0; i--)
+		{
+			if (SpottedPlayerPositions[i].bCanSeePlayerShoulder_Left || SpottedPlayerPositions[i].bCanSeePlayerShoulder_Right || SpottedPlayerPositions[i].bCanSeePlayerChest)
+				LastKnownSpottedPositions = SpottedPlayerPositions[i];
+		}
+		bLostLineOfSight = false;
+	}
+
 	// Sidestep to the most recent know position
+	if (LastKnownSpottedPositions.bCanSeePlayerShoulder_Left && !LastKnownSpottedPositions.bCanSeePlayerShoulder_Right)
+		NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * 100.f));
+	else if (LastKnownSpottedPositions.bCanSeePlayerShoulder_Right && !LastKnownSpottedPositions.bCanSeePlayerShoulder_Left)
+		NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * -100.f));
 }
-void ACultistCharacter::GuardLastKnownPosition()
+void ACultistCharacter::GuardLastKnownPosition(float DeltaTime)
 {
+	Debug::LogOnScreen("Guard Mode");
 	if (true)
-		GoCloseToLastKnowPosition();
+		GoCloseToLastKnowPosition(DeltaTime);
 	else
 	{
-		// To till en random position runt sig
+		// Gå till en random position runt sig
 		// FaceLocation(last knownLocation)
 
 		// if (x time has passed)
 		//		move too location(spawn location)
 		//		go idle;
+
+		/*FNavLocation NewPos;
+		NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
+		NavSystem->SimpleMoveToLocation(GetController(), NewPos.Location);*/
 	}
 }
-void ACultistCharacter::GoCloseToLastKnowPosition()
+void ACultistCharacter::GoCloseToLastKnowPosition(float DeltaTime)
 {
 	// gå nära den senaste kända positionen av spelaren
 }

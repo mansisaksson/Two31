@@ -18,6 +18,9 @@ AShotgun::AShotgun()
 	RadiusMax = 10.f;
 	Distance = 5000.f;
 	NumberOfShots = 8;
+
+	MuzzleFlashLocation = CreateDefaultSubobject<USceneComponent>("MuzzleFlash");
+	MuzzleFlashLocation->AttachTo(WeaponMesh, TEXT("MuzzleFlash"));
 }
 
 void AShotgun::FireShot(FVector TowardsLocation)
@@ -51,7 +54,7 @@ void AShotgun::FireShot(FVector TowardsLocation)
 
 		if (MuzzeFlash != NULL)
 		{
-			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, BulletSpawnLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
+			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, MuzzleFlashLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
 			FTransform particleTransform = particleComp->GetRelativeTransform();
 			particleTransform.SetScale3D(FVector(0.1f, 0.1f, 0.1f));
 			particleComp->SetRelativeTransform(particleTransform);
@@ -101,7 +104,7 @@ void AShotgun::FireShot(FVector TowardsLocation)
 
 			if (hitObject)
 			{
-				Debug::LogOnScreen((result.GetActor()->GetName()));
+				//Debug::LogOnScreen((result.GetActor()->GetName()));
 				if (MuzzeFlash != NULL)
 					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
 
