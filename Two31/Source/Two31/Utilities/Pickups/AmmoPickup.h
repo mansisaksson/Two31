@@ -11,6 +11,11 @@ class TWO31_API AAmmoPickup : public APickup
 public:	
 	AAmmoPickup();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	int32 GetAmount();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	EAmmoType GetAmmoType();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	EAmmoType AmmoType;

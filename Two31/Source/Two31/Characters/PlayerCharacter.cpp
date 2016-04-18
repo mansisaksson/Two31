@@ -118,6 +118,13 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 				Armor->Destroy();
 
 		}
+		else if (Cast<AAmmoPickup>(OtherActor))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Ammo Pickup"));
+			AAmmoPickup* Ammo = Cast<AAmmoPickup>(OtherActor);
+			if (AddAmmo(Ammo->GetAmmoType(), Ammo->GetAmount()))
+				Ammo->Destroy();
+		}
 	}
 }
 
@@ -198,6 +205,36 @@ void APlayerCharacter::OnReload()
 {
 	if (CurrentWeapon != NULL)
 		CurrentWeapon->Reload();
+}
+
+bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
+{
+	FAmmo* AmmoToRefill;
+	switch (Ammo)
+	{
+	case EAmmoType::BulletAmmo:
+		AmmoToRefill = &BulletAmmo;
+		break;
+	case EAmmoType::ShotgunAmmo:
+		AmmoToRefill = &ShotgunAmmo;
+		break;
+	case EAmmoType::ExplosiveAmmo:
+		AmmoToRefill = &ExplosiveAmmo;
+		break;
+	case EAmmoType::PlasmaAmmo:
+		AmmoToRefill = &PlasmaAmmo;
+		break;
+	default:
+		AmmoToRefill = NULL;
+		break;
+	}
+	if (AmmoToRefill != NULL && (AmmoToRefill->AmmoPool > AmmoToRefill->MaxAmmo))
+	{
+		AmmoToRefill->AmmoPool = FMath::Clamp(AmmoToRefill->AmmoPool + Amount, 0, AmmoToRefill->MaxAmmo);
+		return true;
+	}
+
+	return false;
 }
 
 void APlayerCharacter::SelectWeaponSlot(int index)

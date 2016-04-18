@@ -86,6 +86,8 @@ protected:
 	void OnReleaseFire();
 	void OnReload();
 
+	bool AddAmmo(EAmmoType Ammo, int Amount);
+
 	void SelectWeaponSlot(int index);
 	void SelectWeaponSlot1();
 	void SelectWeaponSlot2();
