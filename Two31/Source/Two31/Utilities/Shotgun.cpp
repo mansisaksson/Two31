@@ -33,14 +33,14 @@ void AShotgun::FireShot(FVector TowardsLocation)
 		AmmoInClip--;
 		(*AmmoPool)--;
 
-		const FName TraceTag("Debug Trace");
+		//const FName TraceTag("Debug Trace");
 
 		FHitResult result;
 		ECollisionChannel collisionChannel;
 		collisionChannel = ECC_WorldDynamic;
 		FCollisionQueryParams collisionQuery;
-		collisionQuery.TraceTag = TraceTag;
-		GetWorld()->DebugDrawTraceTag = TraceTag;
+		//collisionQuery.TraceTag = TraceTag;
+		//GetWorld()->DebugDrawTraceTag = TraceTag;
 		collisionQuery.bTraceComplex = true;
 		FCollisionObjectQueryParams objectCollisionQuery;
 		objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
@@ -120,7 +120,12 @@ void AShotgun::FireShot(FVector TowardsLocation)
 						APlayerController* PlayerController = Cast<APlayerController>(result.GetActor()->GetInstigatorController());
 						TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 						FDamageEvent DamageEvent(ValidDamageTypeClass);
-						Enemy->TakeDamage(WeaponDamage * (result.Distance/Distance), DamageEvent, PlayerController, this);
+						/*
+						std::ostringstream ss;
+						ss << (result.Distance / Distance);
+						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, UTF8_TO_TCHAR(ss.str().c_str()));
+						*/
+						Enemy->TakeDamage(WeaponDamage * (1.0f - FMath::Clamp(result.Distance/Distance, 0.0f, 1.0f)), DamageEvent, PlayerController, this);
 					}
 				}
 			}
