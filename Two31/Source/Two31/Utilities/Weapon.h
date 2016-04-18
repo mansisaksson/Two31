@@ -87,13 +87,11 @@ protected:
 	bool bCanFire;
 	bool bIsFiring;
 	bool bFirstTimeEquiped;
+	bool bReload;
+	bool bReadyToFire;
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnWeaponHit(FHitResult HitResult);
 	void OnWeaponHit_Implementation(FHitResult HitResult);
-
-private:
-	bool bReload;
-	bool bReadyToFire;
 
 };

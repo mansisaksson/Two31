@@ -14,7 +14,7 @@ DEFINE_LOG_CATEGORY(DebugAI);
 //Logging for Critical Errors that must always be addressed
 DEFINE_LOG_CATEGORY(DebugError);
 
-void Debug::OnScreenMessage(FString message, FColor color /* = FColor::White */)
+void Debug::LogOnScreen(FString message, FColor color /* = FColor::White */)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2.5f, color, message);
 }

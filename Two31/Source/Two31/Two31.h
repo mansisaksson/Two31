@@ -21,7 +21,7 @@ DECLARE_LOG_CATEGORY_EXTERN(DebugError, Log, All);
 static class Debug
 {
 public:
-	static void OnScreenMessage(FString message, FColor color = FColor::White);
+	static void LogOnScreen(FString message, FColor color = FColor::White);
 	static void Log(FString message);
 	static void LogWarning(FString message);
 	static void LogFatalError(FString message);

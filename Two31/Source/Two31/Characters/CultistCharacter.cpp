@@ -122,6 +122,7 @@ void ACultistCharacter::FireTowardsPlayer()
 	{
 		FVector Direction = (PlayerReferense->GetActorLocation() + FVector(FMath::FRandRange(-100, 100.f), FMath::FRandRange(-100, 100.f), FMath::FRandRange(-100, 100.f))) - GetActorLocation();
 
+		// Gör detta i intervall, möjligtvis olika beroende på vapen
 		CurrentWeapon->StartFire(Direction * 5000.f);
 		CurrentWeapon->StopFire(Direction * 5000.f);
 	}
