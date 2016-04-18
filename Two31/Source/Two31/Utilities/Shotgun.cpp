@@ -101,7 +101,8 @@ void AShotgun::FireShot(FVector TowardsLocation)
 
 			if (hitObject)
 			{
-				Debug::LogOnScreen((result.GetActor()->GetName()));
+				OnWeaponHit(result);
+				//Debug::LogOnScreen((result.GetActor()->GetName()));
 				if (MuzzeFlash != NULL)
 					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
 
