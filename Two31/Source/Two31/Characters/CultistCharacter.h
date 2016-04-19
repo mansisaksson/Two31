@@ -30,7 +30,9 @@ protected:
 	bool EquipWeapon(TSubclassOf<class AWeapon> Weapon);
 	void SelectWeaponSlot(int index);
 	int GetWeaponIndex();
+
 	void Death();
+	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
 	TSubclassOf<class AWeapon> Weapon;
@@ -42,7 +44,13 @@ protected:
 	float TimeToIdle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	/* Will be more prone to move when taking damage (0 - 100) 100 = 100% chance to move */
+	float AvoidDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
 	float TimeToRandMove;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	/* A Random amount if time (in seconds) that will be added to the TimeToRandMove (Helps if enemies are spawned in a group) */
+	float AddedRandomTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
 	/* After this amount of time the RandMove might get overridden by other movement*/
 	float TimeGivenTooMove;
@@ -77,6 +85,7 @@ private:
 	bool bIsRandMoving;
 	bool bLostLineOfSight;
 
+	float DefaultTimeToRandMove;
 	float TimeSinceLostLineOfSight;
 	float TimeSinceRandMovement;
 

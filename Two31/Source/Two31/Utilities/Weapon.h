@@ -25,6 +25,7 @@ public:
 
 	/* These are all called from the PlayerCharacter */
 	virtual void EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* AmmoPool);
+	virtual void HolsterWeapon();
 	virtual void SetPlayerAnimations(USkeletalMeshComponent* PlayerMesh);
 	virtual void SetCultistAnimations(USkeletalMeshComponent* CultistMesh);
 
@@ -38,7 +39,7 @@ public:
 	void FillClip();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	bool GetIsFiring();
+	bool GetFireIsPressed() { return bFireIsPressed; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	bool GetCanFire() { return bCanFire; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
@@ -46,21 +47,32 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	bool GetIsReloading() { return bReload; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetClipSize();
+	int32 GetClipSize() { return ClipSize; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetAmmoInClip();
+	int32 GetAmmoInClip() { return AmmoInClip; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	uint8 GetAmmoType();
+	uint8 GetAmmoType() { return (uint8)AmmoType; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	float GetTotalReloadTime();
+	float GetTotalReloadTime() { return ReloadTime; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	float GetTimeSinceReload();
+	float GetTimeSinceReload() { return timeSinceReloadStart; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	AActor* GetOwner();
+	float GetTimeSinceEquip() { return timeSinceEquip; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	bool GetIsEquiped() { return bIsEquiped; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	AActor* GetOwner();
 
 protected:
+	UFUNCTION(BlueprintNativeEvent)
+	void OnWeaponHit(FHitResult HitResult);
+	void OnWeaponHit_Implementation(FHitResult HitResult);
+	UFUNCTION(BlueprintNativeEvent)
+	void OnFireShot();
+	void OnFireShot_Implementation();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* PlayerAnimationBlueprint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
@@ -84,24 +96,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float EquipTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float DeequipTime;
+	float UnequipTime;
 	
 	USkeletalMeshComponent* OwnerMesh;
 
 	int AmmoInClip;
 	int* AmmoPool;
-
+	
 	float timeSinceReloadStart;
 	float timeSinceFire;
-
+	float timeSinceEquip;
+	float timeSinceUnequip;
+	
+	bool bIsEquiped;
+	bool bEquip;
 	bool bCanFire;
-	bool bIsFiring;
+	bool bFireIsPressed;
 	bool bFirstTimeEquiped;
 	bool bReload;
 	bool bReadyToFire;
-
-	UFUNCTION(BlueprintNativeEvent)
-	void OnWeaponHit(FHitResult HitResult);
-	void OnWeaponHit_Implementation(FHitResult HitResult);
-
+	bool bHasFiredShot;
 };

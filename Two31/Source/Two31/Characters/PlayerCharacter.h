@@ -100,9 +100,6 @@ protected:
 	void MoveForward(float Val);
 	void MoveSideways(float Val);
 
-	void StartSprint();
-	void StopSprint();
-
 	void NextWeapon();
 	void PreviousWeapon();
 	int GetWeaponIndex();
@@ -118,9 +115,10 @@ protected:
 	float BaseTurnRate;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float BaseLookUpRate;
-	/* Sprint speed = max walk speed, walk speed = max walk speed / muliplier */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float SprintMultiplier;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float ViewPitchMax;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float ViewPitchMin;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	bool bCanJump;
@@ -147,7 +145,6 @@ protected:
 	FAmmo ExplosiveAmmo;
 
 private:
-	bool bIsSprinting;
 	bool bFireIsPressed;
 
 	float CurrentHealth;
@@ -157,6 +154,8 @@ private:
 
 	FAmmo* CurrentAmmo;
 	class AWeapon* CurrentWeapon;
+	class APlayerController* PlayerController;
+
 	TArray<class AWeapon*> WeaponSlots;
 	TArray<float> HealthPacks;
 };

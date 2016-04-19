@@ -18,7 +18,8 @@ APlayerCharacter::APlayerCharacter()
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
-	SprintMultiplier = 1.5f;
+	ViewPitchMax = 70.f;
+	ViewPitchMin = -70.f;
 	
 	CurrentHealth = 50.f;
 	MaxHealth = 100.f;
@@ -29,7 +30,6 @@ APlayerCharacter::APlayerCharacter()
 	WeaponSlots.SetNum(4);
 	HealthPacks.SetNum(0);
 
-	bIsSprinting = false;
 	bFireIsPressed = false;
 	bCanJump = true;
 
@@ -41,7 +41,7 @@ APlayerCharacter::APlayerCharacter()
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	FPArmMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
-	FPArmMesh->SetOnlyOwnerSee(true);
+	FPArmMesh->SetOnlyOwnerSee(false);
 	FPArmMesh->AttachParent = FPCamera;
 	FPArmMesh->bCastDynamicShadow = false;
 	FPArmMesh->CastShadow = false;
@@ -64,6 +64,11 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	PlayerController = Cast<APlayerController>(Controller);
+	PlayerController->PlayerCameraManager->ViewPitchMax = ViewPitchMax;
+	PlayerController->PlayerCameraManager->ViewPitchMin = ViewPitchMin;
+
 	EquipWeapon(StarterWeapon1);
 	EquipWeapon(StarterWeapon2);
 	EquipWeapon(StarterWeapon2);
@@ -152,7 +157,7 @@ bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 				const FVector SpawnLocation = FVector::ZeroVector;
 				WeaponSlots[i] = GetWorld()->SpawnActor<AWeapon>(Weapon, SpawnLocation, SpawnRotation);
 				WeaponSlots[i]->AttachRootComponentTo(FPArmMesh);
-				WeaponSlots[i]->SetActorHiddenInGame(true);
+				WeaponSlots[i]->HolsterWeapon();
 
 				if (CurrentWeapon == NULL)
 					SelectWeaponSlot(i);
@@ -191,8 +196,6 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveSideways);
-	InputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::StartSprint);
-	InputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::StopSprint);
 
 	InputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	InputComponent->BindAxis("TurnRate", this, &APlayerCharacter::TurnAtRate);
@@ -255,10 +258,9 @@ void APlayerCharacter::SelectWeaponSlot(int index)
 	if (WeaponSlots[index] != NULL && CurrentWeapon != WeaponSlots[index])
 	{
 		if (CurrentWeapon != NULL)
-			CurrentWeapon->SetActorHiddenInGame(true);
+			CurrentWeapon->HolsterWeapon();
 
 		CurrentWeapon = WeaponSlots[index];
-		CurrentWeapon->SetActorHiddenInGame(false);
 		
 		switch ((EAmmoType)CurrentWeapon->GetAmmoType())
 		{
@@ -303,29 +305,12 @@ void APlayerCharacter::SelectWeaponSlot4()
 void APlayerCharacter::MoveForward(float Value)
 {
 	if (Value != 0.0f)
-	{
-		if (!bIsSprinting || Value < 0)
-			Value /= SprintMultiplier;
-
 		AddMovementInput(GetActorForwardVector(), Value);
-	}
 }
 void APlayerCharacter::MoveSideways(float Value)
 {
 	if (Value != 0.0f)
-	{
-		Value /= SprintMultiplier;
 		AddMovementInput(GetActorRightVector(), Value);
-	}
-}
-
-void APlayerCharacter::StartSprint()
-{
-	bIsSprinting = true;
-}
-void APlayerCharacter::StopSprint()
-{
-	bIsSprinting = false;
 }
 
 void APlayerCharacter::NextWeapon()

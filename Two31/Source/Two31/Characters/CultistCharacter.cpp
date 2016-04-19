@@ -11,7 +11,9 @@ ACultistCharacter::ACultistCharacter()
 	TurnRate = 10.f;
 	TimeToIdle = 20.f;
 
-	TimeToRandMove = 3.5f;
+	AvoidDamage = 10.f;
+	TimeToRandMove = 3.0f;
+	AddedRandomTime = 3.f;
 	TimeGivenTooMove = 1.f;
 
 	bPrioritizeLineOfSight = false;
@@ -41,6 +43,8 @@ void ACultistCharacter::BeginPlay()
 		if (Cast<APlayerCharacter>(*Itr))
 			PlayerReferense = Cast<APlayerCharacter>(*Itr);
 	}
+	DefaultTimeToRandMove = TimeToRandMove;
+	TimeToRandMove = DefaultTimeToRandMove + FMath::FRandRange(0.f, AddedRandomTime);
 }
 
 void ACultistCharacter::Tick(float DeltaTime)
@@ -166,14 +170,16 @@ void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 	TimeSinceRandMovement += DeltaTime;
 	if (TimeSinceRandMovement > TimeToRandMove)
 	{
+		TimeToRandMove = DefaultTimeToRandMove + FMath::FRandRange(0.f, AddedRandomTime);
 		TimeSinceRandMovement = 0.f;
-		FNavLocation NewPos;
-		NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
+
 		/*float RandRad = FMath::FRandRange(MinRandMoveRadius, MaxRandMoveRadius);
 		float RandDir = FMath::FRandRange(0.f, 360.f);
 		FVector NewPos = GetActorLocation();
 		NewPos.X += FMath::Cos(RandDir) * RandRad;
 		NewPos.Y += FMath::Sin(RandDir) * RandRad;*/
+		FNavLocation NewPos;
+		NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
 		NavSystem->SimpleMoveToLocation(GetController(), NewPos.Location);
 		bIsRandMoving = true;
 	}
@@ -331,4 +337,14 @@ void ACultistCharacter::Death()
 		if (WeaponSlots[i] != NULL)
 			WeaponSlots[i]->Destroy();
 	}
+}
+float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
+
+	TimeSinceRandMovement += TimeToRandMove * (AvoidDamage / 100.f);
+
+	if (CurrentHealth == 0)
+		bIsAlive = false;
+	return DamageAmount;
 }
