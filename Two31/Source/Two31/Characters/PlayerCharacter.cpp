@@ -100,14 +100,20 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Weapon Pickup"));
 			AWeaponPickup* WeaponPickup = Cast<AWeaponPickup>(OtherActor);
 			if (EquipWeapon(WeaponPickup->GetWeapon()))
+			{
 				WeaponPickup->Destroy();
+				PickedUpItem(OtherActor);
+			}
 		}
 		else if (Cast<AHealthPickup>(OtherActor))
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Health Pickup"));
 			AHealthPickup* Healthpack = Cast<AHealthPickup>(OtherActor);
 			if (PickupHealthPack(Healthpack))
+			{
 				Healthpack->Destroy();
+				PickedUpItem(OtherActor);
+			}
 
 		}
 		else if (Cast<AArmorPickup>(OtherActor))
@@ -115,7 +121,10 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Armor Pickup"));
 			AArmorPickup* Armor = Cast<AArmorPickup>(OtherActor);
 			if (ChangeArmor(Armor->GetArmor()))
+			{
 				Armor->Destroy();
+				PickedUpItem(OtherActor);
+			}
 
 		}
 		else if (Cast<AAmmoPickup>(OtherActor))
@@ -123,7 +132,10 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Ammo Pickup"));
 			AAmmoPickup* Ammo = Cast<AAmmoPickup>(OtherActor);
 			if (AddAmmo(Ammo->GetAmmoType(), Ammo->GetAmount()))
+			{
 				Ammo->Destroy();
+				PickedUpItem(OtherActor);
+			}
 		}
 	}
 }
@@ -352,6 +364,17 @@ void APlayerCharacter::PreviousWeapon()
 
 	SelectWeaponSlot(tempIndex);
 }
+
+float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
+	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
+	//if (CurrentHealth == 0)
+	//	bIsAlive = false;
+
+	return DamageAmount;
+}
+
 int APlayerCharacter::GetWeaponIndex()
 {
 	int index = -1;
@@ -375,16 +398,6 @@ int32 APlayerCharacter::GetHealthPacks()
 {
 	return HealthPacks.Num();
 }
-float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
-	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
-	//if (CurrentHealth == 0)
-	//	bIsAlive = false;
-
-	return DamageAmount;
-}
-
 void APlayerCharacter::TurnAtRate(float Rate)
 {
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
@@ -432,6 +445,11 @@ bool APlayerCharacter::ChangeArmor(float pChange)
 		return true;
 	}
 	return false;
+}
+
+void APlayerCharacter::PickedUpItem_Implementation(AActor* OtherActor)
+{
+
 }
 
 int32 APlayerCharacter::GetClipSize()

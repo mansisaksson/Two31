@@ -10,7 +10,11 @@ AWeapon::AWeapon()
 
 	ClipSize = 30;
 	RPM = 500;
+
 	ReloadTime = 2.f;
+	EquipTime = 1.f;
+	DeequipTime = 1.f;
+
 	bAutoReload = true;
 
 	timeSinceFire = 0.f;
@@ -32,6 +36,8 @@ AWeapon::AWeapon()
 
 	BulletSpawnLocation = CreateDefaultSubobject<USceneComponent>("BulletSpawnLocation");
 	BulletSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
+
+	//AutoReceiveInput() <--- Gör detta sen
 }
 
 void AWeapon::BeginPlay()

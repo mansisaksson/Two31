@@ -40,6 +40,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	bool GetIsFiring();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	bool GetCanFire() { return bCanFire; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	bool GetIsReadyToFire() { return bReadyToFire; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	bool GetIsReloading() { return bReload; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetClipSize();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetAmmoInClip();
@@ -75,6 +81,10 @@ protected:
 	float RPM;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float WeaponDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float EquipTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float DeequipTime;
 	
 	USkeletalMeshComponent* OwnerMesh;
 

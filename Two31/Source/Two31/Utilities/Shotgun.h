@@ -19,21 +19,16 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	USoundBase* FireSound;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MuzzeFlash;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
-		int32 NumberOfShots;
-
+	int32 NumberOfShots;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
-		float RadiusMax;
-
+	float RadiusMax;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
-		float RadiusMin;
-
+	float RadiusMin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
-		float Distance;
+	float Distance;
 
 private:
 

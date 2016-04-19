@@ -38,9 +38,6 @@ void ARocketLauncher::FireShot(FVector TowardsLocation)
 				particleComp->SetRelativeTransform(particleTransform);
 			}
 
-			if (FireSound != NULL)
-				UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
-
 			if (ArmFireAnimation != NULL && OwnerMesh != NULL)
 			{
 				if (Cast<APlayerCharacter>(OwnerMesh->GetAttachmentRootActor()))

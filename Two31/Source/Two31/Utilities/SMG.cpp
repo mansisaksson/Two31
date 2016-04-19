@@ -84,9 +84,6 @@ void ASMG::FireShot(FVector TowardsLocation)
 				}
 			}
 		}
-
-		if (FireSound != NULL)
-			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 }
 

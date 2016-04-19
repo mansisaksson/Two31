@@ -34,6 +34,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FPCamera; }
 
+	UFUNCTION()
+	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetHealth();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
@@ -42,16 +45,16 @@ public:
 	bool PickupHealthPack(AHealthPickup* Healthpack);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetHealthPacks();
-
-	UFUNCTION()
-	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
-
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetArmor();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxArmor();
-	UFUNCTION(BlueprintCallable,Category = GetFunction)
+	UFUNCTION(BlueprintCallable, Category = GetFunction)
 	bool ChangeArmor(float pChange);
+
+	UFUNCTION(BlueprintNativeEvent, Category = Event)
+	void PickedUpItem(AActor* OtherActor);
+	void PickedUpItem_Implementation(AActor* OtherActor);
 
 	/* Ta bort, Kan använda GetWeapon() Istället */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
