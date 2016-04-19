@@ -29,6 +29,7 @@ APlayerCharacter::APlayerCharacter()
 
 	WeaponSlots.SetNum(4);
 	HealthPacks.SetNum(0);
+	Items.SetNum(0);
 
 	bFireIsPressed = false;
 	bCanJump = true;
@@ -142,6 +143,13 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 				PickedUpItem(OtherActor);
 			}
 		}
+		else if (Cast<AItemPickup>(OtherActor))
+		{
+			Debug::LogOnScreen(TEXT("Item Pickup"));
+			AItemPickup* Item = Cast<AItemPickup>(OtherActor);
+			if (AddItem(Item))
+				Item->Destroy();
+		}
 	}
 }
 
@@ -247,6 +255,16 @@ bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Refill ammo"));
 		AmmoToRefill->AmmoPool = FMath::Clamp(AmmoToRefill->AmmoPool + Amount, 0, AmmoToRefill->MaxAmmo);
+		return true;
+	}
+
+	return false;
+}
+bool APlayerCharacter::AddItem(AItemPickup* item)
+{
+	if (Items.Num() < 2)
+	{
+		Items.Add(item);
 		return true;
 	}
 
