@@ -2,6 +2,7 @@
 
 #include "GameFramework/Character.h"
 #include "../Utilities/WeaponGlobals.h"
+#include "../Utilities/Pickups/ItemPickup.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -91,6 +92,8 @@ protected:
 
 	bool AddAmmo(EAmmoType Ammo, int Amount);
 
+	bool AddItem(AItemPickup* item);
+
 	void SelectWeaponSlot(int index);
 	void SelectWeaponSlot1();
 	void SelectWeaponSlot2();
@@ -159,4 +162,7 @@ private:
 	class AWeapon* CurrentWeapon;
 	TArray<class AWeapon*> WeaponSlots;
 	TArray<float> HealthPacks;
+
+	class AItemPickup* CurrentItem;
+	TArray<class AItemPickup*> Items;
 };
