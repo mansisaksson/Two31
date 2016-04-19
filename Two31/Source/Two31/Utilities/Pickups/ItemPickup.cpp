@@ -6,12 +6,10 @@
 AItemPickup::AItemPickup()
 	: APickup()
 {
-	ItemType = EItemType::BlueKey;
+	ID = 0;
+	Name = "None";
 }
 
-EItemType AItemPickup::GetItemType()
-{
-	return ItemType;
-}
+
 
 

@@ -259,13 +259,40 @@ bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
 }
 bool APlayerCharacter::AddItem(AItemPickup* item)
 {
-	if (Items.Num() < 2)
+	if (Items.Num() < 4 && Items.Num() > 0 )
+	{
+		bool  bShouldAdd = true;
+		for (size_t i = 0; i < Items.Num(); i++)
+		{
+			if (Items[i]->GetItemID() == item->GetItemID())
+			{
+				//Debug::LogOnScreen(TEXT("Item duplicate, not picked up"));
+				bShouldAdd = false;
+			}
+		}
+		if (bShouldAdd)
+		{
+			Items.Add(item);
+			Debug::LogOnScreen(Items[0]->GetItemName());
+			return true;
+		}
+	}
+	else if (Items.Num() == 0)
 	{
 		Items.Add(item);
+		Debug::LogOnScreen(Items[0]->GetItemName());
 		return true;
 	}
-
 	return false;
+}
+FString APlayerCharacter::GetFirstItem()
+{
+	if (Items.Num() > 0)
+	{
+		return Items[0]->GetItemName();
+	}
+
+	return "";
 }
 
 void APlayerCharacter::SelectWeaponSlot(int index)

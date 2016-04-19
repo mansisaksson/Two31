@@ -5,14 +5,6 @@
 #include "Utilities/Pickups/Pickup.h"
 #include "ItemPickup.generated.h"
 
-UENUM(BlueprintType)
-enum class EItemType : uint8
-{
-	BlueKey		UMETA(DisplayName = "BlueKey"),
-	RedKey		UMETA(DisplayName = "RedKey"),
-	GreenKey	UMETA(DisplayName = "GreenKey")
-};
-
 UCLASS()
 class TWO31_API AItemPickup : public APickup
 {
@@ -22,11 +14,14 @@ public:
 	AItemPickup();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	EItemType GetItemType();
+	int32 GetItemID() { return ID; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	FString GetItemName() { return Name; }
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items)
-	EItemType ItemType;
-	
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
+	int32 ID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
+	FString Name;
+
 };

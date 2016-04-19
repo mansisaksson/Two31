@@ -76,6 +76,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	class AWeapon* GetCurrentWeapon();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	FString GetItemName(AItemPickup* ItemToName) { return ItemToName->GetItemName(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	int32 GetItemID(AItemPickup* ItemToName) { return ItemToName->GetItemID(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	FString GetFirstItem();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
