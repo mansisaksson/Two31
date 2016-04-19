@@ -12,6 +12,8 @@ ARocketLauncher::ARocketLauncher()
 
 void ARocketLauncher::FireShot(FVector TowardsLocation)
 {
+	AWeapon::FireShot(TowardsLocation);
+
 	if (AmmoPool == NULL)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No Ammo Pool assigned!"));

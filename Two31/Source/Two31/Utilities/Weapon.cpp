@@ -13,17 +13,21 @@ AWeapon::AWeapon()
 
 	ReloadTime = 2.f;
 	EquipTime = 1.f;
-	DeequipTime = 1.f;
+	UnequipTime = 1.f;
 
 	bAutoReload = true;
 
 	timeSinceFire = 0.f;
 	timeSinceReloadStart = 0.f;
+	timeSinceEquip = 0.f;
+	timeSinceUnequip = 0.f;
 
 	WeaponDamage = 10;
 
+	bEquip = false;
+	bIsEquiped = false;
 	bReload = false;
-	bIsFiring = false;
+	bFireIsPressed = false;
 	bCanFire = true;
 	bReadyToFire = false;
 	bFirstTimeEquiped = true;
@@ -50,38 +54,52 @@ void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (AmmoPool == NULL)
-		return;
-
-	if (!bCanFire && !bReadyToFire)
+	if (bEquip)
 	{
-		timeSinceFire += DeltaTime;
-		if (timeSinceFire > 1.f / (RPM / 60.f))
+		timeSinceEquip += DeltaTime;
+		if (timeSinceEquip >= EquipTime)
 		{
-			timeSinceFire = 0;
-			bReadyToFire = true;
+			timeSinceEquip = 0.f;
+			bEquip = false;
+			bIsEquiped = true;
 		}
 	}
 
-	if (bReadyToFire && (bFullAuto || !bIsFiring))
+	if (bIsEquiped)
 	{
-		bCanFire = true;
-		bReadyToFire = false;
-	}
+		if (AmmoPool == NULL)
+			return;
 
-	if (bCanFire && (!bIsFiring || timeSinceReloadStart > 0.f))
-	{
-		if (bAutoReload && AmmoInClip <= 0)
-			bReload = true;
-
-		if (bReload && (*AmmoPool) > 0)
+		if (!bCanFire && !bReadyToFire)
 		{
-			timeSinceReloadStart += DeltaTime;
-			if (timeSinceReloadStart >= ReloadTime)
+			timeSinceFire += DeltaTime;
+			if (timeSinceFire > 1.f / (RPM / 60.f))
 			{
-				bReload = false;
-				timeSinceReloadStart = 0.f;
-				FillClip();
+				timeSinceFire = 0;
+				bReadyToFire = true;
+			}
+		}
+
+		if (bReadyToFire && (bFullAuto || !bFireIsPressed))
+		{
+			bCanFire = true;
+			bReadyToFire = false;
+		}
+
+		if (bCanFire && (!bFireIsPressed || timeSinceReloadStart > 0.f))
+		{
+			if (bAutoReload && AmmoInClip <= 0)
+				bReload = true;
+
+			if (bReload && (*AmmoPool) > 0)
+			{
+				timeSinceReloadStart += DeltaTime;
+				if (timeSinceReloadStart >= ReloadTime)
+				{
+					bReload = false;
+					timeSinceReloadStart = 0.f;
+					FillClip();
+				}
 			}
 		}
 	}
@@ -107,8 +125,27 @@ void AWeapon::EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* AmmoPool)
 	if (bFirstTimeEquiped)
 		FillClip();
 
+	bEquip = true;
+	bIsEquiped = false;
 	bFirstTimeEquiped = false;
+
+	timeSinceEquip = 0.f;
+	timeSinceUnequip = 0.f;
 	timeSinceReloadStart = 0.f;
+
+	SetActorHiddenInGame(false);
+}
+void AWeapon::HolsterWeapon()
+{
+	bEquip = false;
+	bIsEquiped = false;
+	bReload = false;
+
+	timeSinceEquip = 0.f;
+	timeSinceUnequip = 0.f;
+	timeSinceReloadStart = 0.f;
+
+	SetActorHiddenInGame(true);
 }
 
 void AWeapon::SetPlayerAnimations(USkeletalMeshComponent* PlayerMesh)
@@ -134,31 +171,37 @@ void AWeapon::SetCultistAnimations(USkeletalMeshComponent* CultistMesh)
 
 void AWeapon::StartFire(FVector TowardsLocation)
 {
-	if (bCanFire && !bReload)
+	if (bIsEquiped)
 	{
-		bCanFire = false;
-		bIsFiring = true;
-		timeSinceFire = 0.f;
-		FireShot(TowardsLocation);
+		if (bCanFire && !bReload)
+		{
+			bCanFire = false;
+			bFireIsPressed = true;
+			timeSinceFire = 0.f;
+			FireShot(TowardsLocation);
+		}
 	}
 }
 void AWeapon::UpdateFire(FVector TowardsLocation)
 {
-	if (bCanFire && bFullAuto && !bReload)
+	if (bIsEquiped)
 	{
-		bCanFire = false;
-		bIsFiring = true;
-		timeSinceFire = 0.f;
-		FireShot(TowardsLocation);
+		if (bCanFire && bFullAuto && !bReload)
+		{
+			bCanFire = false;
+			bFireIsPressed = true;
+			timeSinceFire = 0.f;
+			FireShot(TowardsLocation);
+		}
 	}
 }
 void AWeapon::StopFire(FVector TowardsLocation)
 {
-	bIsFiring = false;
+	bFireIsPressed = false;
 }
 void AWeapon::FireShot(FVector TowardsLocation)
 {
-
+	OnFireShot();
 }
 
 void AWeapon::Reload()
@@ -183,31 +226,6 @@ void AWeapon::FillClip()
 	}
 }
 
-bool AWeapon::GetIsFiring()
-{
-	return bIsFiring;
-}
-int32 AWeapon::GetClipSize()
-{
-	return ClipSize;
-}
-int32 AWeapon::GetAmmoInClip()
-{
-	return AmmoInClip;
-}
-uint8 AWeapon::GetAmmoType()
-{
-	return (uint8)AmmoType;
-}
-
-float AWeapon::GetTotalReloadTime()
-{
-	return ReloadTime;
-}
-float AWeapon::GetTimeSinceReload()
-{
-	return timeSinceReloadStart;
-}
 AActor* AWeapon::GetOwner()
 {
 	if (OwnerMesh != NULL)
@@ -217,5 +235,9 @@ AActor* AWeapon::GetOwner()
 
 void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 {
-	
+
+}
+void AWeapon::OnFireShot_Implementation()
+{
+
 }

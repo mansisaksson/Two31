@@ -25,6 +25,8 @@ AShotgun::AShotgun()
 
 void AShotgun::FireShot(FVector TowardsLocation)
 {
+	AWeapon::FireShot(TowardsLocation);
+
 	if (AmmoPool == NULL)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No Ammo Pool assigned!"));
