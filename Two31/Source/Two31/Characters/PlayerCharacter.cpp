@@ -297,6 +297,24 @@ FString APlayerCharacter::GetFirstItem()
 
 	return "";
 }
+FString APlayerCharacter::GetSecondItem()
+{
+	if (Items.Num() > 1)
+	{
+		return Items[1]->GetItemName();
+	}
+
+	return "";
+}
+FString APlayerCharacter::GetThirdItem()
+{
+	if (Items.Num() > 2)
+	{
+		return Items[2]->GetItemName();
+	}
+
+	return "";
+}
 
 void APlayerCharacter::SelectWeaponSlot(int index)
 {

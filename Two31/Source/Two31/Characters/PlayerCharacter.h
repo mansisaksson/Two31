@@ -82,6 +82,10 @@ public:
 	int32 GetItemID(AItemPickup* ItemToName) { return ItemToName->GetItemID(); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	FString GetFirstItem();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	FString GetSecondItem();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	FString GetThirdItem();
 
 protected:
 	virtual void BeginPlay() override;
