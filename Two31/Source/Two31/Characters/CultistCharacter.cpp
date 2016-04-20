@@ -11,10 +11,11 @@ ACultistCharacter::ACultistCharacter()
 	TurnRate = 10.f;
 	TimeToIdle = 20.f;
 
-	AvoidDamage = 10.f;
-	TimeToRandMove = 3.0f;
-	AddedRandomTime = 3.f;
-	TimeGivenTooMove = 1.f;
+	AvoidDamage = 20.f;
+	TimeToRandMove = 4.0f;
+	AddedRandomTime = 4.f;
+	TimeGivenToMove = 1.5f;
+	TimeToMoveTooLastKnownPosititon = 5.f;
 
 	bPrioritizeLineOfSight = false;
 	bInstaReactToCornerPeaking = false;
@@ -74,7 +75,10 @@ void ACultistCharacter::Tick(float DeltaTime)
 					if (bOldHasLineOfSight && !bHasLineOfSight)
 						bLostLineOfSight = true;
 					if (TimeSinceLostLineOfSight > 1.f && TimeSinceLostLineOfSight < 3.f)
+					{
+						TimeSinceRanToLastKnownPosition = 0.f;
 						TryGetLineOfSight(DeltaTime);
+					}
 					else
 						GuardLastKnownPosition(DeltaTime);
 				}
@@ -175,38 +179,34 @@ void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 		TimeSinceRandMovement = 0.f;
 
 		FVector NewPos;
-		//if (bRandMoveAwayFromPlayer)
-		//{
+		if (bRandMoveAwayFromPlayer)
+		{
 			bRandMoveAwayFromPlayer = false;
 			float RandRad = FMath::FRandRange(MinRandMoveRadius, MaxRandMoveRadius);
-			float RandDir = FMath::FRandRange(0.f, 180.f);
+			float RandDir = FMath::FRandRange(-90.f, 90.f);
 			NewPos = GetActorLocation();
-			NewPos.X += FMath::Cos(RandDir) * RandRad;
-			NewPos.Y += FMath::Sin(RandDir) * RandRad;
-			//GetActorForwardVector().RotateAngleAxis(RandDir, FVector(0, 0, 1));
-		//}
-		//else
-		//{
-		//	float RandRad = FMath::FRandRange(MinRandMoveRadius, MaxRandMoveRadius);
-		//	float RandDir = FMath::FRandRange(0.f, 360.f);
-		//	FVector NewPos = GetActorLocation();
-		//	NewPos.X += FMath::Cos(RandDir) * RandRad;
-		//	NewPos.Y += FMath::Sin(RandDir) * RandRad;
-		//	//NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
-		//}
+			NewPos += GetActorForwardVector().RotateAngleAxis(RandDir, FVector(0, 0, 1)) * -RandRad;
+		}
+		else
+		{
+			float RandRad = FMath::FRandRange(MinRandMoveRadius, MaxRandMoveRadius);
+			float RandDir = FMath::FRandRange(0.f, 360.f);
+			NewPos = GetActorLocation();
+			NewPos += GetActorForwardVector().RotateAngleAxis(RandDir, FVector(0, 0, 1)) * RandRad;
+		}
 		
 		NavSystem->SimpleMoveToLocation(GetController(), NewPos);
 		bIsRandMoving = true;
 	}
-	if (TimeSinceRandMovement > TimeGivenTooMove)
+	if (TimeSinceRandMovement > TimeGivenToMove)
 		bIsRandMoving = false;
 
 	if (bInstaReactToCornerPeaking && (!bIsRandMoving || bPrioritizeLineOfSight))
 	{
 		if (SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Left && !SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Right)
-			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * 200.f);
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * 100.f);
 		else if (SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Right && !SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Left)
-			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * -200.f);
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * -100.f);
 	}
 	LastKnownPlayerPos = PlayerReferense->GetActorLocation();
 }
@@ -266,11 +266,14 @@ void ACultistCharacter::TryGetLineOfSight(float DeltaTime)
 }
 void ACultistCharacter::GuardLastKnownPosition(float DeltaTime)
 {
-	Debug::LogOnScreen("Guard Mode");
-	if (true)
-		GoCloseToLastKnowPosition(DeltaTime);
-	else
+	if (TimeSinceRanToLastKnownPosition == 0.f)
 	{
+		Debug::LogOnScreen("Go Close to location");
+		NavSystem->SimpleMoveToLocation(GetController(), PlayerReferense->GetActorLocation());
+	}
+	else if (TimeSinceRanToLastKnownPosition > TimeToMoveTooLastKnownPosititon)
+	{
+		Debug::LogOnScreen("Done Moving");
 		// Gå till en random position runt sig
 		// FaceLocation(last knownLocation)
 
@@ -282,12 +285,8 @@ void ACultistCharacter::GuardLastKnownPosition(float DeltaTime)
 		NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
 		NavSystem->SimpleMoveToLocation(GetController(), NewPos.Location);*/
 	}
+	TimeSinceRanToLastKnownPosition += DeltaTime;
 }
-void ACultistCharacter::GoCloseToLastKnowPosition(float DeltaTime)
-{
-	// gå nära den senaste kända positionen av spelaren
-}
-
 void ACultistCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
 {
 	
@@ -355,7 +354,8 @@ void ACultistCharacter::Death()
 }
 float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
+	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
+	Debug::LogOnScreen(FString::Printf(TEXT("Current Health: %f"), CurrentHealth));
 
 	TimeSinceRandMovement += TimeToRandMove * (AvoidDamage / 100.f);
 	if (TimeSinceRandMovement >= TimeToRandMove)

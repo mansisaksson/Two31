@@ -10,7 +10,6 @@ AEnemyCharacter::AEnemyCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
 	MaxHealth = 100.f;
-	CurrentHealth = MaxHealth;
 	bIsAlive = true;
 
 	DespawnTimer = 3.f;
@@ -24,7 +23,7 @@ AEnemyCharacter::AEnemyCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
-	
+
 	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
 }
 
@@ -38,12 +37,13 @@ void AEnemyCharacter::PostInitializeComponents()
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentHealth = MaxHealth;
 
 	NavSystem = GetWorld()->GetNavigationSystem();
 	AIController = Cast<AAIController>(GetController());
 
 	if (AIController == NULL)
-		UE_LOG(DebugError, Fatal, TEXT("AIController Not found!"));
+		UE_LOG(DebugError, Warning, TEXT("AIController Not found!"));
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)
@@ -73,7 +73,7 @@ void AEnemyCharacter::OnSeePawn(APawn *OtherPawn)
 float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
-	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
+	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 	if (CurrentHealth == 0)
 		bIsAlive = false;
 	return DamageAmount;

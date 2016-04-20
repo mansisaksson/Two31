@@ -53,7 +53,10 @@ protected:
 	float AddedRandomTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
 	/* After this amount of time the RandMove might get overridden by other movement*/
-	float TimeGivenTooMove;
+	float TimeGivenToMove;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	/* After the AI has lost track of the player it will move towards the last known position of the player (this is the amount of time it is given to do so) */
+	float TimeToMoveTooLastKnownPosititon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
 	/* If true, TimeToRandMove will be ignored if a better line of sight is needed */
 	bool bPrioritizeLineOfSight;
@@ -77,7 +80,6 @@ private:
 
 	void TryGetLineOfSight(float DeltaTime);
 	void GuardLastKnownPosition(float DeltaTime);
-	void GoCloseToLastKnowPosition(float DeltaTime);
 
 	int AmmoPool;
 	bool bHasLineOfSight;
@@ -89,6 +91,7 @@ private:
 	float DefaultTimeToRandMove;
 	float TimeSinceLostLineOfSight;
 	float TimeSinceRandMovement;
+	float TimeSinceRanToLastKnownPosition;
 
 	FVector LastKnownPlayerPos;
 
