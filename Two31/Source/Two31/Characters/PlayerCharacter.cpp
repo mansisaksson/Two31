@@ -60,6 +60,7 @@ APlayerCharacter::APlayerCharacter()
 	LineOfSight_Shoulder_Left = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Left"));
 	LineOfSight_Shoulder_Left->AttachTo(RootComponent);
 	LineOfSight_Shoulder_Left->SetRelativeLocation(FVector(0.f, -40.f, 60.f));
+
 }
 
 void APlayerCharacter::BeginPlay()
@@ -267,7 +268,7 @@ bool APlayerCharacter::AddItem(AItemPickup* item)
 		bool  bShouldAdd = true;
 		for (size_t i = 0; i < Items.Num(); i++)
 		{
-			if (Items[i]->GetItemID() == item->GetItemID())
+			if (Items[i] == item->GetItemID())
 			{
 				//Debug::LogOnScreen(TEXT("Item duplicate, not picked up"));
 				bShouldAdd = false;
@@ -275,45 +276,54 @@ bool APlayerCharacter::AddItem(AItemPickup* item)
 		}
 		if (bShouldAdd)
 		{
-			Items.Add(item);
-			Debug::LogOnScreen(Items[0]->GetItemName());
+			Items.Add(item->GetItemID());
 			return true;
 		}
 	}
 	else if (Items.Num() == 0)
 	{
-		Items.Add(item);
-		Debug::LogOnScreen(Items[0]->GetItemName());
+		Items.Add(item->GetItemID());
 		return true;
 	}
 	return false;
 }
-FString APlayerCharacter::GetFirstItem()
+// to remove once hud has been decided
+int32 APlayerCharacter::GetFirstItem()
 {
 	if (Items.Num() > 0)
 	{
-		return Items[0]->GetItemName();
+		return Items[0];
 	}
 
-	return "";
+	return 0;
 }
-FString APlayerCharacter::GetSecondItem()
+int32 APlayerCharacter::GetSecondItem()
 {
 	if (Items.Num() > 1)
 	{
-		return Items[1]->GetItemName();
+		return Items[1];
 	}
 
-	return "";
+	return 0;
 }
-FString APlayerCharacter::GetThirdItem()
+int32 APlayerCharacter::GetThirdItem()
 {
 	if (Items.Num() > 2)
 	{
-		return Items[2]->GetItemName();
+		return Items[2];
 	}
 
-	return "";
+	return 0;
+}
+bool APlayerCharacter::PlayerHasItem(int32 ItemName)
+{
+	for (size_t i = 0; i < Items.Num(); i++)
+	{
+		if (Items[i] == ItemName)
+			return true;
+	}
+
+	return false;
 }
 
 void APlayerCharacter::SelectWeaponSlot(int index)

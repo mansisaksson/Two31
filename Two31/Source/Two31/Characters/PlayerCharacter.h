@@ -53,10 +53,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = GetFunction)
 	bool ChangeArmor(float pChange);
 
-	UFUNCTION(BlueprintNativeEvent, Category = Event)
-	void PickedUpItem(AActor* OtherActor);
-	void PickedUpItem_Implementation(AActor* OtherActor);
-
 	/* Ta bort, Kan använda GetWeapon() Istället */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetClipSize();
@@ -76,16 +72,24 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	class AWeapon* GetCurrentWeapon();
 
+	// items, some to be removed
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	FString GetItemName(AItemPickup* ItemToName) { return ItemToName->GetItemName(); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetItemID(AItemPickup* ItemToName) { return ItemToName->GetItemID(); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	FString GetFirstItem();
+	int32 GetFirstItem();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	FString GetSecondItem();
+	int32 GetSecondItem();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	FString GetThirdItem();
+	int32 GetThirdItem();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	bool PlayerHasItem(int32 ItemName);
+
+	UFUNCTION(BlueprintNativeEvent, Category = Event)
+	void PickedUpItem(AActor* OtherActor);
+	void PickedUpItem_Implementation(AActor* OtherActor);
 
 protected:
 	virtual void BeginPlay() override;
@@ -173,6 +177,5 @@ private:
 	TArray<class AWeapon*> WeaponSlots;
 	TArray<float> HealthPacks;
 
-	class AItemPickup* CurrentItem;
-	TArray<class AItemPickup*> Items;
+	TArray<int32> Items;
 };
