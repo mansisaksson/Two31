@@ -84,6 +84,7 @@ private:
 	bool bOldHasLineOfSight;
 	bool bIsRandMoving;
 	bool bLostLineOfSight;
+	bool bRandMoveAwayFromPlayer;
 
 	float DefaultTimeToRandMove;
 	float TimeSinceLostLineOfSight;

@@ -26,6 +26,7 @@ ACultistCharacter::ACultistCharacter()
 	HuntDistance = 1500.f;
 
 	bHasLineOfSight = false;
+	bRandMoveAwayFromPlayer = false;
 	TimeSinceLostLineOfSight = 0.f;
 	TimeSinceRandMovement = 0.f;
 	
@@ -173,14 +174,27 @@ void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 		TimeToRandMove = DefaultTimeToRandMove + FMath::FRandRange(0.f, AddedRandomTime);
 		TimeSinceRandMovement = 0.f;
 
-		/*float RandRad = FMath::FRandRange(MinRandMoveRadius, MaxRandMoveRadius);
-		float RandDir = FMath::FRandRange(0.f, 360.f);
-		FVector NewPos = GetActorLocation();
-		NewPos.X += FMath::Cos(RandDir) * RandRad;
-		NewPos.Y += FMath::Sin(RandDir) * RandRad;*/
-		FNavLocation NewPos;
-		NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
-		NavSystem->SimpleMoveToLocation(GetController(), NewPos.Location);
+		FVector NewPos;
+		//if (bRandMoveAwayFromPlayer)
+		//{
+			bRandMoveAwayFromPlayer = false;
+			float RandRad = FMath::FRandRange(MinRandMoveRadius, MaxRandMoveRadius);
+			float RandDir = FMath::FRandRange(0.f, 180.f);
+			NewPos = GetActorLocation();
+			NewPos.X += FMath::Cos(RandDir) * RandRad;
+			NewPos.Y += FMath::Sin(RandDir) * RandRad;
+		//}
+		//else
+		//{
+		//	float RandRad = FMath::FRandRange(MinRandMoveRadius, MaxRandMoveRadius);
+		//	float RandDir = FMath::FRandRange(0.f, 360.f);
+		//	FVector NewPos = GetActorLocation();
+		//	NewPos.X += FMath::Cos(RandDir) * RandRad;
+		//	NewPos.Y += FMath::Sin(RandDir) * RandRad;
+		//	//NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
+		//}
+		
+		NavSystem->SimpleMoveToLocation(GetController(), NewPos);
 		bIsRandMoving = true;
 	}
 	if (TimeSinceRandMovement > TimeGivenTooMove)
@@ -343,6 +357,8 @@ float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
 
 	TimeSinceRandMovement += TimeToRandMove * (AvoidDamage / 100.f);
+	if (TimeSinceRandMovement >= TimeToRandMove)
+		bRandMoveAwayFromPlayer = true;
 
 	if (CurrentHealth == 0)
 		bIsAlive = false;
