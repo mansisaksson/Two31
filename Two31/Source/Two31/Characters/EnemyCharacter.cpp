@@ -60,14 +60,14 @@ void AEnemyCharacter::Tick(float DeltaTime)
 void AEnemyCharacter::OnHearNoise(APawn *OtherPawn, const FVector &Location, float Volume)
 {
 	const FString VolumeDesc = FString::Printf(TEXT(" at volume %f"), Volume);
-	//FString message = TEXT("Heard Actor ") + OtherPawn->GetName() + VolumeDesc;
+	FString message = TEXT("Heard Actor ") + OtherPawn->GetName() + VolumeDesc;
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
 }
 
 void AEnemyCharacter::OnSeePawn(APawn *OtherPawn)
 {
 	FString message = TEXT("Saw Pawn ") + OtherPawn->GetName();
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
 }
 
 float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
