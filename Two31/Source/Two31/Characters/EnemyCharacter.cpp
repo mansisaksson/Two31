@@ -1,6 +1,7 @@
 #include "Two31.h"
 #include "EnemyCharacter.h"
 #include "Perception/PawnSensingComponent.h"
+#include "../MusicManager.h"
 #include "../Characters/PlayerCharacter.h"
 #include "AIController.h"
 #include "Engine.h"
@@ -16,6 +17,7 @@ AEnemyCharacter::AEnemyCharacter()
 	TimeSinceDeath = 0.f;
 
 	EnemyState = EEnemyState::Idle;
+
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -89,4 +91,11 @@ void AEnemyCharacter::Death()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	MusicManager::RemoveEnemy(EnemyState);
+}
+
+void AEnemyCharacter::SetCurrentState(EEnemyState State)
+{
+	MusicManager::OnEnemyStateSwitch(EnemyState, State);
+	EnemyState = State;
 }

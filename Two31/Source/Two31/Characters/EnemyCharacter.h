@@ -8,7 +8,8 @@ enum class EEnemyState : uint8
 {
 	Triggered		UMETA(DisplayName = "Triggered"),
 	Search			UMETA(DisplayName = "Search"),
-	Idle			UMETA(DisplayName = "Idle")
+	Idle			UMETA(DisplayName = "Idle"),
+	NumberOfStates	UMETA(DisplayName = "DoNotUse")
 };
 
 UCLASS(config=Game)
@@ -44,8 +45,6 @@ protected:
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float DespawnTimer;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	EEnemyState EnemyState;
 
 	UNavigationSystem* NavSystem;
 	class AAIController* AIController;
@@ -55,5 +54,15 @@ protected:
 	float TimeSinceDeath;
 
 	bool bIsAlive;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+		EEnemyState GetCurrentState() { return EnemyState; }
+	UFUNCTION(BlueprintCallable, Category = SetFunction)
+	void SetCurrentState(EEnemyState State);
+
+private:
+	UPROPERTY(EditAnywhere, Category = Gameplay)
+	EEnemyState EnemyState;
+
 };
 

@@ -58,7 +58,7 @@ void ACultistCharacter::Tick(float DeltaTime)
 
 	if (bIsAlive)
 	{
-		if (EnemyState == EEnemyState::Triggered)
+		if (GetCurrentState() == EEnemyState::Triggered)
 		{
 			CheckLineOfSight();
 
@@ -304,7 +304,7 @@ void ACultistCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, 
 void ACultistCharacter::OnSeePawn(APawn *OtherPawn)
 {
 	if (Cast<APlayerCharacter>(OtherPawn))
-		EnemyState = EEnemyState::Triggered;
+		SetCurrentState(EEnemyState::Triggered);
 }
 
 bool ACultistCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
