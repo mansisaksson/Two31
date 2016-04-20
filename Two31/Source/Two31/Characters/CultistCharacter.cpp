@@ -183,6 +183,7 @@ void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 			NewPos = GetActorLocation();
 			NewPos.X += FMath::Cos(RandDir) * RandRad;
 			NewPos.Y += FMath::Sin(RandDir) * RandRad;
+			//GetActorForwardVector().RotateAngleAxis(RandDir, FVector(0, 0, 1));
 		//}
 		//else
 		//{
