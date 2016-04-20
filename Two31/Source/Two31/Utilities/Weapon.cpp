@@ -175,6 +175,7 @@ void AWeapon::StartFire(FVector TowardsLocation)
 	{
 		if (bCanFire && !bReload)
 		{
+			OnBeginFire();
 			bCanFire = false;
 			bFireIsPressed = true;
 			timeSinceFire = 0.f;
@@ -188,6 +189,7 @@ void AWeapon::UpdateFire(FVector TowardsLocation)
 	{
 		if (bCanFire && bFullAuto && !bReload)
 		{
+			OnUpdateFire();
 			bCanFire = false;
 			bFireIsPressed = true;
 			timeSinceFire = 0.f;
@@ -197,11 +199,12 @@ void AWeapon::UpdateFire(FVector TowardsLocation)
 }
 void AWeapon::StopFire(FVector TowardsLocation)
 {
+	OnStopFire();
 	bFireIsPressed = false;
 }
 void AWeapon::FireShot(FVector TowardsLocation)
 {
-	OnFireShot();
+
 }
 
 void AWeapon::Reload()
@@ -237,7 +240,15 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 {
 
 }
-void AWeapon::OnFireShot_Implementation()
+void AWeapon::OnBeginFire_Implementation()
+{
+
+}
+void AWeapon::OnUpdateFire_Implementation()
+{
+
+}
+void AWeapon::OnStopFire_Implementation()
 {
 
 }

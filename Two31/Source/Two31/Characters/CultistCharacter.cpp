@@ -47,6 +47,9 @@ void ACultistCharacter::BeginPlay()
 	}
 	DefaultTimeToRandMove = TimeToRandMove;
 	TimeToRandMove = DefaultTimeToRandMove + FMath::FRandRange(0.f, AddedRandomTime);
+
+	if (PlayerReferense == NULL)
+		Debug::LogFatalError("Could not find Player Character!");
 }
 
 void ACultistCharacter::Tick(float DeltaTime)
@@ -93,52 +96,58 @@ void ACultistCharacter::Tick(float DeltaTime)
 
 void ACultistCharacter::CheckLineOfSight()
 {
-	FHitResult result;
-	ECollisionChannel collisionChannel;
-	collisionChannel = ECC_WorldDynamic;
-	FCollisionQueryParams collisionQuery;
-	collisionQuery.bTraceComplex = true;
-	FCollisionObjectQueryParams objectCollisionQuery;
-	objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
-	FCollisionResponseParams collisionResponse;
-	collisionResponse = ECR_Block;
-	collisionQuery.AddIgnoredActor(this);
-	collisionQuery.AddIgnoredActor(CurrentWeapon);
-
-	SpottedPositions spottedPositions;
-	for (size_t i = 0; i < 3; i++)
+	if (PlayerReferense != NULL)
 	{
-		if (i == 0)
-		{
-			GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Chest()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
-			if (Cast<APlayerCharacter>(result.GetActor()))
-				spottedPositions.bCanSeePlayerChest = true;
-		}
-		else if (i == 1)
-		{
-			GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Shoulder_Left()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
-			if (Cast<APlayerCharacter>(result.GetActor()))
-				spottedPositions.bCanSeePlayerShoulder_Left = true;
-		}
-		else if (i == 2)
-		{
-			GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Shoulder_Right()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
-			if (Cast<APlayerCharacter>(result.GetActor()))
-				spottedPositions.bCanSeePlayerShoulder_Right = true;
-		}
-	}
+		if (PlayerReferense->GetPlayerHitPoint_Chest() == NULL || PlayerReferense->GetPlayerHitPoint_Shoulder_Left() == NULL || PlayerReferense->GetPlayerHitPoint_Shoulder_Right() == NULL)
+			return;//Debug::LogFatalError("Hit Points on player is NULL");
 
-	bOldHasLineOfSight = bHasLineOfSight;
-	if (spottedPositions.bCanSeePlayerChest || spottedPositions.bCanSeePlayerShoulder_Left || spottedPositions.bCanSeePlayerShoulder_Right)
-	{
-		bHasLineOfSight = true;
-		TimeSinceLostLineOfSight = true;
-	}
-	else
-		bHasLineOfSight = false;
+		FHitResult result;
+		ECollisionChannel collisionChannel;
+		collisionChannel = ECC_WorldDynamic;
+		FCollisionQueryParams collisionQuery;
+		collisionQuery.bTraceComplex = true;
+		FCollisionObjectQueryParams objectCollisionQuery;
+		objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
+		FCollisionResponseParams collisionResponse;
+		collisionResponse = ECR_Block;
+		collisionQuery.AddIgnoredActor(this);
+		collisionQuery.AddIgnoredActor(CurrentWeapon);
 
-	SpottedPlayerPositions.RemoveAt(0);
-	SpottedPlayerPositions.Add(spottedPositions);
+		SpottedPositions spottedPositions;
+		for (size_t i = 0; i < 3; i++)
+		{
+			if (i == 0)
+			{
+				GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Chest()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
+				if (Cast<APlayerCharacter>(result.GetActor()))
+					spottedPositions.bCanSeePlayerChest = true;
+			}
+			else if (i == 1)
+			{
+				GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Shoulder_Left()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
+				if (Cast<APlayerCharacter>(result.GetActor()))
+					spottedPositions.bCanSeePlayerShoulder_Left = true;
+			}
+			else if (i == 2)
+			{
+				GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Shoulder_Right()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
+				if (Cast<APlayerCharacter>(result.GetActor()))
+					spottedPositions.bCanSeePlayerShoulder_Right = true;
+			}
+		}
+
+		bOldHasLineOfSight = bHasLineOfSight;
+		if (spottedPositions.bCanSeePlayerChest || spottedPositions.bCanSeePlayerShoulder_Left || spottedPositions.bCanSeePlayerShoulder_Right)
+		{
+			bHasLineOfSight = true;
+			TimeSinceLostLineOfSight = true;
+		}
+		else
+			bHasLineOfSight = false;
+
+		SpottedPlayerPositions.RemoveAt(0);
+		SpottedPlayerPositions.Add(spottedPositions);
+	}
 }
 
 void ACultistCharacter::FireTowardsPlayer(float DeltaTime)
@@ -236,10 +245,10 @@ void ACultistCharacter::AvoidPlayer(float DeltaTime)
 			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorForwardVector() * -MoveSpeed);
 		// Move Left If needed
 		if (GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorRightVector() * -NavRadius), collisionChannel, collisionQuery, collisionResponse))
-			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * -MoveSpeed);
-		// Move Right If needed
-		else if (GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorRightVector() * NavRadius), collisionChannel, collisionQuery, collisionResponse))
 			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * MoveSpeed);
+		// Move Right If needed
+		if (GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorRightVector() * NavRadius), collisionChannel, collisionQuery, collisionResponse))
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * -MoveSpeed);
 	}
 }
 
@@ -287,6 +296,7 @@ void ACultistCharacter::GuardLastKnownPosition(float DeltaTime)
 	}
 	TimeSinceRanToLastKnownPosition += DeltaTime;
 }
+
 void ACultistCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
 {
 	

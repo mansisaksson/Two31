@@ -70,8 +70,14 @@ protected:
 	void OnWeaponHit(FHitResult HitResult);
 	void OnWeaponHit_Implementation(FHitResult HitResult);
 	UFUNCTION(BlueprintNativeEvent)
-	void OnFireShot();
-	void OnFireShot_Implementation();
+	void OnBeginFire();
+	void OnBeginFire_Implementation();
+	UFUNCTION(BlueprintNativeEvent)
+	void OnUpdateFire();
+	void OnUpdateFire_Implementation();
+	UFUNCTION(BlueprintNativeEvent)
+	void OnStopFire();
+	void OnStopFire_Implementation();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* PlayerAnimationBlueprint;

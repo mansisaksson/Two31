@@ -21,11 +21,11 @@ class TWO31_API APlayerCharacter : public ACharacter
 	class UPawnNoiseEmitterComponent* NoiseEmitter;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USceneComponent* LineOfSight_Chest;
+	USceneComponent* LineOfSight_Chest;
 	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USceneComponent* LineOfSight_Shoulder_Right;
+	USceneComponent* LineOfSight_Shoulder_Right;
 	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USceneComponent* LineOfSight_Shoulder_Left;
+	USceneComponent* LineOfSight_Shoulder_Left;
 
 public:
 	APlayerCharacter();
@@ -65,9 +65,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetMaxAmmo();
 
-	FORCEINLINE class USceneComponent* GetPlayerHitPoint_Chest() { return LineOfSight_Chest; }
-	FORCEINLINE class USceneComponent* GetPlayerHitPoint_Shoulder_Right() { return LineOfSight_Shoulder_Right; }
-	FORCEINLINE class USceneComponent* GetPlayerHitPoint_Shoulder_Left() { return LineOfSight_Shoulder_Left; }
+	USceneComponent* GetPlayerHitPoint_Chest() { return LineOfSight_Chest; }
+	USceneComponent* GetPlayerHitPoint_Shoulder_Right() { return LineOfSight_Shoulder_Right; }
+	USceneComponent* GetPlayerHitPoint_Shoulder_Left() { return LineOfSight_Shoulder_Left; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	class AWeapon* GetCurrentWeapon();
@@ -104,6 +104,7 @@ protected:
 	void OnFire();
 	void OnReleaseFire();
 	void OnReload();
+	void ADS();
 
 	bool AddAmmo(EAmmoType Ammo, int Amount);
 
@@ -137,6 +138,10 @@ protected:
 	float ViewPitchMax;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float ViewPitchMin;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float DefaultFOV;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	float ADSFOV;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	bool bCanJump;
@@ -164,6 +169,7 @@ protected:
 
 private:
 	bool bFireIsPressed;
+	bool bADS;
 
 	float CurrentHealth;
 	float MaxHealth;

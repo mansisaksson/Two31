@@ -20,6 +20,8 @@ APlayerCharacter::APlayerCharacter()
 	BaseLookUpRate = 45.f;
 	ViewPitchMax = 70.f;
 	ViewPitchMin = -70.f;
+	DefaultFOV = 90.f;
+	ADSFOV = 60.f;
 	
 	CurrentHealth = 50.f;
 	MaxHealth = 100.f;
@@ -33,6 +35,7 @@ APlayerCharacter::APlayerCharacter()
 
 	bFireIsPressed = false;
 	bCanJump = true;
+	bADS = false;
 
 	// Create a CameraComponent	
 	FPCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
@@ -50,15 +53,15 @@ APlayerCharacter::APlayerCharacter()
 	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("Noise Emitter"));
 
 	LineOfSight_Chest = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Chest"));
-	LineOfSight_Chest->AttachTo(RootComponent);
+	LineOfSight_Chest->AttachTo(GetCapsuleComponent());
 	LineOfSight_Chest->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
 
 	LineOfSight_Shoulder_Right = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Right"));
-	LineOfSight_Shoulder_Right->AttachTo(RootComponent);
+	LineOfSight_Shoulder_Right->AttachTo(GetCapsuleComponent());
 	LineOfSight_Shoulder_Right->SetRelativeLocation(FVector(0.f, 40.f, 60.f));
 
 	LineOfSight_Shoulder_Left = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Left"));
-	LineOfSight_Shoulder_Left->AttachTo(RootComponent);
+	LineOfSight_Shoulder_Left->AttachTo(GetCapsuleComponent());
 	LineOfSight_Shoulder_Left->SetRelativeLocation(FVector(0.f, -40.f, 60.f));
 
 }
@@ -66,6 +69,8 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	FPCamera->FieldOfView = DefaultFOV;
 
 	PlayerController = Cast<APlayerController>(Controller);
 	PlayerController->PlayerCameraManager->ViewPitchMax = ViewPitchMax;
@@ -93,6 +98,19 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 	{
 		MakeNoise(1.0f, this, FVector::ZeroVector);
 		LastFootstep = Now;
+	}
+
+	if (bADS)
+	{
+		FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, ADSFOV, 10.f * DeltaSeconds);
+		FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), FRotator(3.f, -108.2f, 0.f), 10.f * DeltaSeconds));
+		FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), FVector(0.f, -30.65f, -148.2f), 10.f * DeltaSeconds));
+	}
+	else
+	{
+		FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, DefaultFOV, 10.f * DeltaSeconds);
+		FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), FRotator(-1.099945f, -104.020050f, 0.136789f), 10.f * DeltaSeconds));
+		FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), FVector(3.160810f, -9.322928f, -157.550308f), 10.f * DeltaSeconds));
 	}
 }
 
@@ -191,6 +209,7 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 	InputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::OnFire);
 	InputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::OnReleaseFire);
 	InputComponent->BindAction("Reload", IE_Released, this, &APlayerCharacter::OnReload);
+	InputComponent->BindAction("ADS", IE_Pressed, this, &APlayerCharacter::ADS);
 
 	InputComponent->BindAction("WeaponSlot1", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot1);
 	InputComponent->BindAction("WeaponSlot2", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot2);
@@ -229,6 +248,10 @@ void APlayerCharacter::OnReload()
 {
 	if (CurrentWeapon != NULL)
 		CurrentWeapon->Reload();
+}
+void APlayerCharacter::ADS()
+{
+	bADS = !bADS;
 }
 
 bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
