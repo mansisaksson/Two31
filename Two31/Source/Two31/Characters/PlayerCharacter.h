@@ -2,7 +2,6 @@
 
 #include "GameFramework/Character.h"
 #include "../Utilities/WeaponGlobals.h"
-#include "../Utilities/Pickups/ItemPickup.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -34,49 +33,38 @@ public:
 	USkeletalMeshComponent* GetFPMeshArmMesh() const { return FPArmMesh; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FPCamera; }
-
-	UFUNCTION()
-	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
-
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	float GetHealth();
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	float GetMaxHealth();
-	UFUNCTION(BlueprintCallable, Category = GetFunction)
-	bool PickupHealthPack(AHealthPickup* Healthpack);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetHealthPacks();
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	float GetArmor();
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	float GetMaxArmor();
-	UFUNCTION(BlueprintCallable, Category = GetFunction)
-	bool ChangeArmor(float pChange);
-
-	/* Ta bort, Kan använda GetWeapon() Istället */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetClipSize();
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetAmmoInClip();
-	/**/
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetAmmoPool();
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetMaxAmmo();
-
 	USceneComponent* GetPlayerHitPoint_Chest() { return LineOfSight_Chest; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	USceneComponent* GetPlayerHitPoint_Shoulder_Right() { return LineOfSight_Shoulder_Right; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	USceneComponent* GetPlayerHitPoint_Shoulder_Left() { return LineOfSight_Shoulder_Left; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	class AWeapon* GetCurrentWeapon();
+	float GetHealth() { return CurrentHealth; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetMaxHealth() { return MaxHealth; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	int32 GetHealthPacks() { return HealthPacks.Num(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetArmor() { return CurrentArmor; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetMaxArmor() { return MaxArmor; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	class AWeapon* GetCurrentWeapon() { return CurrentWeapon; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	bool GetADS() { return bADS; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	int32 GetAmmoPool() { if (CurrentAmmo != NULL) { return CurrentAmmo->AmmoPool; } return 0; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	int32 GetMaxAmmo() { if (CurrentAmmo != NULL) { return CurrentAmmo->MaxAmmo; } return 0; }
 
 	// items, some to be removed
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	FString GetItemName(AItemPickup* ItemToName) { return ItemToName->GetItemName(); }
+	FString GetItemName(class AItemPickup* ItemToName);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetItemID(AItemPickup* ItemToName) { return ItemToName->GetItemID(); }
+	int32 GetItemID(class AItemPickup* ItemToName);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetFirstItem();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
@@ -86,6 +74,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	bool PlayerHasItem(int32 ItemName);
+
+	UFUNCTION()
+	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
 
 	UFUNCTION(BlueprintNativeEvent, Category = Event)
 	void PickedUpItem(AActor* OtherActor);
@@ -106,8 +97,9 @@ protected:
 	void OnReload();
 	void ADS();
 
+	bool PickupHealthPack(class AHealthPickup* Healthpack);
+	bool ChangeArmor(float pChange);
 	bool AddAmmo(EAmmoType Ammo, int Amount);
-
 	bool AddItem(AItemPickup* item);
 
 	void SelectWeaponSlot(int index);
@@ -115,20 +107,19 @@ protected:
 	void SelectWeaponSlot2();
 	void SelectWeaponSlot3();
 	void SelectWeaponSlot4();
-
-	void MoveForward(float Val);
-	void MoveSideways(float Val);
-
 	void NextWeapon();
 	void PreviousWeapon();
 	int GetWeaponIndex();
 
-	void UseHealthPack();
-
-	void SpawnEnemyTest();
+	void MoveForward(float Val);
+	void MoveSideways(float Val);
 
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
+
+	void UseHealthPack();
+
+	void SpawnEnemyTest();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float BaseTurnRate;
@@ -175,6 +166,7 @@ private:
 	float MaxHealth;
 	float CurrentArmor;
 	float MaxArmor;
+	float LastFootstep;
 
 	FAmmo* CurrentAmmo;
 	class AWeapon* CurrentWeapon;

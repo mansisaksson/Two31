@@ -1,6 +1,7 @@
 #include "Two31.h"
 #include "PlayerCharacter.h"
 #include "../Utilities/Pickups/Pickup.h"
+#include "../Utilities/Pickups/ItemPickup.h"
 #include "../Utilities/Pickups/WeaponPickup.h"
 #include "../Utilities/Pickups/HealthPickup.h"
 #include "../Utilities/Pickups/ArmorPickup.h"
@@ -28,6 +29,7 @@ APlayerCharacter::APlayerCharacter()
 	CurrentArmor = 35.f;
 	MaxArmor = 100.f;
 	MaxAmountOfHealthPacks = 3;
+	LastFootstep = 0.f;
 
 	WeaponSlots.SetNum(4);
 	HealthPacks.SetNum(0);
@@ -82,7 +84,6 @@ void APlayerCharacter::BeginPlay()
 	EquipWeapon(StarterWeapon4);
 }
 
-static float LastFootstep = 0.f;
 void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -172,29 +173,6 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	}
 }
 
-bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
-{
-	if (Weapon != NULL)
-	{
-		for (size_t i = 0; i < WeaponSlots.Num(); i++)
-		{
-			if (WeaponSlots[i] == NULL)
-			{
-				const FRotator SpawnRotation = FRotator::ZeroRotator;
-				const FVector SpawnLocation = FVector::ZeroVector;
-				WeaponSlots[i] = GetWorld()->SpawnActor<AWeapon>(Weapon, SpawnLocation, SpawnRotation);
-				WeaponSlots[i]->AttachRootComponentTo(FPArmMesh);
-				WeaponSlots[i]->HolsterWeapon();
-
-				if (CurrentWeapon == NULL)
-					SelectWeaponSlot(i);
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
 	check(InputComponent);
@@ -254,6 +232,29 @@ void APlayerCharacter::ADS()
 	bADS = !bADS;
 }
 
+bool APlayerCharacter::PickupHealthPack(AHealthPickup* Healthpack)
+{
+	if (CurrentHealth < MaxHealth)
+	{
+		CurrentHealth = FMath::Clamp((CurrentHealth + Healthpack->GetHealth()), 0.f, MaxHealth);
+		return true;
+	}
+	else if (CurrentHealth == MaxHealth && HealthPacks.Num() < MaxAmountOfHealthPacks)
+	{
+		HealthPacks.Add(Healthpack->GetHealth());
+		return true;
+	}
+	return false;
+}
+bool APlayerCharacter::ChangeArmor(float pChange)
+{
+	if (CurrentArmor < MaxArmor)
+	{
+		CurrentArmor = FMath::Clamp((CurrentArmor + pChange), 0.f, MaxArmor);
+		return true;
+	}
+	return false;
+}
 bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
 {
 	FAmmo* AmmoToRefill;
@@ -310,31 +311,26 @@ bool APlayerCharacter::AddItem(AItemPickup* item)
 	}
 	return false;
 }
+
 // to remove once hud has been decided
 int32 APlayerCharacter::GetFirstItem()
 {
 	if (Items.Num() > 0)
-	{
 		return Items[0];
-	}
 
 	return 0;
 }
 int32 APlayerCharacter::GetSecondItem()
 {
 	if (Items.Num() > 1)
-	{
 		return Items[1];
-	}
 
 	return 0;
 }
 int32 APlayerCharacter::GetThirdItem()
 {
 	if (Items.Num() > 2)
-	{
 		return Items[2];
-	}
 
 	return 0;
 }
@@ -349,6 +345,28 @@ bool APlayerCharacter::PlayerHasItem(int32 ItemName)
 	return false;
 }
 
+bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
+{
+	if (Weapon != NULL)
+	{
+		for (size_t i = 0; i < WeaponSlots.Num(); i++)
+		{
+			if (WeaponSlots[i] == NULL)
+			{
+				const FRotator SpawnRotation = FRotator::ZeroRotator;
+				const FVector SpawnLocation = FVector::ZeroVector;
+				WeaponSlots[i] = GetWorld()->SpawnActor<AWeapon>(Weapon, SpawnLocation, SpawnRotation);
+				WeaponSlots[i]->AttachRootComponentTo(FPArmMesh);
+				WeaponSlots[i]->HolsterWeapon();
+
+				if (CurrentWeapon == NULL)
+					SelectWeaponSlot(i);
+				return true;
+			}
+		}
+	}
+	return false;
+}
 void APlayerCharacter::SelectWeaponSlot(int index)
 {
 	if (WeaponSlots[index] != NULL && CurrentWeapon != WeaponSlots[index])
@@ -398,17 +416,6 @@ void APlayerCharacter::SelectWeaponSlot4()
 	SelectWeaponSlot(3);
 }
 
-void APlayerCharacter::MoveForward(float Value)
-{
-	if (Value != 0.0f)
-		AddMovementInput(GetActorForwardVector(), Value);
-}
-void APlayerCharacter::MoveSideways(float Value)
-{
-	if (Value != 0.0f)
-		AddMovementInput(GetActorRightVector(), Value);
-}
-
 void APlayerCharacter::NextWeapon()
 {
 	int index = GetWeaponIndex() + 1;
@@ -445,17 +452,6 @@ void APlayerCharacter::PreviousWeapon()
 
 	SelectWeaponSlot(tempIndex);
 }
-
-float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
-	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
-	//if (CurrentHealth == 0)
-	//	bIsAlive = false;
-
-	return DamageAmount;
-}
-
 int APlayerCharacter::GetWeaponIndex()
 {
 	int index = -1;
@@ -467,18 +463,17 @@ int APlayerCharacter::GetWeaponIndex()
 	return index;
 }
 
-void APlayerCharacter::UseHealthPack()
+void APlayerCharacter::MoveForward(float Value)
 {
-	if (CurrentHealth < MaxHealth && HealthPacks.Num() > 0 )
-	{
-		CurrentHealth = FMath::Clamp((CurrentHealth + HealthPacks[0]), 0.f, MaxHealth);
-		HealthPacks.RemoveAt(0);
-	}
+	if (Value != 0.0f)
+		AddMovementInput(GetActorForwardVector(), Value);
 }
-int32 APlayerCharacter::GetHealthPacks()
+void APlayerCharacter::MoveSideways(float Value)
 {
-	return HealthPacks.Num();
+	if (Value != 0.0f)
+		AddMovementInput(GetActorRightVector(), Value);
 }
+
 void APlayerCharacter::TurnAtRate(float Rate)
 {
 	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
@@ -488,78 +483,28 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-float APlayerCharacter::GetHealth()
+void APlayerCharacter::UseHealthPack()
 {
-	return CurrentHealth;
-}
-float APlayerCharacter::GetMaxHealth()
-{
-	return MaxHealth;
-}
-bool APlayerCharacter::PickupHealthPack(AHealthPickup* Healthpack)
-{
-	if (CurrentHealth < MaxHealth)
+	if (CurrentHealth < MaxHealth && HealthPacks.Num() > 0)
 	{
-		CurrentHealth = FMath::Clamp((CurrentHealth + Healthpack->GetHealth()), 0.f, MaxHealth);
-		return true;
+		CurrentHealth = FMath::Clamp((CurrentHealth + HealthPacks[0]), 0.f, MaxHealth);
+		HealthPacks.RemoveAt(0);
 	}
-	else if ( CurrentHealth == MaxHealth && HealthPacks.Num() < MaxAmountOfHealthPacks)
-	{
-		HealthPacks.Add(Healthpack->GetHealth());
-		return true;
-	}
-	return false;
 }
-float APlayerCharacter::GetArmor()
+
+float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	return CurrentArmor;
-}
-float APlayerCharacter::GetMaxArmor()
-{
-	return MaxArmor;
-}
-bool APlayerCharacter::ChangeArmor(float pChange)
-{
-	if (CurrentArmor < MaxArmor)
-	{
-		CurrentArmor = FMath::Clamp((CurrentArmor + pChange), 0.f, MaxArmor);
-		return true;
-	}
-	return false;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
+	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
+	//if (CurrentHealth == 0)
+	//	bIsAlive = false;
+
+	return DamageAmount;
 }
 
 void APlayerCharacter::PickedUpItem_Implementation(AActor* OtherActor)
 {
 
-}
-
-int32 APlayerCharacter::GetClipSize()
-{
-	if (CurrentWeapon != NULL)
-		return CurrentWeapon->GetClipSize();
-	return 0;
-}
-int32 APlayerCharacter::GetAmmoInClip()
-{
-	if (CurrentWeapon != NULL)
-		return CurrentWeapon->GetAmmoInClip();
-	return 0;
-}
-int32 APlayerCharacter::GetAmmoPool()
-{
-	if (CurrentAmmo != NULL)
-		return CurrentAmmo->AmmoPool;
-	return 0;
-}
-int32 APlayerCharacter::GetMaxAmmo()
-{
-	if (CurrentAmmo != NULL)
-		return CurrentAmmo->MaxAmmo;
-	return 0;
-}
-AWeapon* APlayerCharacter::GetCurrentWeapon()
-{
-	return CurrentWeapon;
 }
 
 void APlayerCharacter::SpawnEnemyTest()
@@ -569,3 +514,7 @@ void APlayerCharacter::SpawnEnemyTest()
 	//GetWorld()->SpawnActor<AEnemyCharacter>(SpawnLocation, SpawnRotation);
 	//GetWorld()->SpawnActorAbsolute<AEnemyCharacter>(SpawnLocation, SpawnRotation);
 }
+
+FString APlayerCharacter::GetItemName(AItemPickup* ItemToName) {  return ItemToName->GetItemName(); }
+int32 APlayerCharacter::GetItemID(AItemPickup* ItemToName) { return ItemToName->GetItemID(); }
+
