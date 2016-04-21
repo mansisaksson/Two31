@@ -37,6 +37,7 @@ void ASMG::FireShot(FVector TowardsLocation)
 		FCollisionResponseParams collisionResponse;
 		collisionResponse = ECR_Block;
 		collisionQuery.AddIgnoredActor(this);
+		collisionQuery.AddIgnoredActor(GetOwner());
 
 		bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), TowardsLocation, collisionChannel, collisionQuery, collisionResponse);
 
@@ -77,12 +78,17 @@ void ASMG::FireShot(FVector TowardsLocation)
 			{
 				if (Cast<AEnemyCharacter>(result.GetActor()))
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Damaging Enemy"));
 					AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
-					APlayerController* PlayerController = Cast<APlayerController>(result.GetActor()->GetInstigatorController());
 					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 					FDamageEvent DamageEvent(ValidDamageTypeClass);
-					Enemy->TakeDamage(WeaponDamage, DamageEvent, PlayerController, this);
+					Enemy->TakeDamage(WeaponDamage, DamageEvent, result.GetActor()->GetInstigatorController(), this);
+				}
+				else if (Cast<APlayerCharacter>(result.GetActor()))
+				{
+					APlayerCharacter* Player = Cast<APlayerCharacter>(result.GetActor());
+					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+					FDamageEvent DamageEvent(ValidDamageTypeClass);
+					Player->TakeDamage(WeaponDamage, DamageEvent, result.GetActor()->GetInstigatorController(), this);
 				}
 			}
 		}

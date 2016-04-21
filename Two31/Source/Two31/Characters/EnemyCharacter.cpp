@@ -18,7 +18,6 @@ AEnemyCharacter::AEnemyCharacter()
 
 	EnemyState = EEnemyState::Idle;
 
-
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
@@ -41,11 +40,19 @@ void AEnemyCharacter::BeginPlay()
 	Super::BeginPlay();
 	CurrentHealth = MaxHealth;
 
+	for (TObjectIterator<AActor> Itr; Itr; ++Itr)
+	{
+		if (Cast<APlayerCharacter>(*Itr))
+			PlayerReferense = Cast<APlayerCharacter>(*Itr);
+	}
+	if (PlayerReferense == NULL)
+		Debug::LogFatalError("Could not find Player Character!");
+
 	NavSystem = GetWorld()->GetNavigationSystem();
 	AIController = Cast<AAIController>(GetController());
 
 	if (AIController == NULL)
-		UE_LOG(DebugError, Warning, TEXT("AIController Not found!"));
+		Debug::LogFatalError("AIController Not found!");
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)

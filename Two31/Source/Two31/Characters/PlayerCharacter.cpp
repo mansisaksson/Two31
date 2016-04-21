@@ -198,7 +198,6 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 	InputComponent->BindAction("PreviousWeapon", IE_Pressed, this, &APlayerCharacter::PreviousWeapon);
 
 	InputComponent->BindAction("UseHealthPack", IE_Pressed, this, &APlayerCharacter::UseHealthPack);
-	InputComponent->BindAction("SpawnEnemyTest", IE_Pressed, this, &APlayerCharacter::SpawnEnemyTest);
 
 	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveSideways);
@@ -494,7 +493,6 @@ void APlayerCharacter::UseHealthPack()
 
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
 	//if (CurrentHealth == 0)
 	//	bIsAlive = false;
@@ -505,14 +503,6 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 void APlayerCharacter::PickedUpItem_Implementation(AActor* OtherActor)
 {
 
-}
-
-void APlayerCharacter::SpawnEnemyTest()
-{
-	const FRotator SpawnRotation = GetActorRotation();
-	const FVector SpawnLocation = GetActorLocation() - FVector(100.f, 100.f, 0.f);
-	//GetWorld()->SpawnActor<AEnemyCharacter>(SpawnLocation, SpawnRotation);
-	//GetWorld()->SpawnActorAbsolute<AEnemyCharacter>(SpawnLocation, SpawnRotation);
 }
 
 FString APlayerCharacter::GetItemName(AItemPickup* ItemToName) {  return ItemToName->GetItemName(); }

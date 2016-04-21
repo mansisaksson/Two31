@@ -11,6 +11,8 @@ ACultistCharacter::ACultistCharacter()
 	TurnRate = 10.f;
 	TimeToIdle = 20.f;
 
+	TriggeredMoveSpeed = 500.f;
+	SearchMoveSpeed = 200.f;
 	AvoidDamage = 20.f;
 	TimeToRandMove = 4.0f;
 	AddedRandomTime = 4.f;
@@ -24,15 +26,19 @@ ACultistCharacter::ACultistCharacter()
 	MaxRandMoveRadius = 400.f;
 
 	RetreatDistance = 500.f;
+	RetreatRadius = 80.f;
+	RetreatNavRadius = 100.f;
 	HuntDistance = 1500.f;
 
 	bHasLineOfSight = false;
 	bRandMoveAwayFromPlayer = false;
 	TimeSinceLostLineOfSight = 0.f;
 	TimeSinceRandMovement = 0.f;
-	
+	TimeToGetLineOfSight = 2.f;
+
 	WeaponSlots.SetNum(1);
 	SpottedPlayerPositions.SetNum(5);
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 }
 
 void ACultistCharacter::BeginPlay()
@@ -40,16 +46,9 @@ void ACultistCharacter::BeginPlay()
 	AEnemyCharacter::BeginPlay();
 	EquipWeapon(Weapon);
 
-	for (TObjectIterator<AActor> Itr; Itr; ++Itr)
-	{
-		if (Cast<APlayerCharacter>(*Itr))
-			PlayerReferense = Cast<APlayerCharacter>(*Itr);
-	}
+	OldRotation = GetActorRotation();
 	DefaultTimeToRandMove = TimeToRandMove;
 	TimeToRandMove = DefaultTimeToRandMove + FMath::FRandRange(0.f, AddedRandomTime);
-
-	if (PlayerReferense == NULL)
-		Debug::LogFatalError("Could not find Player Character!");
 }
 
 void ACultistCharacter::Tick(float DeltaTime)
@@ -60,6 +59,7 @@ void ACultistCharacter::Tick(float DeltaTime)
 	{
 		if (GetCurrentState() == EEnemyState::Triggered)
 		{
+			GetCharacterMovement()->MaxWalkSpeed = TriggeredMoveSpeed;
 			CheckLineOfSight();
 
 			if (bHasLineOfSight)
@@ -73,23 +73,22 @@ void ACultistCharacter::Tick(float DeltaTime)
 			else
 			{
 				TimeSinceLostLineOfSight += DeltaTime;
-				if (TimeSinceLostLineOfSight < TimeToIdle)
+				if (bOldHasLineOfSight && !bHasLineOfSight)
+					bLostLineOfSight = true;
+
+				if (TimeSinceLostLineOfSight < TimeToGetLineOfSight)
 				{
-					if (bOldHasLineOfSight && !bHasLineOfSight)
-						bLostLineOfSight = true;
-					if (TimeSinceLostLineOfSight > 1.f && TimeSinceLostLineOfSight < 3.f)
-					{
-						TimeSinceRanToLastKnownPosition = 0.f;
-						TryGetLineOfSight(DeltaTime);
-					}
-					else
-						GuardLastKnownPosition(DeltaTime);
+					TimeSinceRanToLastKnownPosition = 0.f;
+					TryGetLineOfSight(DeltaTime);
 				}
 				else
-				{
-					// Go Idle
-				}
+					GoToLastKnownPosition(DeltaTime);
 			}
+		}
+		else if (GetCurrentState() == EEnemyState::Search)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = TriggeredMoveSpeed;
+			SearchForPlayer(DeltaTime);
 		}
 	}
 }
@@ -99,7 +98,10 @@ void ACultistCharacter::CheckLineOfSight()
 	if (PlayerReferense != NULL)
 	{
 		if (PlayerReferense->GetPlayerHitPoint_Chest() == NULL || PlayerReferense->GetPlayerHitPoint_Shoulder_Left() == NULL || PlayerReferense->GetPlayerHitPoint_Shoulder_Right() == NULL)
-			return;//Debug::LogFatalError("Hit Points on player is NULL");
+		{
+			Debug::LogWarning("Hit Points on player is NULL, Skipping Check Line if Sight Function");
+			return;
+		}
 
 		FHitResult result;
 		ECollisionChannel collisionChannel;
@@ -140,7 +142,7 @@ void ACultistCharacter::CheckLineOfSight()
 		if (spottedPositions.bCanSeePlayerChest || spottedPositions.bCanSeePlayerShoulder_Left || spottedPositions.bCanSeePlayerShoulder_Right)
 		{
 			bHasLineOfSight = true;
-			TimeSinceLostLineOfSight = true;
+			TimeSinceLostLineOfSight = 0.f;
 		}
 		else
 			bHasLineOfSight = false;
@@ -168,18 +170,19 @@ void ACultistCharacter::FocusOnPosition(float DeltaTime, FVector Position)
 
 	// Gör en lerp här
 	NewControlRotation.Yaw = FRotator::ClampAxis(NewControlRotation.Yaw);
-	//FaceRotation(FMath::Lerp(GetActorRotation(), NewControlRotation, DeltaTime * TurnRate));
-	FaceRotation(NewControlRotation);
+	FaceRotation(FMath::Lerp(OldRotation, NewControlRotation, TurnRate * DeltaTime));
+	//FaceRotation(NewControlRotation);
+	OldRotation = GetActorRotation();
 }
 void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 {
 	// Notes för framtiden:
 	// Kolla om fienden är åvanför spelaren och agera anorlunda utifrån detta
 	float distanceToPlayer = FVector::Dist(GetActorLocation(), PlayerReferense->GetActorLocation());
-	if (distanceToPlayer < 500.f)
+	if (distanceToPlayer < RetreatDistance)
 		AvoidPlayer(DeltaTime);
 	//else if (distanceToPlayer > HuntDistance)
-	//	HuntPlayer();
+	//	Debug::LogOnScreen("TODO: Player Is far away, Should go closer");
 
 	TimeSinceRandMovement += DeltaTime;
 	if (TimeSinceRandMovement > TimeToRandMove)
@@ -213,9 +216,9 @@ void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 	if (bInstaReactToCornerPeaking && (!bIsRandMoving || bPrioritizeLineOfSight))
 	{
 		if (SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Left && !SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Right)
-			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * 100.f);
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * 100.f) + (GetActorForwardVector() * 100.f));
 		else if (SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Right && !SpottedPlayerPositions.Last().bCanSeePlayerShoulder_Left)
-			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * -100.f);
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * -100.f) + (GetActorForwardVector() * 100.f));
 	}
 	LastKnownPlayerPos = PlayerReferense->GetActorLocation();
 }
@@ -235,20 +238,17 @@ void ACultistCharacter::AvoidPlayer(float DeltaTime)
 	collisionResponse = ECR_Block;
 	collisionQuery.AddIgnoredActor(this);
 
-	float MoveSpeed = 80.f;
-	float NavRadius = 100.f;
-
 	if (!bIsRandMoving)
 	{
 		// If Can Move Backwards
-		if (!GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * -NavRadius), collisionChannel, collisionQuery, collisionResponse))
-			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorForwardVector() * -MoveSpeed);
+		if (!GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorForwardVector() * -RetreatNavRadius), collisionChannel, collisionQuery, collisionResponse))
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorForwardVector() * -RetreatRadius);
 		// Move Left If needed
-		if (GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorRightVector() * -NavRadius), collisionChannel, collisionQuery, collisionResponse))
-			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * MoveSpeed);
+		if (GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorRightVector() * -RetreatNavRadius), collisionChannel, collisionQuery, collisionResponse))
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * RetreatRadius);
 		// Move Right If needed
-		if (GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorRightVector() * NavRadius), collisionChannel, collisionQuery, collisionResponse))
-			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * -MoveSpeed);
+		if (GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + (GetActorRightVector() * RetreatNavRadius), collisionChannel, collisionQuery, collisionResponse))
+			NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + GetActorRightVector() * -RetreatRadius);
 	}
 }
 
@@ -273,33 +273,37 @@ void ACultistCharacter::TryGetLineOfSight(float DeltaTime)
 	else if (LastKnownSpottedPositions.bCanSeePlayerShoulder_Right && !LastKnownSpottedPositions.bCanSeePlayerShoulder_Left)
 		NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * -100.f));
 }
-void ACultistCharacter::GuardLastKnownPosition(float DeltaTime)
+void ACultistCharacter::GoToLastKnownPosition(float DeltaTime)
 {
-	if (TimeSinceRanToLastKnownPosition == 0.f)
+	if (TimeSinceRanToLastKnownPosition > TimeToMoveTooLastKnownPosititon)
 	{
-		Debug::LogOnScreen("Go Close to location");
+		Debug::LogOnScreen("Done Moving, Entering Search Mode");
+		SetCurrentState(EEnemyState::Search);
+	}
+	else if (TimeSinceRanToLastKnownPosition < 1.5f) // Kommer gå till en uppdaterad position av spelaren i ett visst antal sekunder
+	{
+		Debug::LogOnScreen("Moving to player position");
 		NavSystem->SimpleMoveToLocation(GetController(), PlayerReferense->GetActorLocation());
 	}
-	else if (TimeSinceRanToLastKnownPosition > TimeToMoveTooLastKnownPosititon)
-	{
-		Debug::LogOnScreen("Done Moving");
-		// Gå till en random position runt sig
-		// FaceLocation(last knownLocation)
-
-		// if (x time has passed)
-		//		move too location(spawn location)
-		//		go idle;
-
-		/*FNavLocation NewPos;
-		NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
-		NavSystem->SimpleMoveToLocation(GetController(), NewPos.Location);*/
-	}
 	TimeSinceRanToLastKnownPosition += DeltaTime;
+}
+void ACultistCharacter::SearchForPlayer(float DeltaTime)
+{
+	// Gå till en random position runt sig
+	// FaceLocation(framåt)
+
+	// if (x time has passed)
+	//		move too location(spawn location)
+	//		go idle;
+
+	/*FNavLocation NewPos;
+	NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
+	NavSystem->SimpleMoveToLocation(GetController(), NewPos.Location);*/
 }
 
 void ACultistCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
 {
-	
+	SetCurrentState(EEnemyState::Triggered);
 }
 void ACultistCharacter::OnSeePawn(APawn *OtherPawn)
 {
@@ -365,7 +369,7 @@ void ACultistCharacter::Death()
 float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
-	Debug::LogOnScreen(FString::Printf(TEXT("Current Health: %f"), CurrentHealth));
+	//Debug::LogOnScreen(FString::Printf(TEXT("Current Health: %f"), CurrentHealth));
 
 	TimeSinceRandMovement += TimeToRandMove * (AvoidDamage / 100.f);
 	if (TimeSinceRandMovement >= TimeToRandMove)

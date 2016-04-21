@@ -15,6 +15,8 @@ class TWO31_API AShotgun : public AWeapon
 public:
 	AShotgun();
 
+	virtual void BeginPlay();
+	virtual void Tick(float DeltaTime);
 	virtual void FireShot(FVector TowardsLocation) override;
 
 protected:
@@ -29,7 +31,13 @@ protected:
 	float RadiusMin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
 	float Distance;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+	float HeatDissipationScale;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+	float HeatAccumulationScale;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+	float MaxHeatAccumulation;
 private:
-
+	float HeatParam;
+	UMaterialInstanceDynamic* MatInstance;
 };

@@ -56,7 +56,7 @@ protected:
 	bool bIsAlive;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-		EEnemyState GetCurrentState() { return EnemyState; }
+	EEnemyState GetCurrentState() { return EnemyState; }
 	UFUNCTION(BlueprintCallable, Category = SetFunction)
 	void SetCurrentState(EEnemyState State);
 

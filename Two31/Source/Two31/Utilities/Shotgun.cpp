@@ -5,7 +5,7 @@
 #include "../Characters/EnemyCharacter.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
-
+#include "Kismet/KismetMaterialLibrary.h"
 
 AShotgun::AShotgun()
 	: AWeapon()
@@ -18,9 +18,29 @@ AShotgun::AShotgun()
 	RadiusMax = 10.f;
 	Distance = 5000.f;
 	NumberOfShots = 8;
+	HeatParam = 0.f;
+
+	HeatDissipationScale = 1.3f;
+	HeatAccumulationScale = 1.5f;
+	MaxHeatAccumulation = 10.f;
 
 	MuzzleFlashLocation = CreateDefaultSubobject<USceneComponent>("MuzzleFlash");
 	MuzzleFlashLocation->AttachTo(WeaponMesh, TEXT("MuzzleFlash"));
+}
+
+void AShotgun::BeginPlay()
+{
+	AWeapon::BeginPlay();
+	
+	MatInstance = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, WeaponMesh->GetMaterial(0));
+	WeaponMesh->SetMaterial(0, MatInstance);
+}
+
+void AShotgun::Tick(float DeltaTime)
+{
+	AWeapon::Tick(DeltaTime);
+	HeatParam = FMath::Clamp(HeatParam - DeltaTime * HeatDissipationScale, 0.f, 10.f);
+	MatInstance->SetScalarParameterValue(TEXT("HeatParam"), HeatParam);
 }
 
 void AShotgun::FireShot(FVector TowardsLocation)
@@ -37,9 +57,10 @@ void AShotgun::FireShot(FVector TowardsLocation)
 	{
 		AmmoInClip--;
 		(*AmmoPool)--;
+		
+		HeatParam += HeatAccumulationScale;
 
 		//const FName TraceTag("Debug Trace");
-
 		FHitResult result;
 		ECollisionChannel collisionChannel;
 		collisionChannel = ECC_WorldDynamic;
@@ -121,17 +142,10 @@ void AShotgun::FireShot(FVector TowardsLocation)
 				{
 					if (Cast<AEnemyCharacter>(result.GetActor()))
 					{
-						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Damaging Enemy"));
 						AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
-						APlayerController* PlayerController = Cast<APlayerController>(result.GetActor()->GetInstigatorController());
 						TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 						FDamageEvent DamageEvent(ValidDamageTypeClass);
-						/*
-						std::ostringstream ss;
-						ss << (result.Distance / Distance);
-						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, UTF8_TO_TCHAR(ss.str().c_str()));
-						*/
-						Enemy->TakeDamage(WeaponDamage * (1.0f - FMath::Clamp(result.Distance/Distance, 0.0f, 1.0f)), DamageEvent, PlayerController, this);
+						Enemy->TakeDamage(WeaponDamage * (1.0f - FMath::Clamp(result.Distance/Distance, 0.0f, 1.0f)), DamageEvent, result.GetActor()->GetInstigatorController(), this);
 					}
 				}
 			}

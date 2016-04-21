@@ -119,8 +119,6 @@ protected:
 
 	void UseHealthPack();
 
-	void SpawnEnemyTest();
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float BaseTurnRate;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)

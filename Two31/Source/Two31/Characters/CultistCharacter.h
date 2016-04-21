@@ -34,42 +34,62 @@ protected:
 	void Death();
 	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
 	TSubclassOf<class AWeapon> Weapon;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
 	float TurnRate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
+	/* Tiden det tar efter att fienden tappat siken om spelaren innan den går idle */
+	float TriggeredMoveSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
 	/* Tiden det tar efter att fienden tappat siken om spelaren innan den går idle */
 	float TimeToIdle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
 	/* Will be more prone to move when taking damage (0 - 100) 100 = 100% chance to move */
 	float AvoidDamage;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
 	float TimeToRandMove;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
 	/* A Random amount if time (in seconds) that will be added to the TimeToRandMove (Helps if enemies are spawned in a group) */
 	float AddedRandomTime;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
 	/* After this amount of time the RandMove might get overridden by other movement*/
 	float TimeGivenToMove;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
 	/* After the AI has lost track of the player it will move towards the last known position of the player (this is the amount of time it is given to do so) */
 	float TimeToMoveTooLastKnownPosititon;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
 	/* If true, TimeToRandMove will be ignored if a better line of sight is needed */
 	bool bPrioritizeLineOfSight;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
+	/* After loosing line of sight the enemy will try to re-gain it for this amount if time (includes side-stepping and relocating) */
+	float TimeToGetLineOfSight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
 	bool bInstaReactToCornerPeaking;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
 	float MinRandMoveRadius;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
 	float MaxRandMoveRadius;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
+	/* When the player gets withing this radius the enemy will start to back off */
 	float RetreatDistance;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
+	/* The distance of which the enemy will back off */
+	float RetreatRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
+	/* If an obstacle is within this radius the enemy might not move in that direction */
+	float RetreatNavRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
+	/* When the player gets outside this radius the enemy will start to run towards the player */
 	float HuntDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Search)
+	/* When the player gets outside this radius the enemy will start to run towards the player */
+	float SearchRadius;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Search)
+	/* When the player gets outside this radius the enemy will start to run towards the player */
+	float SearchMoveSpeed;
 
 private:
 	void CheckLineOfSight();
@@ -79,7 +99,8 @@ private:
 	void AvoidPlayer(float DeltaTime);
 
 	void TryGetLineOfSight(float DeltaTime);
-	void GuardLastKnownPosition(float DeltaTime);
+	void GoToLastKnownPosition(float DeltaTime);
+	void SearchForPlayer(float DeltaTime);
 
 	int AmmoPool;
 	bool bHasLineOfSight;
@@ -94,6 +115,7 @@ private:
 	float TimeSinceRanToLastKnownPosition;
 
 	FVector LastKnownPlayerPos;
+	FRotator OldRotation;
 
 	class AWeapon* CurrentWeapon;
 	TArray<class AWeapon*> WeaponSlots;
