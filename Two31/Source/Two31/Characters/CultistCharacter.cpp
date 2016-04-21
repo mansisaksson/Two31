@@ -11,6 +11,12 @@ ACultistCharacter::ACultistCharacter()
 	TurnRate = 10.f;
 	TimeToIdle = 20.f;
 
+	RPM = 480;
+	MinBurstPause = 0.5f;
+	MaxBurstPause = 2.f;
+	MinBurstSize = 8;
+	MaxBurstSize = 10;
+
 	TriggeredMoveSpeed = 500.f;
 	SearchMoveSpeed = 200.f;
 	AvoidDamage = 20.f;
@@ -34,6 +40,7 @@ ACultistCharacter::ACultistCharacter()
 	bRandMoveAwayFromPlayer = false;
 	TimeSinceLostLineOfSight = 0.f;
 	TimeSinceRandMovement = 0.f;
+	TimeSinceShotFired = 0.f;
 	TimeToGetLineOfSight = 2.f;
 
 	WeaponSlots.SetNum(1);
@@ -49,6 +56,9 @@ void ACultistCharacter::BeginPlay()
 	OldRotation = GetActorRotation();
 	DefaultTimeToRandMove = TimeToRandMove;
 	TimeToRandMove = DefaultTimeToRandMove + FMath::FRandRange(0.f, AddedRandomTime);
+	TimeToBurstPause = FMath::FRandRange(MinBurstPause, MaxBurstPause);
+	TimeSinceBurstPause = MinBurstPause;
+	BurstSize = FMath::RandRange(MinBurstSize, MaxBurstSize);
 }
 
 void ACultistCharacter::Tick(float DeltaTime)
@@ -156,11 +166,31 @@ void ACultistCharacter::FireTowardsPlayer(float DeltaTime)
 {
 	if (PlayerReferense != NULL && CurrentWeapon != NULL)
 	{
-		FVector Direction = (PlayerReferense->GetActorLocation() + FVector(FMath::FRandRange(-100, 100.f), FMath::FRandRange(-100, 100.f), FMath::FRandRange(-100, 100.f))) - GetActorLocation();
+		if (TimeSinceBurstPause >= TimeToBurstPause)
+		{
+			TimeToBurstPause = FMath::FRandRange(MinBurstPause, MaxBurstPause);
 
-		// Gör detta i intervall, möjligtvis olika beroende på vapen
-		CurrentWeapon->StartFire(Direction * 5000.f);
-		CurrentWeapon->StopFire(Direction * 5000.f);
+			if (TimesShot < BurstSize)
+			{
+				if (TimeSinceShotFired >= 1.f / (RPM / 60.f))
+				{
+					FVector Direction = (PlayerReferense->GetActorLocation() + FVector(FMath::FRandRange(-100, 100.f), FMath::FRandRange(-100, 100.f), FMath::FRandRange(-100, 100.f))) - GetActorLocation();
+					CurrentWeapon->StartFire(Direction * 5000.f);
+					CurrentWeapon->StopFire(Direction * 5000.f);
+					TimesShot++;
+					TimeSinceShotFired = 0.f;
+				}
+				TimeSinceShotFired += DeltaTime;
+			}
+			else
+			{
+				BurstSize = FMath::RandRange(MinBurstSize, MaxBurstSize);
+				TimeSinceBurstPause = 0.f;
+				TimeSinceShotFired = 0.f;
+				TimesShot = 0.f;
+			}
+		}
+		TimeSinceBurstPause += DeltaTime;
 	}
 }
 void ACultistCharacter::FocusOnPosition(float DeltaTime, FVector Position)
@@ -224,13 +254,13 @@ void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 }
 void ACultistCharacter::AvoidPlayer(float DeltaTime)
 {
-	const FName TraceTag("Debug Trace");
+	//const FName TraceTag("Debug Trace");
 	FHitResult result;
 	ECollisionChannel collisionChannel;
 	collisionChannel = ECC_WorldDynamic;
 	FCollisionQueryParams collisionQuery;
-	collisionQuery.TraceTag = TraceTag;
-	GetWorld()->DebugDrawTraceTag = TraceTag;
+	//collisionQuery.TraceTag = TraceTag;
+	//GetWorld()->DebugDrawTraceTag = TraceTag;
 	collisionQuery.bTraceComplex = true;
 	FCollisionObjectQueryParams objectCollisionQuery;
 	objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
@@ -284,12 +314,15 @@ void ACultistCharacter::GoToLastKnownPosition(float DeltaTime)
 	{
 		Debug::LogOnScreen("Moving to player position");
 		NavSystem->SimpleMoveToLocation(GetController(), PlayerReferense->GetActorLocation());
+		LastKnownPlayerVelocity = PlayerReferense->GetVelocity();
 	}
 	TimeSinceRanToLastKnownPosition += DeltaTime;
 }
 void ACultistCharacter::SearchForPlayer(float DeltaTime)
 {
-	// Gå till en random position runt sig
+
+	// Kolla vilket håll spelaren gick
+	// gå mot en punkt ut det hållet (i en kon?)
 	// FaceLocation(framåt)
 
 	// if (x time has passed)
@@ -368,6 +401,7 @@ void ACultistCharacter::Death()
 }
 float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
+	SetCurrentState(EEnemyState::Triggered);
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 	//Debug::LogOnScreen(FString::Printf(TEXT("Current Health: %f"), CurrentHealth));
 

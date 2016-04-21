@@ -40,11 +40,28 @@ protected:
 	float TurnRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
-	/* Tiden det tar efter att fienden tappat siken om spelaren innan den går idle */
+	/* The Movespeed of the enemy when it's triggered */
 	float TriggeredMoveSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
 	/* Tiden det tar efter att fienden tappat siken om spelaren innan den går idle */
 	float TimeToIdle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
+	/* How fast the enemy will fire it's burst */
+	float RPM;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
+	/* The minimum amount of bullets the enemy will shoot before pausing */
+	int32 MinBurstSize;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
+	/* The maximum amount of bullets the enemy will shoot before pausing */
+	int32 MaxBurstSize;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
+	/* The minimum amount if time the enemy will pause before bursting again */
+	float MinBurstPause;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_General)
+	/* The maximum amount if time the enemy will pause before bursting again */
+	float MaxBurstPause;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Triggerd)
 	/* Will be more prone to move when taking damage (0 - 100) 100 = 100% chance to move */
 	float AvoidDamage;
@@ -103,6 +120,9 @@ private:
 	void SearchForPlayer(float DeltaTime);
 
 	int AmmoPool;
+	int TimesShot;
+	int BurstSize;
+
 	bool bHasLineOfSight;
 	bool bOldHasLineOfSight;
 	bool bIsRandMoving;
@@ -113,8 +133,12 @@ private:
 	float TimeSinceLostLineOfSight;
 	float TimeSinceRandMovement;
 	float TimeSinceRanToLastKnownPosition;
+	float TimeSinceBurstPause;
+	float TimeToBurstPause;
+	float TimeSinceShotFired;
 
 	FVector LastKnownPlayerPos;
+	FVector LastKnownPlayerVelocity;
 	FRotator OldRotation;
 
 	class AWeapon* CurrentWeapon;
