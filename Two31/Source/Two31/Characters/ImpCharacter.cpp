@@ -10,18 +10,29 @@ AImpCharacter::AImpCharacter()
 	TimeSinceLastAttack = 0.f;
 	TimeSinceRotationStart = 0.f;
 
+	DistanceToPlayer = 100000.f;
+	RangeToAttack = 500.f;
+
 	bAggro = false;
 
-	RotationTimer = 2.f;
+	RotationTimer = 0.3f;
 
-	TargetLocation = FVector::ZeroVector;
+	LastKnowPosition = FVector::ZeroVector;
+	TimeSinceLostLineOfSight = 0.f;
+	TimeToIdle = 2.f;
 
-	bIsChasingPlayer = false;
+	ExtraTimeToGetLocation = 1.f;
+	ExtraTimeToMove = 0.f;
+
 	bAttackOnCooldown = false;
 
 	AttackRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRadius"));
 	AttackRadius->AttachTo(GetMesh());
 	AttackRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	AlertRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AlertRadius"));
+	AlertRadius->AttachTo(GetMesh());
+	AlertRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AImpCharacter::PostInitializeComponents()
@@ -35,42 +46,191 @@ void AImpCharacter::BeginPlay()
 {
 	AEnemyCharacter::BeginPlay();
 
+	// Get Reference to player - for rotation, position
+	for (TObjectIterator<AActor> Itr; Itr; ++Itr)
+	{
+		if (Cast<APlayerCharacter>(*Itr))
+			PlayerReferense = Cast<APlayerCharacter>(*Itr);
+	}
+	if (PlayerReferense == NULL)
+		Debug::LogFatalError("Could not find Player Character!");
 }
 
 void AImpCharacter::Tick(float DeltaTime)
 {
 	AEnemyCharacter::Tick(DeltaTime);
 
-	if (bAttackOnCooldown)
+	if (bIsAlive)
 	{
-		TimeSinceLastAttack += DeltaTime;
-		if (TimeSinceLastAttack > AttackCooldown)
+		if (GetCurrentState() == EEnemyState::Triggered)
 		{
-			bIsChasingPlayer = false;
-			bAttackOnCooldown = false;
-			TimeSinceLastAttack = 0.f;
+			// Can you see the player?
+			if (CanSeePlayer())
+			{
+				//Debug::LogOnScreen("Can see the player");
+				DistanceToPlayer = GetDistanceToPlayer();
+				//Debug::LogOnScreen(FString::Printf(TEXT("Distance is '%f'" ),DistanceToPlayer));
+				//Debug::LogOnScreen(FString::Printf(TEXT("Range to attack is '%f'"), RangeToAttack));
+
+				// Are you in range to attack ?
+				if (DistanceToPlayer < RangeToAttack)
+				{
+					// check attack cool-down and such
+					// Attack()
+					//Debug::LogOnScreen("Can Attack");
+				}
+				else
+				{
+					NavSystem->SimpleMoveToLocation(GetController(), LastKnowPosition);
+				}
+				ExtraTimeToMove = 0.f;
+			}
+			else
+			{
+				ExtraTimeToMove += DeltaTime;
+				if (ExtraTimeToMove < ExtraTimeToGetLocation)
+					LastKnowPosition = PlayerReferense->GetActorLocation();
+
+				if (!AtLastKnownPosition())
+				{
+					//Debug::LogOnScreen(FString::Printf(TEXT("Last known position '%f' , '%f'"), LastKnowPosition.X, LastKnowPosition.Y));
+					//Debug::LogOnScreen(FString::Printf(TEXT("Current position '%f' , '%f'"), GetActorLocation().X, GetActorLocation().Y));
+					NavSystem->SimpleMoveToLocation(GetController(), LastKnowPosition);
+				}
+				else
+				{
+					// time since lost line of sight.
+					TimeSinceLostLineOfSight += DeltaTime;
+					if (TimeSinceLostLineOfSight > TimeToIdle)
+					{
+						SetCurrentState(EEnemyState::Idle);
+						Debug::LogOnScreen("Going Idle");
+						TimeSinceLostLineOfSight = 0.f;
+					}
+				}
+			}
 		}
+		else if (GetCurrentState() == EEnemyState::Search)
+		{
+
+			RotateTowardsPlayer();
+			TimeSinceRotationStart += DeltaTime;
+			if (TimeSinceRotationStart > RotationTimer)
+				SetCurrentState(EEnemyState::Triggered);
+		}
+		else if (GetCurrentState() == EEnemyState::Idle)
+		{
+			if (bAggro)
+			{
+				GetOverlappingActors(AlertRadius, AImpCharacter::GetClass());
+				// Rotate then change state
+			}
+		}
+			// can you see the player
+				// yes 
+					// is the player within attack range
+						// yes 
+							// is attack on cool-down
+								// no - attack 
+								// yes - 
+						// no - run to player 
+				// no 
+					// are you at the last seen position
+						// no - move there
+						// yes - start idle timer
+							// has idle timer been reached
+								// go search
+		// State Search
+			// look for player
+				// rotation ? 
+				// move ? 
+					// failure to locate player - go idle
+		// State Idle
+			// if you take damage 
+				// rotate to face player
+				// alert nearby imps to also face player 
+			
+	}
+}
+
+bool AImpCharacter::CanSeePlayer()
+{
+	if (PlayerReferense != NULL)
+	{
+		if (PlayerReferense->GetPlayerHitPoint_Chest() == NULL || PlayerReferense->GetPlayerHitPoint_Shoulder_Left() == NULL || PlayerReferense->GetPlayerHitPoint_Shoulder_Right() == NULL)
+			return false;//Debug::LogFatalError("Hit Points on player is NULL");
+
+		FHitResult result;
+		ECollisionChannel collisionChannel;
+		collisionChannel = ECC_WorldDynamic;
+		FCollisionQueryParams collisionQuery;
+		collisionQuery.bTraceComplex = true;
+		FCollisionObjectQueryParams objectCollisionQuery;
+		objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
+		FCollisionResponseParams collisionResponse;
+		collisionResponse = ECR_Block;
+		collisionQuery.AddIgnoredActor(this);
+
+
+		SeenPositions seenPositions;
+		for (size_t i = 0; i < 3; i++)
+		{
+			if (i == 0)
+			{
+				GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Chest()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
+				if (Cast<APlayerCharacter>(result.GetActor()))
+					seenPositions.bCanSeePlayerChest = true;
+			}
+			else if (i == 1)
+			{
+				GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Shoulder_Left()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
+				if (Cast<APlayerCharacter>(result.GetActor()))
+					seenPositions.bCanSeePlayerShoulder_Left = true;
+			}
+			else if (i == 2)
+			{
+				GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), PlayerReferense->GetPlayerHitPoint_Shoulder_Right()->GetComponentLocation(), collisionChannel, collisionQuery, collisionResponse);
+				if (Cast<APlayerCharacter>(result.GetActor()))
+					seenPositions.bCanSeePlayerShoulder_Right = true;
+			}
+		}
+
+		bOldLineOfSight = bLineOfSight;
+		if (seenPositions.bCanSeePlayerChest || seenPositions.bCanSeePlayerShoulder_Left || seenPositions.bCanSeePlayerShoulder_Right)
+		{
+			bLineOfSight = true;
+			TimeSinceLostLineOfSight = true;
+			LastKnowPosition = PlayerReferense->GetActorLocation();
+		}
+		else
+			bLineOfSight = false;
 	}
 
-	if (bAggro)
-	{
-		// Mask is used to mask the Z-Vector during rotation.
-		FVector Mask = FVector(1, 1, 0);
-		FVector MyLocation = GetMesh()->GetComponentLocation();
+	return bLineOfSight;
+}
 
-		FVector TargetRotation = (TargetLocation - MyLocation);
-		TargetRotation *= Mask;
-		TargetRotation.Normalize();
+float AImpCharacter::GetDistanceToPlayer()
+{
+	FVector distance = PlayerReferense->GetActorLocation() - GetActorLocation();
+	return FMath::Abs(distance.Size()); 
+}
 
-		SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation.Rotation(), 0.05f));
+bool AImpCharacter::AtLastKnownPosition()
+{
+	if (GetActorLocation().X > LastKnowPosition.X - 50 && GetActorLocation().X < LastKnowPosition.X + 50 && GetActorLocation().Y > LastKnowPosition.Y - 50 && GetActorLocation().Y < LastKnowPosition.Y + 50)
+		return true;
+	return false;
+}
 
-		TimeSinceRotationStart += DeltaTime;
-		if (TimeSinceRotationStart > RotationTimer)
-		{
-			bAggro = false;
-			TimeSinceRotationStart = 0;
-		}
-	}
+void AImpCharacter::RotateTowardsPlayer()
+{
+	// Mask to not rotate in Z-Vector
+	FVector Mask = FVector(1, 1, 0);
+	FVector TargetRotation = (PlayerReferense->GetActorLocation() - GetActorLocation());
+	TargetRotation *= Mask;
+	TargetRotation.Normalize();
+
+	SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation.Rotation(), 0.05f));
 }
 
 void AImpCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
@@ -85,22 +245,18 @@ void AImpCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, floa
 
 void AImpCharacter::OnSeePawn(APawn *OtherPawn)
 {
-	NavSystem->SimpleMoveToLocation(GetController(), OtherPawn->GetActorLocation());
-	//if (!bIsChasingPlayer)
-	//{
-	//	
-	//	//NavSystem->SimpleMoveToActor(GetController(), OtherPawn);
-	//	bIsChasingPlayer = true;
-	//	//Attack(OtherPawn);
-	//}
+	bAggro = true;
+}
+
+void AImpCharacter::SetCurrentState(EEnemyState State)
+{
+	AEnemyCharacter::SetCurrentState(State);
 }
 
 float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	AEnemyCharacter::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Herpa DERPA!!!"));
-	
-	TargetLocation = DamageCauser->GetActorLocation();
+
 	if (!bAggro)
 		bAggro = true;
 
@@ -122,6 +278,21 @@ void AImpCharacter::OnAttackBeginOverlap(class AActor* OtherActor, class UPrimit
 			FDamageEvent DamageEvent(ValidDamageTypeClass);
 			Player->TakeDamage(AttackDamage, DamageEvent, PlayerController, this);
 			bAttackOnCooldown = true;
+		}
+	}
+}
+
+void AImpCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter)
+{
+	TArray<AActor*> OverlappingEnemies;
+	Sphere->GetOverlappingActors(OverlappingEnemies, ClassFilter);
+	for (size_t i = 0; i < OverlappingEnemies.Num(); i++)
+	{
+		if (Cast<AImpCharacter>(OverlappingEnemies[i]))
+		{
+			AImpCharacter* imp = Cast<AImpCharacter>(OverlappingEnemies[i]);
+			imp->bAggro = false;
+			imp->SetCurrentState(EEnemyState::Search);
 		}
 	}
 }
