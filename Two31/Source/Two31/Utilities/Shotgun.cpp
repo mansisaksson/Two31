@@ -129,8 +129,8 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			{
 				OnWeaponHit(result);
 				//Debug::LogOnScreen((result.GetActor()->GetName()));
-				if (MuzzeFlash != NULL)
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
+				//if (MuzzeFlash != NULL)
+					//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
 
 				if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
 				{
