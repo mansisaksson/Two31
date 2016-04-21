@@ -4,6 +4,12 @@
 #include "../Utilities/WeaponGlobals.h"
 #include "PlayerCharacter.generated.h"
 
+struct SInventory
+{
+	int32 ID = 0;
+	FString Name = "None";
+};
+
 UCLASS()
 class TWO31_API APlayerCharacter : public ACharacter
 {
@@ -65,15 +71,12 @@ public:
 	FString GetItemName(class AItemPickup* ItemToName);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetItemID(class AItemPickup* ItemToName);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetFirstItem();
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetSecondItem();
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	int32 GetThirdItem();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	bool PlayerHasItem(int32 ItemName);
+	int32 GetItem(int32 itemID);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	bool PlayerHasItem(int32 ItemID);
 
 	UFUNCTION()
 	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
@@ -176,4 +179,5 @@ private:
 	TArray<float> HealthPacks;
 
 	TArray<int32> Items;
+	TArray<SInventory> Inventory;
 };

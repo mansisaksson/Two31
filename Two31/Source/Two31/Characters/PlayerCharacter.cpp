@@ -34,6 +34,7 @@ APlayerCharacter::APlayerCharacter()
 	WeaponSlots.SetNum(4);
 	HealthPacks.SetNum(0);
 	Items.SetNum(0);
+	Inventory.SetNum(0);
 
 	bFireIsPressed = false;
 	bCanJump = true;
@@ -287,12 +288,12 @@ bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
 }
 bool APlayerCharacter::AddItem(AItemPickup* item)
 {
-	if (Items.Num() < 4 && Items.Num() > 0 )
+	if (Inventory.Num() < 4 && Inventory.Num() > 0 )
 	{
 		bool  bShouldAdd = true;
-		for (size_t i = 0; i < Items.Num(); i++)
+		for (size_t i = 0; i < Inventory.Num(); i++)
 		{
-			if (Items[i] == item->GetItemID())
+			if (Inventory[i].ID == item->GetItemID())
 			{
 				//Debug::LogOnScreen(TEXT("Item duplicate, not picked up"));
 				bShouldAdd = false;
@@ -300,45 +301,39 @@ bool APlayerCharacter::AddItem(AItemPickup* item)
 		}
 		if (bShouldAdd)
 		{
-			Items.Add(item->GetItemID());
+			//Items.Add(item->GetItemID());
+			SInventory toAdd;
+			toAdd.ID = item->GetItemID();
+			toAdd.Name = item->GetItemName();
+			Inventory.Add(toAdd);
 			return true;
 		}
 	}
-	else if (Items.Num() == 0)
+	else if (Inventory.Num() == 0)
 	{
-		Items.Add(item->GetItemID());
+		//Items.Add(item->GetItemID());
+		SInventory toAdd;
+		toAdd.ID = item->GetItemID();
+		toAdd.Name = item->GetItemName();
+		Inventory.Add(toAdd);
 		return true;
 	}
 	return false;
 }
-
-// to remove once hud has been decided
-int32 APlayerCharacter::GetFirstItem()
+int32 APlayerCharacter::GetItem(int32 itemID)
 {
-	if (Items.Num() > 0)
-		return Items[0];
-
-	return 0;
-}
-int32 APlayerCharacter::GetSecondItem()
-{
-	if (Items.Num() > 1)
-		return Items[1];
+	if (Inventory.Num() == 0)
+		return 0;
+	if (Inventory.Num() > itemID)
+		return Inventory[itemID].ID;
 
 	return 0;
 }
-int32 APlayerCharacter::GetThirdItem()
+bool APlayerCharacter::PlayerHasItem(int32 ItemID)
 {
-	if (Items.Num() > 2)
-		return Items[2];
-
-	return 0;
-}
-bool APlayerCharacter::PlayerHasItem(int32 ItemName)
-{
-	for (size_t i = 0; i < Items.Num(); i++)
+	for (size_t i = 0; i < Inventory.Num(); i++)
 	{
-		if (Items[i] == ItemName)
+		if (Inventory[i].ID == ItemID)
 			return true;
 	}
 
@@ -515,6 +510,6 @@ void APlayerCharacter::SpawnEnemyTest()
 	//GetWorld()->SpawnActorAbsolute<AEnemyCharacter>(SpawnLocation, SpawnRotation);
 }
 
-FString APlayerCharacter::GetItemName(AItemPickup* ItemToName) {  return ItemToName->GetItemName(); }
+FString APlayerCharacter::GetItemName(AItemPickup* ItemToName) { return ItemToName->GetItemName(); }
 int32 APlayerCharacter::GetItemID(AItemPickup* ItemToName) { return ItemToName->GetItemID(); }
 
