@@ -53,6 +53,7 @@ protected:
 	bool AtLastKnownPosition();
 
 	void RotateTowardsPlayer();
+	void MoveToPlayersEstimatedPosition();
 
 	virtual void Death();
 
@@ -71,6 +72,8 @@ protected:
 	float ExtraTimeToMove;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float ExtraTimeToGetLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	float DistOffsetInSearch;
 
 private:
 	float TimeSinceRotationStart;
@@ -83,7 +86,9 @@ private:
 	float DistanceToPlayer;
 
 	FVector LastKnowPosition;
+	bool bRandomSearch;
 	bool bPlayerHasBeenSpotted;
 	bool bOldLineOfSight;
 	bool bLineOfSight;
+	bool bMoveToLastKnown;
 };
