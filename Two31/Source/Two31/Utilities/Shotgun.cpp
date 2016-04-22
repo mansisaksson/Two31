@@ -20,8 +20,8 @@ AShotgun::AShotgun()
 	NumberOfShots = 8;
 	HeatParam = 0.f;
 
-	HeatDissipationScale = 1.3f;
-	HeatAccumulationScale = 1.5f;
+	HeatDissipationScale = 0.2f;
+	HeatAccumulationScale = 0.3f;
 	MaxHeatAccumulation = 10.f;
 
 	MuzzleFlashLocation = CreateDefaultSubobject<USceneComponent>("MuzzleFlash");
