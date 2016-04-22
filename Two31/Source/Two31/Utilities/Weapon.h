@@ -113,7 +113,7 @@ protected:
 	float timeSinceFire;
 	float timeSinceEquip;
 	float timeSinceUnequip;
-	
+
 	bool bIsEquiped;
 	bool bEquip;
 	bool bCanFire;
