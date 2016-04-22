@@ -46,14 +46,7 @@ void AImpCharacter::BeginPlay()
 {
 	AEnemyCharacter::BeginPlay();
 
-	// Get Reference to player - for rotation, position
-	for (TObjectIterator<AActor> Itr; Itr; ++Itr)
-	{
-		if (Cast<APlayerCharacter>(*Itr))
-			PlayerReferense = Cast<APlayerCharacter>(*Itr);
-	}
-	if (PlayerReferense == NULL)
-		Debug::LogFatalError("Could not find Player Character!");
+
 }
 
 void AImpCharacter::Tick(float DeltaTime)
