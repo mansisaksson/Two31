@@ -17,6 +17,7 @@ AEnemyCharacter::AEnemyCharacter()
 	TimeSinceDeath = 0.f;
 
 	EnemyState = EEnemyState::Idle;
+	UMusicManager::AddEnemy(EnemyState);
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -98,11 +99,11 @@ void AEnemyCharacter::Death()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	MusicManager::RemoveEnemy(EnemyState);
+	UMusicManager::RemoveEnemy(EnemyState);
 }
 
 void AEnemyCharacter::SetCurrentState(EEnemyState State)
 {
-	MusicManager::OnEnemyStateSwitch(EnemyState, State);
+	UMusicManager::OnEnemyStateSwitch(EnemyState, State);
 	EnemyState = State;
 }

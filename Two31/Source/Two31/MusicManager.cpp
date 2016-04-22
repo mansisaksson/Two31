@@ -1,28 +1,32 @@
 #include "Two31.h"
 #include "MusicManager.h"
 
-MusicManager::MusicManager()
-{
+bool UMusicManager::FirstTime = true;
+int32 UMusicManager::StateCounter[NumberOfStates];
 
+void UMusicManager::OnEnemyStateSwitch(EEnemyState CurrentState, EEnemyState NewState)
+{
+	StateCounter[static_cast<int32>(CurrentState)]--;
+	StateCounter[static_cast<int32>(NewState)]++;
 }
 
-MusicManager::~MusicManager()
+void UMusicManager::RemoveEnemy(EEnemyState CurrentState)
 {
-
+	StateCounter[static_cast<int32>(CurrentState)]--;
 }
 
-void MusicManager::OnEnemyStateSwitch(EEnemyState CurrentState, EEnemyState NewState)
+void UMusicManager::AddEnemy(EEnemyState CurrentState)
 {
-	//StateCounter[static_cast<int32>(CurrentState)]--;
-	//StateCounter[static_cast<int32>(NewState)]++;
+	if (FirstTime) {
+		FirstTime = false;
+		for (int i = 0; i < NumberOfStates; i++) {
+			StateCounter[i] = 0;
+		}
+	}
+	StateCounter[static_cast<int32>(CurrentState)]++;
 }
 
-void MusicManager::RemoveEnemy(EEnemyState CurrentState)
+int32 UMusicManager::GetNumberOfEnemiesInState(EEnemyState State)
 {
-	//StateCounter[static_cast<int32>(CurrentState)]--;
-}
-
-void MusicManager::AddEnemy(EEnemyState CurrentState)
-{
-	//StateCounter[static_cast<int32>(CurrentState)]++;
+	return StateCounter[static_cast<int32>(State)];
 }
