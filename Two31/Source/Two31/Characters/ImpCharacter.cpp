@@ -9,6 +9,7 @@ AImpCharacter::AImpCharacter()
 	AttackCooldown = 3.f;
 	TimeSinceLastAttack = 0.f;
 	TimeSinceRotationStart = 0.f;
+	TimeSinceMoveUpdate = 0.f;
 
 	DistanceToPlayer = 100000.f;
 	RangeToAttack = 500.f;
@@ -80,7 +81,15 @@ void AImpCharacter::Tick(float DeltaTime)
 				else
 				{
 					//NavSystem->SimpleMoveToLocation(GetController(), LastKnowPosition);
-					NavSystem->SimpleMoveToActor(GetController(), PlayerReferense);
+
+					TimeSinceMoveUpdate += DeltaTime;
+					if (TimeSinceMoveUpdate > 0.5f)
+					{
+						//NavSystem->SimpleMoveToActor(GetController(), PlayerReferense);
+						NavSystem->SimpleMoveToLocation(GetController(), PlayerReferense->GetActorLocation());
+						TimeSinceMoveUpdate = 0.f;
+					}
+
 				}
 				ExtraTimeToMove = 0.f;
 			}
@@ -147,6 +156,7 @@ void AImpCharacter::Tick(float DeltaTime)
 			{
 				SetCurrentState(EEnemyState::Search);
 				GetOverlappingActors(AlertRadius, AImpCharacter::GetClass());
+				//GetOverlappingActors(AlertRadius, ANavLinkProxy::GetClass());
 				//Debug::LogOnScreen("Getting overlapping actors");
 			}
 
@@ -309,6 +319,8 @@ float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		bAggro = true;
 	}
 
+	//GetOverlappingActors(AlertRadius, AImpCharacter::GetClass());
+
 	return DamageAmount;
 }
 
@@ -341,6 +353,10 @@ void AImpCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassF
 			AImpCharacter* imp = Cast<AImpCharacter>(OverlappingEnemies[i]);
 			imp->bAggro = false;
 			imp->SetCurrentState(EEnemyState::Search);
+		}
+		if (Cast<ANavLinkProxy>(OverlappingEnemies[i]))
+		{
+			Debug::LogOnScreen("Overlapping navlinkprox");
 		}
 	}
 	Debug::LogOnScreen("Triggering other imps");

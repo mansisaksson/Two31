@@ -79,6 +79,7 @@ private:
 	float TimeSinceRotationStart;
 	float TimeSinceLastAttack;
 	float TimeSinceLostLineOfSight;
+	float TimeSinceMoveUpdate;
 
 	bool bAggro;
 	bool bAttackOnCooldown;
