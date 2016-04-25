@@ -16,7 +16,6 @@ AImpCharacter::AImpCharacter()
 	RangeToAttack = 500.f;
 	DistOffsetInSearch = 500.f;
 
-	bAggro = false;
 	bRandomSearch = true;
 	bMoveToLastKnown = true;
 
@@ -34,10 +33,6 @@ AImpCharacter::AImpCharacter()
 	AttackRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRadius"));
 	AttackRadius->AttachTo(GetMesh());
 	AttackRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-	AlertRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AlertRadius"));
-	AlertRadius->AttachTo(GetMesh());
-	AlertRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AImpCharacter::PostInitializeComponents()
@@ -153,14 +148,7 @@ void AImpCharacter::Tick(float DeltaTime)
 		}
 		else if (GetCurrentState() == EEnemyState::Idle)
 		{
-			if (bAggro)
-			{
-				SetCurrentState(EEnemyState::Search);
-				GetOverlappingActors(AlertRadius, AImpCharacter::GetClass());
-				//GetOverlappingActors(AlertRadius, ANavLinkProxy::GetClass());
-				//Debug::LogOnScreen("Getting overlapping actors");
-			}
-
+			// Go idle
 		}
 			// can you see the player
 				// yes 
@@ -322,16 +310,11 @@ void AImpCharacter::OnSeePawn(APawn *OtherPawn)
 {
 	if (GetCurrentState() == EEnemyState::Idle)
 	{
-		bAggro = true;
 		Debug::LogOnScreen("Aggro true - see pawn");
+		SetCurrentState(EEnemyState::Search);
+		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
 	//NavSystem->SimpleMoveToActor(GetController(), PlayerReferense);
-
-}
-
-void AImpCharacter::SetCurrentState(EEnemyState State)
-{
-	AEnemyCharacter::SetCurrentState(State);
 }
 
 float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
@@ -341,23 +324,21 @@ float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	if (GetCurrentState() != EEnemyState::Triggered)
 	{
 		Debug::LogOnScreen("Aggro true - take damage");
-		bAggro = true;
+		SetCurrentState(EEnemyState::Search);
+		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
-
-	//GetOverlappingActors(AlertRadius, AImpCharacter::GetClass());
 
 	return DamageAmount;
 }
 
 void AImpCharacter::OnAttackBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Enemy inrange of something"));
 	if (Cast<APlayerCharacter>(OtherActor))
 	{
 		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
 		if (!bAttackOnCooldown)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Enemy attacking Player"));
+			Debug::LogOnScreen("Enemy attacking Player");
 			APlayerController* PlayerController = Cast<APlayerController>(Player->GetController());
 			TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 			FDamageEvent DamageEvent(ValidDamageTypeClass);
@@ -365,26 +346,6 @@ void AImpCharacter::OnAttackBeginOverlap(class AActor* OtherActor, class UPrimit
 			bAttackOnCooldown = true;
 		}
 	}
-}
-
-void AImpCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter)
-{
-	TArray<AActor*> OverlappingEnemies;
-	Sphere->GetOverlappingActors(OverlappingEnemies, ClassFilter);
-	for (size_t i = 0; i < OverlappingEnemies.Num(); i++)
-	{
-		if (Cast<AImpCharacter>(OverlappingEnemies[i]))
-		{
-			AImpCharacter* imp = Cast<AImpCharacter>(OverlappingEnemies[i]);
-			imp->bAggro = false;
-			imp->SetCurrentState(EEnemyState::Search);
-		}
-		if (Cast<ANavLinkProxy>(OverlappingEnemies[i]))
-		{
-			Debug::LogOnScreen("Overlapping navlinkprox");
-		}
-	}
-	Debug::LogOnScreen("Triggering other imps");
 }
 
 void AImpCharacter::Death()

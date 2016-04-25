@@ -25,6 +25,8 @@ ACultistCharacter::ACultistCharacter()
 	TimeGivenToMove = 1.5f;
 	TimeToMoveTooLastKnownPosititon = 5.f;
 
+	SearchTime = 20.f;
+
 	bPrioritizeLineOfSight = false;
 	bInstaReactToCornerPeaking = false;
 
@@ -88,6 +90,7 @@ void ACultistCharacter::Tick(float DeltaTime)
 
 				if (TimeSinceLostLineOfSight < TimeToGetLineOfSight)
 				{
+					bHasMovedToPlayer = false;
 					TimeSinceRanToLastKnownPosition = 0.f;
 					TryGetLineOfSight(DeltaTime);
 				}
@@ -97,8 +100,16 @@ void ACultistCharacter::Tick(float DeltaTime)
 		}
 		else if (GetCurrentState() == EEnemyState::Search)
 		{
-			GetCharacterMovement()->MaxWalkSpeed = TriggeredMoveSpeed;
-			SearchForPlayer(DeltaTime);
+			GetCharacterMovement()->MaxWalkSpeed = SearchMoveSpeed;
+
+			TimeSinceStartSearch += DeltaTime;
+			if (TimeSinceStartSearch < SearchTime)
+				SearchForPlayer(DeltaTime);
+			else
+			{
+				Debug::LogOnScreen("Done Searching, going idle");
+				SetCurrentState(EEnemyState::Idle);
+			}
 		}
 	}
 }
@@ -198,10 +209,8 @@ void ACultistCharacter::FocusOnPosition(float DeltaTime, FVector Position)
 	FVector Direction = Position - GetActorLocation();
 	FRotator NewControlRotation = Direction.Rotation();
 
-	// Gör en lerp här
 	NewControlRotation.Yaw = FRotator::ClampAxis(NewControlRotation.Yaw);
 	FaceRotation(FMath::Lerp(OldRotation, NewControlRotation, TurnRate * DeltaTime));
-	//FaceRotation(NewControlRotation);
 	OldRotation = GetActorRotation();
 }
 void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
@@ -309,10 +318,14 @@ void ACultistCharacter::GoToLastKnownPosition(float DeltaTime)
 	{
 		Debug::LogOnScreen("Done Moving, Entering Search Mode");
 		SetCurrentState(EEnemyState::Search);
+		TimeSinceStartSearch = 0.f;
+		LastFloorValue = -1.f;
 	}
-	else if (TimeSinceRanToLastKnownPosition < 1.5f) // Kommer gå till en uppdaterad position av spelaren i ett visst antal sekunder
+	else if (TimeSinceRanToLastKnownPosition == 0.f || (TimeSinceRanToLastKnownPosition > 1.5f && !bHasMovedToPlayer)) // Kommer gå till en uppdaterad position av spelaren i ett visst antal sekunder
 	{
 		Debug::LogOnScreen("Moving to player position");
+		if (TimeSinceRanToLastKnownPosition > 1.5f)
+			bHasMovedToPlayer = true;
 		NavSystem->SimpleMoveToLocation(GetController(), PlayerReferense->GetActorLocation());
 		LastKnownPlayerVelocity = PlayerReferense->GetVelocity();
 	}
@@ -320,28 +333,49 @@ void ACultistCharacter::GoToLastKnownPosition(float DeltaTime)
 }
 void ACultistCharacter::SearchForPlayer(float DeltaTime)
 {
+	if (LastFloorValue < FMath::FloorToInt(TimeSinceStartSearch / 3.f))
+	{
+		Debug::LogOnScreen("Run Search Thingy");
 
-	// Kolla vilket håll spelaren gick
-	// gå mot en punkt ut det hållet (i en kon?)
-	// FaceLocation(framåt)
+		float DistToPlayer = (GetActorLocation() - PlayerReferense->GetActorLocation()).Size();
 
-	// if (x time has passed)
-	//		move too location(spawn location)
-	//		go idle;
+		FVector newPos;
+		for (size_t i = 0; i < 10; i++)
+		{
+			float RandDist = FMath::FRandRange(DistToPlayer - 100.f, DistToPlayer + 100.f);
+			float RandDir = FMath::FRandRange(-90.f, 90.f);
+			
+			newPos = GetActorLocation() + GetActorForwardVector().RotateAngleAxis(RandDir, FVector(0, 0, 1)) * RandDist;
 
-	/*FNavLocation NewPos;
-	NavSystem->GetRandomReachablePointInRadius(GetActorLocation(), MaxRandMoveRadius, NewPos);
-	NavSystem->SimpleMoveToLocation(GetController(), NewPos.Location);*/
+			FPathFindingQuery pathFindingQuery;
+			pathFindingQuery.bAllowPartialPaths = true;
+			pathFindingQuery.StartLocation = GetActorLocation();
+			pathFindingQuery.EndLocation = newPos;
+			pathFindingQuery.NavData = NavSystem->GetMainNavData();
+			if (NavSystem->TestPathSync(pathFindingQuery))
+				break;
+		}
+
+		NavSystem->SimpleMoveToLocation(GetController(), newPos);
+	}
+	LastFloorValue = FMath::FloorToInt(TimeSinceStartSearch / 3.f);
 }
 
 void ACultistCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
 {
-	SetCurrentState(EEnemyState::Triggered);
+	if (GetCurrentState() != EEnemyState::Triggered)
+	{
+		SetCurrentState(EEnemyState::Triggered);
+		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
+	}
 }
 void ACultistCharacter::OnSeePawn(APawn *OtherPawn)
 {
-	if (Cast<APlayerCharacter>(OtherPawn))
+	if (GetCurrentState() != EEnemyState::Triggered && Cast<APlayerCharacter>(OtherPawn))
+	{
 		SetCurrentState(EEnemyState::Triggered);
+		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
+	}
 }
 
 bool ACultistCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
@@ -401,9 +435,12 @@ void ACultistCharacter::Death()
 }
 float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	SetCurrentState(EEnemyState::Triggered);
+	if (GetCurrentState() != EEnemyState::Triggered)
+	{
+		SetCurrentState(EEnemyState::Triggered);
+		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
+	}
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
-	//Debug::LogOnScreen(FString::Printf(TEXT("Current Health: %f"), CurrentHealth));
 
 	TimeSinceRandMovement += TimeToRandMove * (AvoidDamage / 100.f);
 	if (TimeSinceRandMovement >= TimeToRandMove)

@@ -17,9 +17,6 @@ class TWO31_API AImpCharacter : public AEnemyCharacter
 
 	UPROPERTY(VisibleAnywhere, Category = Collision)
 	class USphereComponent* AttackRadius;
-
-	UPROPERTY(VisibleAnywhere, Category = Trigger)
-	class USphereComponent* AlertRadius;
 	
 public:
 	AImpCharacter();
@@ -43,11 +40,6 @@ protected:
 	virtual void OnSeePawn(APawn *OtherPawn);
 	UFUNCTION()
 	virtual void OnAttackBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-	UFUNCTION(BlueprintCallable, Category = SetFunction)
-	virtual void SetCurrentState(EEnemyState State);
-
-	UFUNCTION()
-	void GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter);
 
 	UFUNCTION()
 	bool CanSeePlayer();
@@ -87,7 +79,6 @@ private:
 	float TimeSinceLostLineOfSight;
 	float TimeSinceMoveUpdate;
 
-	bool bAggro;
 	bool bAttackOnCooldown;
 
 	float DistanceToPlayer;

@@ -107,6 +107,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Search)
 	/* When the player gets outside this radius the enemy will start to run towards the player */
 	float SearchMoveSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AI_Search)
+	/* The amount of time the enemy will spend searching before going idle */
+	float SearchTime;
 
 private:
 	void CheckLineOfSight();
@@ -122,12 +125,14 @@ private:
 	int AmmoPool;
 	int TimesShot;
 	int BurstSize;
+	int LastFloorValue;
 
 	bool bHasLineOfSight;
 	bool bOldHasLineOfSight;
 	bool bIsRandMoving;
 	bool bLostLineOfSight;
 	bool bRandMoveAwayFromPlayer;
+	bool bHasMovedToPlayer;
 
 	float DefaultTimeToRandMove;
 	float TimeSinceLostLineOfSight;
@@ -136,6 +141,7 @@ private:
 	float TimeSinceBurstPause;
 	float TimeToBurstPause;
 	float TimeSinceShotFired;
+	float TimeSinceStartSearch;
 
 	FVector LastKnownPlayerPos;
 	FVector LastKnownPlayerVelocity;

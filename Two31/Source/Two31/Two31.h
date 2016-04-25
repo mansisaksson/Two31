@@ -2,6 +2,7 @@
 #define __TWO31_H__
 
 #include "EngineMinimal.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Engine.h"
 
 //General Log
@@ -21,7 +22,10 @@ DECLARE_LOG_CATEGORY_EXTERN(DebugError, Log, All);
 static class Debug
 {
 public:
-	static void LogOnScreen(FString message, FColor color = FColor::White);
+	static void LogOnScreen(FString message);
+	static void LogOnScreen(FString message, FColor color);
+	static void LogOnScreen(FString message, float screenTime, FColor color = FColor::White);
+
 	static void Log(FString message);
 	static void LogWarning(FString message);
 	static void LogFatalError(FString message);

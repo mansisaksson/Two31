@@ -20,6 +20,10 @@ class AEnemyCharacter : public ACharacter
 	UPROPERTY(VisibleDefaultsOnly, Category = Sensor, meta = (AllowPrivateAccess = "true"))
 	class UPawnSensingComponent* PawnSensor;
 
+protected:
+	UPROPERTY(VisibleAnywhere, Category = Trigger)
+	class USphereComponent* AlertRadius;
+
 public:
 	AEnemyCharacter();
 
@@ -32,12 +36,16 @@ public:
 
 	UFUNCTION()
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(BlueprintCallable, Category = SetFunction)
+	virtual void SetCurrentState(EEnemyState State);
 
 protected:
 	UFUNCTION()
 	virtual void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
 	UFUNCTION()
 	virtual void OnSeePawn(APawn *OtherPawn);
+	UFUNCTION()
+	void GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter);
 
 	virtual void Death();
 
@@ -57,8 +65,6 @@ protected:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	EEnemyState GetCurrentState() { return EnemyState; }
-	UFUNCTION(BlueprintCallable, Category = SetFunction)
-	void SetCurrentState(EEnemyState State);
 
 private:
 	UPROPERTY(EditAnywhere, Category = Gameplay)

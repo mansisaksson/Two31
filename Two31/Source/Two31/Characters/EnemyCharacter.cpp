@@ -27,6 +27,10 @@ AEnemyCharacter::AEnemyCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
 
 	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
+
+	AlertRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AlertRadius"));
+	AlertRadius->AttachTo(GetMesh());
+	AlertRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AEnemyCharacter::PostInitializeComponents()
@@ -78,6 +82,20 @@ void AEnemyCharacter::OnSeePawn(APawn *OtherPawn)
 {
 	FString message = TEXT("Saw Pawn ") + OtherPawn->GetName();
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+}
+
+void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter)
+{
+	TArray<AActor*> OverlappingEnemies;
+	Sphere->GetOverlappingActors(OverlappingEnemies, ClassFilter);
+	for (size_t i = 0; i < OverlappingEnemies.Num(); i++)
+	{
+		if (Cast<AEnemyCharacter>(OverlappingEnemies[i]))
+		{
+			AEnemyCharacter* enemy = Cast<AEnemyCharacter>(OverlappingEnemies[i]);
+			enemy->SetCurrentState(EEnemyState::Triggered);
+		}
+	}
 }
 
 float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
