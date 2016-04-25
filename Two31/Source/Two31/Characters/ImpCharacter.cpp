@@ -10,6 +10,7 @@ AImpCharacter::AImpCharacter()
 	TimeSinceLastAttack = 0.f;
 	TimeSinceRotationStart = 0.f;
 	TimeSinceMoveUpdate = 0.f;
+	TimeToMoveUpdate = 0.1f;
 
 	DistanceToPlayer = 100000.f;
 	RangeToAttack = 500.f;
@@ -83,7 +84,7 @@ void AImpCharacter::Tick(float DeltaTime)
 					//NavSystem->SimpleMoveToLocation(GetController(), LastKnowPosition);
 
 					TimeSinceMoveUpdate += DeltaTime;
-					if (TimeSinceMoveUpdate > 0.5f)
+					if (TimeSinceMoveUpdate > TimeToMoveUpdate/* 0.5f*/)
 					{
 						//NavSystem->SimpleMoveToActor(GetController(), PlayerReferense);
 						NavSystem->SimpleMoveToLocation(GetController(), PlayerReferense->GetActorLocation());
@@ -187,6 +188,25 @@ void AImpCharacter::Tick(float DeltaTime)
 	}
 }
 
+void AImpCharacter::NotifyActorBeginOverlap(AActor* actor)
+{
+	Super::NotifyActorBeginOverlap(actor);
+	//Debug::LogOnScreen("Test");
+	if (Cast<ANavLinkProxy>(actor))
+	{
+		ANavLinkProxy* NavLink = Cast<ANavLinkProxy>(actor);
+		Debug::LogOnScreen("navlinkproxy");
+		SetTimeToMoveUpdate(10.f);
+	}
+	if (Cast<UBoxComponent>(actor))
+	{
+		Debug::LogOnScreen("Actor overlap");
+		AActor* thing = Cast<UBoxComponent>(actor);
+		if (thing->ActorHasTag("Jump"))
+			Debug::LogOnScreen("The chosen one has been located");
+	}
+}
+
 bool AImpCharacter::CanSeePlayer()
 {
 	if (PlayerReferense != NULL)
@@ -254,6 +274,11 @@ bool AImpCharacter::AtLastKnownPosition()
 	if (GetActorLocation().X > LastKnowPosition.X - 50 && GetActorLocation().X < LastKnowPosition.X + 50 && GetActorLocation().Y > LastKnowPosition.Y - 50 && GetActorLocation().Y < LastKnowPosition.Y + 50)
 		return true;
 	return false;
+}
+
+void AImpCharacter::SetTimeToMoveUpdate(float Time)
+{
+	TimeToMoveUpdate = Time;
 }
 
 void AImpCharacter::RotateTowardsPlayer()

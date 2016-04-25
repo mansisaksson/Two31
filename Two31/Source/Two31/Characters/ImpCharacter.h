@@ -29,8 +29,12 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void NotifyActorBeginOverlap(AActor* actor) override;
+
 	UFUNCTION()
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(BlueprintCallable, Category = SetFunction)
+		void SetTimeToMoveUpdate(float Time);
 
 protected:
 	UFUNCTION()
@@ -68,6 +72,8 @@ protected:
 	float RotationTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float TimeToIdle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	float TimeToMoveUpdate;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float ExtraTimeToMove;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
