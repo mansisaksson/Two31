@@ -14,6 +14,7 @@ AImpCharacter::AImpCharacter()
 
 	DistanceToPlayer = 100000.f;
 	RangeToAttack = 500.f;
+	MinDistanceRandomSearch = 0.f;
 	DistOffsetInSearch = 500.f;
 
 	bRandomSearch = true;
@@ -57,17 +58,17 @@ void AImpCharacter::Tick(float DeltaTime)
 	{
 		if (GetCurrentState() == EEnemyState::Triggered)
 		{
+			Debug::LogOnScreen("triggered state");
 			// Can you see the player?
 			if (CanSeePlayer())
 			{
-				//Debug::LogOnScreen("Can see the player");
+				// Reset values for extra search functions that are used when sight of the player has been lost.
 				bRandomSearch = true;
 				bMoveToLastKnown = true;
-				DistanceToPlayer = GetDistanceToPlayer();
-				//Debug::LogOnScreen(FString::Printf(TEXT("Distance is '%f'" ),DistanceToPlayer));
-				//Debug::LogOnScreen(FString::Printf(TEXT("Range to attack is '%f'"), RangeToAttack));
+				ExtraTimeToMove = 0.f;
 
-				// Are you in range to attack ?
+				// Check whether the imp is able to attack the player or not.
+				DistanceToPlayer = GetDistanceToPlayer();
 				if (DistanceToPlayer < RangeToAttack)
 				{
 					// check attack cool-down and such
@@ -76,46 +77,34 @@ void AImpCharacter::Tick(float DeltaTime)
 				}
 				else
 				{
-					//NavSystem->SimpleMoveToLocation(GetController(), LastKnowPosition);
-
+					// Update the imps destination once the TimeToMoveUpdate has been reached.
 					TimeSinceMoveUpdate += DeltaTime;
 					if (TimeSinceMoveUpdate > TimeToMoveUpdate/* 0.5f*/)
 					{
-						//NavSystem->SimpleMoveToActor(GetController(), PlayerReferense);
 						NavSystem->SimpleMoveToLocation(GetController(), PlayerReferense->GetActorLocation());
 						TimeSinceMoveUpdate = 0.f;
 					}
 
 				}
-				ExtraTimeToMove = 0.f;
 			}
 			else
 			{
+				// Allow the imp to obtain the players position for an extra X amount of time. ( ExtraTimeToGetLocation )
 				ExtraTimeToMove += DeltaTime;
 				if (ExtraTimeToMove < ExtraTimeToGetLocation)
 					LastKnowPosition = PlayerReferense->GetActorLocation();
+
+				// Check if the imp as the last known position (LKP), if not move it there
+				// once the imp has arrived at the LKP it should not longer attempt to move to the LKP and instead search for the player
 				if (AtLastKnownPosition() && bMoveToLastKnown)
-				{
-					Debug::LogOnScreen("At last known position");
 					bMoveToLastKnown = false;
-				}
 				else if (!AtLastKnownPosition() && bMoveToLastKnown)
-				{
-					//Debug::LogOnScreen(FString::Printf(TEXT("Last known position '%f' , '%f'"), LastKnowPosition.X, LastKnowPosition.Y));
-					//Debug::LogOnScreen(FString::Printf(TEXT("Current position '%f' , '%f'"), GetActorLocation().X, GetActorLocation().Y));
 					NavSystem->SimpleMoveToLocation(GetController(), LastKnowPosition);
-				}
 				else
 				{
-					// time since lost line of sight.
-
-					// move to players last known position, done above
-					// get players last known rotation & location and estimate his whereabouts
-					// move to where it is believed the player might be
-					// located player
-						// no - go idle
-						// yes - continue above
-					
+					// Perform one random search based on the players LKP,
+					// if successful in locating the player, functions above will reset values 
+					// otherwise wait timeout to idle.
 					TimeSinceLostLineOfSight += DeltaTime;
 					if (TimeSinceLostLineOfSight < TimeToIdle && bRandomSearch)
 					{
@@ -129,14 +118,13 @@ void AImpCharacter::Tick(float DeltaTime)
 						TimeSinceLostLineOfSight = 0.f;
 						bRandomSearch = true;
 					}
-
-					//MoveToPlayersEstimatedPosition();
-
 				}
 			}
 		}
 		else if (GetCurrentState() == EEnemyState::Search)
 		{
+			// Transition state from idle to triggered, the transition will end when the imp has rotated to face the player.
+			Debug::LogOnScreen("search state");
 			RotateTowardsPlayer();
 			TimeSinceRotationStart += DeltaTime;
 			if (TimeSinceRotationStart > RotationTimer)
@@ -150,29 +138,6 @@ void AImpCharacter::Tick(float DeltaTime)
 		{
 			// Go idle
 		}
-			// can you see the player
-				// yes 
-					// is the player within attack range
-						// yes 
-							// is attack on cool-down
-								// no - attack 
-								// yes - 
-						// no - run to player 
-				// no 
-					// are you at the last seen position
-						// no - move there
-						// yes - start idle timer
-							// has idle timer been reached
-								// go search
-		// State Search
-			// look for player
-				// rotation ? 
-				// move ? 
-					// failure to locate player - go idle
-		// State Idle
-			// if you take damage 
-				// rotate to face player
-				// alert nearby imps to also face player 	
 	}
 }
 
@@ -183,16 +148,9 @@ void AImpCharacter::NotifyActorBeginOverlap(AActor* actor)
 	if (Cast<ANavLinkProxy>(actor))
 	{
 		ANavLinkProxy* NavLink = Cast<ANavLinkProxy>(actor);
-		Debug::LogOnScreen("navlinkproxy");
+		Debug::LogOnScreen("Nav link proxy");
 		SetTimeToMoveUpdate(10.f);
 	}
-	//if (Cast<UBoxComponent>(actor))
-	//{
-	//	Debug::LogOnScreen("Actor overlap");
-	//	AActor* thing = Cast<UBoxComponent>(actor);
-	//	if (thing->ActorHasTag("Jump"))
-	//		Debug::LogOnScreen("The chosen one has been located");
-	//}
 }
 
 bool AImpCharacter::CanSeePlayer()
@@ -271,6 +229,7 @@ void AImpCharacter::SetTimeToMoveUpdate(float Time)
 
 void AImpCharacter::RotateTowardsPlayer()
 {
+	Debug::LogOnScreen("rotating");
 	// Mask to not rotate in Z-Vector
 	FVector Mask = FVector(1, 1, 0);
 	FVector TargetRotation = (PlayerReferense->GetActorLocation() - GetActorLocation());
@@ -282,28 +241,27 @@ void AImpCharacter::RotateTowardsPlayer()
 
 void AImpCharacter::MoveToPlayersEstimatedPosition()
 {
-	Debug::LogOnScreen("Rotating towards random position");
+	//Debug::LogOnScreen("Rotating towards random position");
 	float DistToPlayer = GetDistanceToPlayer() + DistOffsetInSearch;
 
-
-	float RandDist = FMath::FRandRange(0.f, DistToPlayer);
+	float RandDist = FMath::FRandRange(MinDistanceRandomSearch, DistToPlayer);
 	float RandDir = FMath::FRandRange(-90.f, 90.f);
 	FVector newPos = GetActorLocation();
 	newPos += GetActorForwardVector().RotateAngleAxis(RandDir, FVector(0, 0, 1)) * RandDist;
 
 	NavSystem->SimpleMoveToLocation(GetController(), newPos);
 
-	Debug::LogOnScreen(FString::Printf(TEXT("Rand pos  is '%f'  '%f'" ), newPos.X , newPos.Y));
+	//Debug::LogOnScreen(FString::Printf(TEXT("Rand pos  is '%f'  '%f'" ), newPos.X , newPos.Y));
 }
 
 void AImpCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
 {
-	//AEnemyCharacter::OnHearNoise(OtherActor, Location, Volume);
-	//const FString VolumeDesc = FString::Printf(TEXT(" at volume %f"), Volume);
-	//FString message = TEXT("Heard Actor ") + OtherActor->GetName() + VolumeDesc;
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
-	//NavSystem->SimpleMoveToLocation(GetController(), OtherActor->GetActorLocation());
-	// TODO: game-specific logic
+	if (GetCurrentState() == EEnemyState::Idle)
+	{
+		Debug::LogOnScreen("Aggro true - hear pawn");
+		SetCurrentState(EEnemyState::Search);
+		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
+	}
 }
 
 void AImpCharacter::OnSeePawn(APawn *OtherPawn)
@@ -314,7 +272,6 @@ void AImpCharacter::OnSeePawn(APawn *OtherPawn)
 		SetCurrentState(EEnemyState::Search);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
-	//NavSystem->SimpleMoveToActor(GetController(), PlayerReferense);
 }
 
 float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
@@ -323,7 +280,7 @@ float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	if (GetCurrentState() != EEnemyState::Triggered)
 	{
-		Debug::LogOnScreen("Aggro true - take damage");
+		Debug::LogOnScreen("Aggro true - take DAMAGE");
 		SetCurrentState(EEnemyState::Search);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}

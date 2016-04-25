@@ -31,7 +31,7 @@ public:
 	UFUNCTION()
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(BlueprintCallable, Category = SetFunction)
-		void SetTimeToMoveUpdate(float Time);
+	void SetTimeToMoveUpdate(float Time);
 
 protected:
 	UFUNCTION()
@@ -60,16 +60,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
 	float RangeToAttack;
 
+	// Time the imp takes to rotate when triggered
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float RotationTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float TimeToIdle;
+	// How often the Imps destination will be updated
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float TimeToMoveUpdate;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
-	float ExtraTimeToMove;
+
+	// Extra Time given for the imp to get to a location before officially losing sight of the player
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float ExtraTimeToGetLocation;
+
+
+	// Minimum distance when searching for the player during random search.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	float MinDistanceRandomSearch;
+	// Extra Distance added to distance to player when creating max range for random search location.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float DistOffsetInSearch;
 
@@ -78,6 +86,7 @@ private:
 	float TimeSinceLastAttack;
 	float TimeSinceLostLineOfSight;
 	float TimeSinceMoveUpdate;
+	float ExtraTimeToMove;
 
 	bool bAttackOnCooldown;
 
