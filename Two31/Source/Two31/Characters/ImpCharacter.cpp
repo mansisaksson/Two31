@@ -186,6 +186,7 @@ void AImpCharacter::NotifyActorBeginOverlap(AActor* actor)
 		Debug::LogOnScreen("navlinkproxy");
 		SetTimeToMoveUpdate(10.f);
 	}
+	/*
 	if (Cast<UBoxComponent>(actor))
 	{
 		Debug::LogOnScreen("Actor overlap");
@@ -193,6 +194,7 @@ void AImpCharacter::NotifyActorBeginOverlap(AActor* actor)
 		if (thing->ActorHasTag("Jump"))
 			Debug::LogOnScreen("The chosen one has been located");
 	}
+	*/
 }
 
 bool AImpCharacter::CanSeePlayer()
