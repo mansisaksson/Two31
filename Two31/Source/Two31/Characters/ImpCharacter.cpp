@@ -10,7 +10,7 @@ AImpCharacter::AImpCharacter()
 	TimeSinceLastAttack = 0.f;
 	TimeSinceRotationStart = 0.f;
 	TimeSinceMoveUpdate = 0.f;
-	TimeToMoveUpdate = 0.1f;
+	TimeToMoveUpdate = 0.5f;
 
 	DistanceToPlayer = 100000.f;
 	RangeToAttack = 500.f;
@@ -186,15 +186,13 @@ void AImpCharacter::NotifyActorBeginOverlap(AActor* actor)
 		Debug::LogOnScreen("navlinkproxy");
 		SetTimeToMoveUpdate(10.f);
 	}
-	/*
-	if (Cast<UBoxComponent>(actor))
-	{
-		Debug::LogOnScreen("Actor overlap");
-		AActor* thing = Cast<UBoxComponent>(actor);
-		if (thing->ActorHasTag("Jump"))
-			Debug::LogOnScreen("The chosen one has been located");
-	}
-	*/
+	//if (Cast<UBoxComponent>(actor))
+	//{
+	//	Debug::LogOnScreen("Actor overlap");
+	//	AActor* thing = Cast<UBoxComponent>(actor);
+	//	if (thing->ActorHasTag("Jump"))
+	//		Debug::LogOnScreen("The chosen one has been located");
+	//}
 }
 
 bool AImpCharacter::CanSeePlayer()
