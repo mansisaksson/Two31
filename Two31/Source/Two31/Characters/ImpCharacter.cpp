@@ -12,13 +12,16 @@ AImpCharacter::AImpCharacter()
 	TimeSinceMoveUpdate = 0.f;
 	TimeToMoveUpdate = 0.5f;
 
-	DistanceToPlayer = 100000.f;
-	RangeToAttack = 500.f;
 	MinDistanceRandomSearch = 0.f;
 	DistOffsetInSearch = 500.f;
+	SideStepDistance = 200.f;
+
+	MaxWalkSpeed = CharacterMovement->MaxWalkSpeed;
+	HalfWalkSpeed = (CharacterMovement->MaxWalkSpeed / 2);
 
 	bRandomSearch = true;
 	bMoveToLastKnown = true;
+	bRepositioned = true;
 
 	bForceMovement = false;
 	ForcedMovementDirection = FVector::ZeroVector;
@@ -49,6 +52,7 @@ void AImpCharacter::PostInitializeComponents()
 void AImpCharacter::BeginPlay()
 {
 	AEnemyCharacter::BeginPlay();
+	OldRotation = GetActorRotation();
 }
 
 void AImpCharacter::Tick(float DeltaTime)
@@ -64,7 +68,6 @@ void AImpCharacter::Tick(float DeltaTime)
 		}
 		else if (GetCurrentState() == EEnemyState::Triggered)
 		{
-			//Debug::LogOnScreen("triggered state");
 			if (CanSeePlayer())
 			{
 				// Reset values for extra search functions that are used when sight of the player has been lost.
@@ -73,16 +76,25 @@ void AImpCharacter::Tick(float DeltaTime)
 				ExtraTimeToMove = 0.f;
 
 				// Check whether the imp is able to attack the player or not.
-				DistanceToPlayer = GetDistanceToPlayer();
-				if (DistanceToPlayer < RangeToAttack)
+				// check attack cool-down and such
+				if (bAttackOnCooldown)
 				{
-					// check attack cool-down and such
-					// Attack()
-					//Debug::LogOnScreen("Can Attack");
+					if(bRepositioned)
+						Reposition();
+					FocusOnPosition();
+					TimeSinceLastAttack += DeltaTime;
+					if (TimeSinceLastAttack > AttackCooldown)
+					{
+						TimeSinceLastAttack = 0.f;
+						bAttackOnCooldown = false;
+						bRepositioned = true;
+						CharacterMovement->MaxWalkSpeed = MaxWalkSpeed;
+					}
 				}
 				else
 				{
-					// Update the imps destination once the TimeToMoveUpdate has been reached.
+					// done via OnAttackBeginOverlap
+					Attack();
 					NavSystem->SimpleMoveToActor(GetController(), PlayerReferense);
 				}
 			}
@@ -113,7 +125,6 @@ void AImpCharacter::Tick(float DeltaTime)
 					else if (TimeSinceLostLineOfSight > TimeToIdle)
 					{
 						SetCurrentState(EEnemyState::Idle);
-						//Debug::LogOnScreen("Going Idle");
 						TimeSinceLostLineOfSight = 0.f;
 						bRandomSearch = true;
 					}
@@ -123,7 +134,6 @@ void AImpCharacter::Tick(float DeltaTime)
 		else if (GetCurrentState() == EEnemyState::Search)
 		{
 			// Transition state from idle to triggered, the transition will end when the imp has rotated to face the player.
-			//Debug::LogOnScreen("search state");
 			RotateTowardsPlayer();
 			TimeSinceRotationStart += DeltaTime;
 			if (TimeSinceRotationStart > RotationTimer)
@@ -139,18 +149,6 @@ void AImpCharacter::Tick(float DeltaTime)
 			//Debug::LogOnScreen("Idle");
 		}
 	}
-}
-
-void AImpCharacter::NotifyActorBeginOverlap(AActor* actor)
-{
-	Super::NotifyActorBeginOverlap(actor);
-	//Debug::LogOnScreen("Test");
-	//if (Cast<ANavLinkProxy>(actor))
-	//{
-	//	ANavLinkProxy* NavLink = Cast<ANavLinkProxy>(actor);
-	//	Debug::LogOnScreen("Nav link proxy");
-	//	SetTimeToMoveUpdate(10.f);
-	//}
 }
 
 bool AImpCharacter::CanSeePlayer()
@@ -214,14 +212,12 @@ float AImpCharacter::GetDistanceToPlayer()
 	FVector distance = PlayerReferense->GetActorLocation() - GetActorLocation();
 	return FMath::Abs(distance.Size()); 
 }
-
 bool AImpCharacter::AtLastKnownPosition()
 {
 	if (GetActorLocation().X > LastKnowPosition.X - 50 && GetActorLocation().X < LastKnowPosition.X + 50 && GetActorLocation().Y > LastKnowPosition.Y - 50 && GetActorLocation().Y < LastKnowPosition.Y + 50)
 		return true;
 	return false;
 }
-
 void AImpCharacter::ForceMovement(FVector Direction)
 {
 	bForceMovement = true;
@@ -231,7 +227,6 @@ void AImpCharacter::StopForcedMovement()
 {
 	bForceMovement = false;
 }
-
 void AImpCharacter::RotateTowardsPlayer()
 {
 	//Debug::LogOnScreen("rotating");
@@ -243,20 +238,31 @@ void AImpCharacter::RotateTowardsPlayer()
 
 	SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation.Rotation(), 0.05f));
 }
-
 void AImpCharacter::MoveToPlayersEstimatedPosition()
 {
 	//Debug::LogOnScreen("Rotating towards random position");
+	// Move to a random location based on a 180 degree angle from the imps POV
 	float DistToPlayer = GetDistanceToPlayer() + DistOffsetInSearch;
+	FVector newPos;
 
-	float RandDist = FMath::FRandRange(MinDistanceRandomSearch, DistToPlayer);
-	float RandDir = FMath::FRandRange(-90.f, 90.f);
-	FVector newPos = GetActorLocation();
-	newPos += GetActorForwardVector().RotateAngleAxis(RandDir, FVector(0, 0, 1)) * RandDist;
+	for (size_t i = 0; i < 10; i++)
+	{
+		float RandDist = FMath::FRandRange(MinDistanceRandomSearch, DistToPlayer);
+		float RandDir = FMath::FRandRange(-90.f, 90.f);
+
+		newPos = GetActorLocation();
+		newPos += GetActorForwardVector().RotateAngleAxis(RandDir, FVector(0, 0, 1)) * RandDist;
+
+		FPathFindingQuery pathFindingQuery;
+		pathFindingQuery.bAllowPartialPaths = true;
+		pathFindingQuery.StartLocation = GetActorLocation();
+		pathFindingQuery.EndLocation = newPos;
+		pathFindingQuery.NavData = NavSystem->GetMainNavData();
+		if (NavSystem->TestPathSync(pathFindingQuery))
+			break;
+	}
 
 	NavSystem->SimpleMoveToLocation(GetController(), newPos);
-
-	//Debug::LogOnScreen(FString::Printf(TEXT("Rand pos  is '%f'  '%f'" ), newPos.X , newPos.Y));
 }
 
 void AImpCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume)
@@ -268,7 +274,6 @@ void AImpCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, floa
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
 }
-
 void AImpCharacter::OnSeePawn(APawn *OtherPawn)
 {
 	if (GetCurrentState() == EEnemyState::Idle)
@@ -291,6 +296,46 @@ float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 
 	return DamageAmount;
+}
+
+void AImpCharacter::Reposition()
+{
+	//NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorForwardVector() * -200) + (GetActorRightVector() * 200));
+
+	FHitResult result;
+	ECollisionChannel collisionChannel;
+	collisionChannel = ECC_WorldDynamic;
+	FCollisionQueryParams collisionQuery;
+	collisionQuery.bTraceComplex = true;
+	FCollisionObjectQueryParams objectCollisionQuery;
+	objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
+	FCollisionResponseParams collisionResponse;
+	collisionResponse = ECR_Block;
+	collisionQuery.AddIgnoredActor(this);
+
+	int32 Random = FMath::RandRange(0, 1);
+
+	CharacterMovement->MaxWalkSpeed = HalfWalkSpeed;
+
+	if( Random == 0 )
+		NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * SideStepDistance));
+	else if (Random == 1)
+		NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * -SideStepDistance));
+
+
+	bRepositioned = false;
+}
+
+void AImpCharacter::FocusOnPosition()
+{
+	FVector Direction = PlayerReferense->GetActorLocation() - GetActorLocation();
+	FRotator NewControlRotation = Direction.Rotation();
+	SetActorRotation(NewControlRotation);
+}
+
+void AImpCharacter::Attack()
+{
+
 }
 
 void AImpCharacter::OnAttackBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)

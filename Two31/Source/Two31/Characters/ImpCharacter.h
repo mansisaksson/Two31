@@ -26,8 +26,6 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void NotifyActorBeginOverlap(AActor* actor) override;
-
 	UFUNCTION()
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(BlueprintCallable, Category = Movement)
@@ -53,14 +51,16 @@ protected:
 	void RotateTowardsPlayer();
 	void MoveToPlayersEstimatedPosition();
 
+	void Reposition();
+	void FocusOnPosition();
+	void Attack();
+
 	virtual void Death();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
 	float AttackCooldown;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
 	float AttackDamage;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
-	float RangeToAttack;
 
 	// Time the imp takes to rotate when triggered
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
@@ -75,6 +75,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float ExtraTimeToGetLocation;
 
+	// Distance the imp will go to the side after having attacked. 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	float SideStepDistance;
 
 	// Minimum distance when searching for the player during random search.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
@@ -92,15 +95,19 @@ private:
 
 	bool bAttackOnCooldown;
 
-	float DistanceToPlayer;
-
 	FVector LastKnowPosition;
 	bool bRandomSearch;
 	bool bPlayerHasBeenSpotted;
 	bool bOldLineOfSight;
 	bool bLineOfSight;
 	bool bMoveToLastKnown;
+	bool bRepositioned;
 
 	bool bForceMovement;
 	FVector ForcedMovementDirection;
+
+	float MaxWalkSpeed;
+	float HalfWalkSpeed;
+
+	FRotator OldRotation;
 };
