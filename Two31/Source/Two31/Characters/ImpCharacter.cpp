@@ -20,7 +20,10 @@ AImpCharacter::AImpCharacter()
 	bRandomSearch = true;
 	bMoveToLastKnown = true;
 
-	RotationTimer = 0.3f;
+	bForceMovement = false;
+	ForcedMovementDirection = FVector::ZeroVector;
+
+	RotationTimer = 0.4f;
 
 	LastKnowPosition = FVector::ZeroVector;
 	TimeSinceLostLineOfSight = 0.f;
@@ -46,8 +49,6 @@ void AImpCharacter::PostInitializeComponents()
 void AImpCharacter::BeginPlay()
 {
 	AEnemyCharacter::BeginPlay();
-
-
 }
 
 void AImpCharacter::Tick(float DeltaTime)
@@ -56,10 +57,14 @@ void AImpCharacter::Tick(float DeltaTime)
 
 	if (bIsAlive)
 	{
-		if (GetCurrentState() == EEnemyState::Triggered)
+		if (bForceMovement)
+		{
+			GetController()->StopMovement();
+			AddMovementInput(ForcedMovementDirection, 1.0f, true);
+		}
+		else if (GetCurrentState() == EEnemyState::Triggered)
 		{
 			//Debug::LogOnScreen("triggered state");
-			// Can you see the player?
 			if (CanSeePlayer())
 			{
 				// Reset values for extra search functions that are used when sight of the player has been lost.
@@ -78,12 +83,7 @@ void AImpCharacter::Tick(float DeltaTime)
 				else
 				{
 					// Update the imps destination once the TimeToMoveUpdate has been reached.
-					TimeSinceMoveUpdate += DeltaTime;
-					if (TimeSinceMoveUpdate > TimeToMoveUpdate/* 0.5f*/)
-					{
-						NavSystem->SimpleMoveToLocation(GetController(), PlayerReferense->GetActorLocation());
-						TimeSinceMoveUpdate = 0.f;
-					}
+					NavSystem->SimpleMoveToActor(GetController(), PlayerReferense);
 				}
 			}
 			else
@@ -145,12 +145,12 @@ void AImpCharacter::NotifyActorBeginOverlap(AActor* actor)
 {
 	Super::NotifyActorBeginOverlap(actor);
 	//Debug::LogOnScreen("Test");
-	if (Cast<ANavLinkProxy>(actor))
-	{
-		ANavLinkProxy* NavLink = Cast<ANavLinkProxy>(actor);
-		Debug::LogOnScreen("Nav link proxy");
-		SetTimeToMoveUpdate(10.f);
-	}
+	//if (Cast<ANavLinkProxy>(actor))
+	//{
+	//	ANavLinkProxy* NavLink = Cast<ANavLinkProxy>(actor);
+	//	Debug::LogOnScreen("Nav link proxy");
+	//	SetTimeToMoveUpdate(10.f);
+	//}
 }
 
 bool AImpCharacter::CanSeePlayer()
@@ -222,9 +222,14 @@ bool AImpCharacter::AtLastKnownPosition()
 	return false;
 }
 
-void AImpCharacter::SetTimeToMoveUpdate(float Time)
+void AImpCharacter::ForceMovement(FVector Direction)
 {
-	TimeToMoveUpdate = Time;
+	bForceMovement = true;
+	ForcedMovementDirection = Direction;
+}
+void AImpCharacter::StopForcedMovement()
+{
+	bForceMovement = false;
 }
 
 void AImpCharacter::RotateTowardsPlayer()
