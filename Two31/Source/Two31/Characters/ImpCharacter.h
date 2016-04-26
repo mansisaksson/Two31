@@ -30,8 +30,10 @@ public:
 
 	UFUNCTION()
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(BlueprintCallable, Category = SetFunction)
-	void SetTimeToMoveUpdate(float Time);
+	UFUNCTION(BlueprintCallable, Category = Movement)
+	void ForceMovement(FVector Direction);
+	UFUNCTION(BlueprintCallable, Category = Movement)
+	void StopForcedMovement();
 
 protected:
 	UFUNCTION()
@@ -98,4 +100,7 @@ private:
 	bool bOldLineOfSight;
 	bool bLineOfSight;
 	bool bMoveToLastKnown;
+
+	bool bForceMovement;
+	FVector ForcedMovementDirection;
 };
