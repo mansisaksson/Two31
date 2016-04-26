@@ -23,6 +23,7 @@ AWeapon::AWeapon()
 	timeSinceUnequip = 0.f;
 
 	WeaponDamage = 10;
+	ImpulsePowah = 9000.f;
 
 	bEquip = false;
 	bIsEquiped = false;

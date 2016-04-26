@@ -103,7 +103,9 @@ protected:
 	float EquipTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float UnequipTime;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float ImpulsePowah;
+
 	USkeletalMeshComponent* OwnerMesh;
 
 	int AmmoInClip;

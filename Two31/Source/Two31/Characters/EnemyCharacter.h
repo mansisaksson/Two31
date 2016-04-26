@@ -12,6 +12,12 @@ enum class EEnemyState : uint8
 	NumberOfStates	UMETA(DisplayName = "DoNotUse")
 };
 
+struct FImpulseValues
+{
+	FVector Impulse;
+	FVector Location;
+};
+
 UCLASS(config=Game)
 class AEnemyCharacter : public ACharacter
 {
@@ -32,13 +38,16 @@ public:
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaTime);
 
-	virtual float GetHealth();
-
 	UFUNCTION()
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(BlueprintCallable, Category = SetFunction)
 	virtual void SetCurrentState(EEnemyState State);
+	virtual void AddDelayedImpulse(FVector Impulse, FVector Location);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	EEnemyState GetCurrentState() { return EnemyState; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	virtual float GetHealth() { return CurrentHealth; }
 protected:
 	UFUNCTION()
 	virtual void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
@@ -63,12 +72,10 @@ protected:
 
 	bool bIsAlive;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	EEnemyState GetCurrentState() { return EnemyState; }
-
 private:
 	UPROPERTY(EditAnywhere, Category = Gameplay)
 	EEnemyState EnemyState;
 
+	TArray<FImpulseValues> DelayedImpulses;
 };
 

@@ -19,6 +19,7 @@ AShotgun::AShotgun()
 	Distance = 5000.f;
 	NumberOfShots = 8;
 	HeatParam = 0.f;
+	ImpulsePowah = 900.f;
 
 	HeatDissipationScale = 0.2f;
 	HeatAccumulationScale = 0.3f;
@@ -128,16 +129,10 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			if (hitObject)
 			{
 				OnWeaponHit(result);
-				//Debug::LogOnScreen((result.GetActor()->GetName()));
+
 				//if (MuzzeFlash != NULL)
 					//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
 
-				if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
-				{
-					FVector HitAngle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-					HitAngle.Normalize();
-					result.GetComponent()->AddImpulseAtLocation(HitAngle * 50000.0f, result.Location);
-				}
 				if (result.GetActor() != NULL)
 				{
 					if (Cast<AEnemyCharacter>(result.GetActor()))
@@ -146,6 +141,16 @@ void AShotgun::FireShot(FVector TowardsLocation)
 						TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 						FDamageEvent DamageEvent(ValidDamageTypeClass);
 						Enemy->TakeDamage(WeaponDamage * (1.0f - FMath::Clamp(result.Distance/Distance, 0.0f, 1.0f)), DamageEvent, result.GetActor()->GetInstigatorController(), this);
+						
+						FVector HitAngle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
+						HitAngle.Normalize();
+						Enemy->AddDelayedImpulse(HitAngle * ImpulsePowah, result.Location);
+					}
+					else if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
+					{
+						FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
+						Angle.Normalize();
+						result.GetComponent()->AddImpulseAtLocation(Angle * 50000.0f, result.Location);
 					}
 				}
 			}

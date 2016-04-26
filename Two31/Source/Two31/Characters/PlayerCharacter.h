@@ -56,6 +56,8 @@ public:
 	float GetArmor() { return CurrentArmor; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxArmor() { return MaxArmor; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetTimeSinceMeele() { return TimeSinceMeele; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	class AWeapon* GetCurrentWeapon() { return CurrentWeapon; }
@@ -98,7 +100,8 @@ protected:
 	void OnFire();
 	void OnReleaseFire();
 	void OnReload();
-	void ADS();
+	void OnADS();
+	void OnMeeleAttack();
 
 	bool PickupHealthPack(class AHealthPickup* Healthpack);
 	bool ChangeArmor(float pChange);
@@ -136,8 +139,9 @@ protected:
 	float ADSFOV;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float MeeleTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	bool bCanJump;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	int32 MaxAmountOfHealthPacks;
 
@@ -162,12 +166,14 @@ protected:
 private:
 	bool bFireIsPressed;
 	bool bADS;
+	bool bMeeleAttack;
 
 	float CurrentHealth;
 	float MaxHealth;
 	float CurrentArmor;
 	float MaxArmor;
 	float LastFootstep;
+	float TimeSinceMeele;
 
 	FAmmo* CurrentAmmo;
 	class AWeapon* CurrentWeapon;
