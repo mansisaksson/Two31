@@ -3,6 +3,7 @@
 #include "Perception/PawnSensingComponent.h"
 #include "../MusicManager.h"
 #include "../Characters/PlayerCharacter.h"
+#include "ImpCharacter.h"
 #include "AIController.h"
 #include "Engine.h"
 
@@ -31,6 +32,7 @@ AEnemyCharacter::AEnemyCharacter()
 	AlertRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AlertRadius"));
 	AlertRadius->AttachTo(GetMesh());
 	AlertRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	AlertRadius->IgnoreActorWhenMoving(this, true);
 }
 
 void AEnemyCharacter::PostInitializeComponents()
@@ -90,7 +92,13 @@ void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* Clas
 	Sphere->GetOverlappingActors(OverlappingEnemies, ClassFilter);
 	for (size_t i = 0; i < OverlappingEnemies.Num(); i++)
 	{
-		if (Cast<AEnemyCharacter>(OverlappingEnemies[i]))
+		if (Cast<AImpCharacter>(OverlappingEnemies[i]))
+		{
+			Debug::Log("blahö");
+			AEnemyCharacter* enemy = Cast<AEnemyCharacter>(OverlappingEnemies[i]);
+			enemy->SetCurrentState(EEnemyState::Search);
+		}
+		else if (Cast<AEnemyCharacter>(OverlappingEnemies[i]))
 		{
 			AEnemyCharacter* enemy = Cast<AEnemyCharacter>(OverlappingEnemies[i]);
 			enemy->SetCurrentState(EEnemyState::Triggered);

@@ -58,7 +58,7 @@ void AImpCharacter::Tick(float DeltaTime)
 	{
 		if (GetCurrentState() == EEnemyState::Triggered)
 		{
-			Debug::LogOnScreen("triggered state");
+			//Debug::LogOnScreen("triggered state");
 			// Can you see the player?
 			if (CanSeePlayer())
 			{
@@ -84,7 +84,6 @@ void AImpCharacter::Tick(float DeltaTime)
 						NavSystem->SimpleMoveToLocation(GetController(), PlayerReferense->GetActorLocation());
 						TimeSinceMoveUpdate = 0.f;
 					}
-
 				}
 			}
 			else
@@ -114,7 +113,7 @@ void AImpCharacter::Tick(float DeltaTime)
 					else if (TimeSinceLostLineOfSight > TimeToIdle)
 					{
 						SetCurrentState(EEnemyState::Idle);
-						Debug::LogOnScreen("Going Idle");
+						//Debug::LogOnScreen("Going Idle");
 						TimeSinceLostLineOfSight = 0.f;
 						bRandomSearch = true;
 					}
@@ -124,7 +123,7 @@ void AImpCharacter::Tick(float DeltaTime)
 		else if (GetCurrentState() == EEnemyState::Search)
 		{
 			// Transition state from idle to triggered, the transition will end when the imp has rotated to face the player.
-			Debug::LogOnScreen("search state");
+			//Debug::LogOnScreen("search state");
 			RotateTowardsPlayer();
 			TimeSinceRotationStart += DeltaTime;
 			if (TimeSinceRotationStart > RotationTimer)
@@ -137,6 +136,7 @@ void AImpCharacter::Tick(float DeltaTime)
 		else if (GetCurrentState() == EEnemyState::Idle)
 		{
 			// Go idle
+			//Debug::LogOnScreen("Idle");
 		}
 	}
 }
@@ -229,7 +229,7 @@ void AImpCharacter::SetTimeToMoveUpdate(float Time)
 
 void AImpCharacter::RotateTowardsPlayer()
 {
-	Debug::LogOnScreen("rotating");
+	//Debug::LogOnScreen("rotating");
 	// Mask to not rotate in Z-Vector
 	FVector Mask = FVector(1, 1, 0);
 	FVector TargetRotation = (PlayerReferense->GetActorLocation() - GetActorLocation());
