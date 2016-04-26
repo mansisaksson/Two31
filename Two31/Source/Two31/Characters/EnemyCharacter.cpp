@@ -71,6 +71,8 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		if (TimeSinceDeath > DespawnTimer)
 			Destroy();
 	}
+	
+	DelayedImpulses.Empty();
 }
 
 void AEnemyCharacter::OnHearNoise(APawn *OtherPawn, const FVector &Location, float Volume)
@@ -94,7 +96,6 @@ void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* Clas
 	{
 		if (Cast<AImpCharacter>(OverlappingEnemies[i]))
 		{
-			Debug::Log("blahö");
 			AEnemyCharacter* enemy = Cast<AEnemyCharacter>(OverlappingEnemies[i]);
 			enemy->SetCurrentState(EEnemyState::Search);
 		}
@@ -108,16 +109,17 @@ void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* Clas
 
 float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
-	if (CurrentHealth == 0)
+	if (CurrentHealth <= 0)
 		bIsAlive = false;
+
 	return DamageAmount;
 }
 
-float AEnemyCharacter::GetHealth()
+void AEnemyCharacter::AddDelayedImpulse(FVector Impulse, FVector Location)
 {
-	return CurrentHealth;
+	DelayedImpulses.Add({ Impulse, Location });
 }
 
 void AEnemyCharacter::Death()
@@ -126,6 +128,12 @@ void AEnemyCharacter::Death()
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	UMusicManager::RemoveEnemy(EnemyState);
+
+	for (size_t i = 0; i < DelayedImpulses.Num(); i++) {
+		Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
+		GetMesh()->AddImpulseAtLocation(DelayedImpulses[i].Impulse, DelayedImpulses[i].Location);
+	}
+	DelayedImpulses.Empty();
 }
 
 void AEnemyCharacter::SetCurrentState(EEnemyState State)

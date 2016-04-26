@@ -60,19 +60,9 @@ void ASMG::FireShot(FVector TowardsLocation)
 
 		if (hitObject)
 		{
-			//AWeapon::OnWeaponHit_Implementation(result);
-			//AWeapon::OnWeaponHit(result);
-			//OnWeaponHit_Implementation(result);
 			OnWeaponHit(result);
 			if (MuzzeFlash != NULL)
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
-
-			if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
-			{
-				FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-				Angle.Normalize();
-				result.GetComponent()->AddImpulseAtLocation(Angle * 50000.0f, result.Location);
-			}
 
 			if (result.GetActor() != NULL)
 			{
@@ -82,6 +72,10 @@ void ASMG::FireShot(FVector TowardsLocation)
 					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 					FDamageEvent DamageEvent(ValidDamageTypeClass);
 					Enemy->TakeDamage(WeaponDamage, DamageEvent, result.GetActor()->GetInstigatorController(), this);
+
+					FVector HitAngle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
+					HitAngle.Normalize();
+					Enemy->AddDelayedImpulse(HitAngle * ImpulsePowah, result.Location);
 				}
 				else if (Cast<APlayerCharacter>(result.GetActor()))
 				{
@@ -90,25 +84,13 @@ void ASMG::FireShot(FVector TowardsLocation)
 					FDamageEvent DamageEvent(ValidDamageTypeClass);
 					Player->TakeDamage(WeaponDamage, DamageEvent, result.GetActor()->GetInstigatorController(), this);
 				}
+				else if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
+				{
+					FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
+					Angle.Normalize();
+					result.GetComponent()->AddImpulseAtLocation(Angle * ImpulsePowah, result.Location);
+				}
 			}
 		}
 	}
 }
-
-/*
-void ASMG::OnWeaponHit(FHitResult HitResult)
-{
-
-	OnWeaponHit2(HitResult);
-
-	if (HitResult.GetComponent() != NULL)
-	{
-		UDestructibleComponent* DstrComp = Cast<UDestructibleComponent>(HitResult.GetComponent());
-		if (DstrComp)
-		{
-			DstrComp->ApplyRadiusDamage(1, HitResult.Location, 1, 5000, false);
-		}
-	}
-
-}
-*/
