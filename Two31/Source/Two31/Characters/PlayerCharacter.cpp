@@ -30,8 +30,8 @@ APlayerCharacter::APlayerCharacter()
 	MaxArmor = 100.f;
 	MaxAmountOfHealthPacks = 3;
 	LastFootstep = 0.f;
-	MeeleTime = 1.666667;
-	TimeSinceMeele = 0.f;
+	MeleeTime = 1.666667;
+	TimeSinceMelee = 0.f;
 
 	WeaponSlots.SetNum(4);
 	HealthPacks.SetNum(0);
@@ -41,7 +41,7 @@ APlayerCharacter::APlayerCharacter()
 	bFireIsPressed = false;
 	bCanJump = true;
 	bADS = false;
-	bMeeleAttack = false;
+	bMeleeAttack = false;
 
 	// Create a CameraComponent	
 	FPCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
@@ -94,7 +94,7 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 
 	if (bFireIsPressed && CurrentWeapon != NULL)
 	{
-		if (bMeeleAttack && TimeSinceMeele == 0.f)
+		if (bMeleeAttack && TimeSinceMelee == 0.f)
 			CurrentWeapon->StopFire(FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
 		else
 			CurrentWeapon->UpdateFire(FPCamera->GetComponentLocation() + (GetControlRotation().Vector() * 5000.f));
@@ -124,13 +124,13 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 		FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), FVector(3.160810f, -9.322928f, -157.550308f), 10.f * DeltaSeconds));
 	}
 
-	if (bMeeleAttack)
+	if (bMeleeAttack)
 	{
-		TimeSinceMeele += DeltaSeconds;
-		if (TimeSinceMeele >= MeeleTime)
+		TimeSinceMelee += DeltaSeconds;
+		if (TimeSinceMelee >= MeleeTime)
 		{
-			TimeSinceMeele = 0.f;
-			bMeeleAttack = false;
+			TimeSinceMelee = 0.f;
+			bMeleeAttack = false;
 		}
 	}
 }
@@ -208,7 +208,7 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 	InputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::OnReleaseFire);
 	InputComponent->BindAction("Reload", IE_Released, this, &APlayerCharacter::OnReload);
 	InputComponent->BindAction("ADS", IE_Pressed, this, &APlayerCharacter::OnADS);
-	InputComponent->BindAction("MeleeAttack", IE_Pressed, this, &APlayerCharacter::OnMeeleAttack);
+	InputComponent->BindAction("MeleeAttack", IE_Pressed, this, &APlayerCharacter::OnMeleeAttack);
 
 	InputComponent->BindAction("WeaponSlot1", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot1);
 	InputComponent->BindAction("WeaponSlot2", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot2);
@@ -231,7 +231,7 @@ void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputCom
 
 void APlayerCharacter::OnFire()
 {
-	if (!bMeeleAttack)
+	if (!bMeleeAttack)
 	{
 		bFireIsPressed = true;
 		if (CurrentWeapon != NULL)
@@ -254,12 +254,12 @@ void APlayerCharacter::OnADS()
 {
 	bADS = !bADS;
 }
-void APlayerCharacter::OnMeeleAttack()
+void APlayerCharacter::OnMeleeAttack()
 {
-	if (!bMeeleAttack)
+	if (!bMeleeAttack)
 	{
-		bMeeleAttack = true;
-		TimeSinceMeele = 0.f;
+		bMeleeAttack = true;
+		TimeSinceMelee = 0.f;
 		Debug::LogOnScreen("Meele!");
 	}
 }
