@@ -520,6 +520,7 @@ void APlayerCharacter::UseHealthPack()
 
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
 	//if (CurrentHealth == 0)
 	//	bIsAlive = false;

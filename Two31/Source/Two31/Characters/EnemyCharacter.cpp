@@ -60,6 +60,7 @@ void AEnemyCharacter::BeginPlay()
 
 	if (AIController == NULL)
 		Debug::LogFatalError("AIController Not found!");
+
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)

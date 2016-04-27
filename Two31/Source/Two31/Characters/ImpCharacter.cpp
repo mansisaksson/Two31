@@ -11,6 +11,7 @@ AImpCharacter::AImpCharacter()
 	TimeSinceRotationStart = 0.f;
 	TimeSinceMoveUpdate = 0.f;
 	TimeToMoveUpdate = 0.5f;
+	MoveAroundTimer = 0.f;
 
 	MinDistanceRandomSearch = 0.f;
 	DistOffsetInSearch = 500.f;
@@ -19,6 +20,8 @@ AImpCharacter::AImpCharacter()
 	MaxWalkSpeed = CharacterMovement->MaxWalkSpeed;
 	HalfWalkSpeed = (CharacterMovement->MaxWalkSpeed / 2);
 
+	bMoveAroundPlayer = true;
+	bMoveOnce = true;
 	bRandomSearch = true;
 	bMoveToLastKnown = true;
 	bRepositioned = true;
@@ -28,6 +31,8 @@ AImpCharacter::AImpCharacter()
 
 	RotationTimer = 0.4f;
 
+	PlayerPositionedWhenAggro = FVector::ZeroVector;
+	PlayerForwardVectorWhenAggro = FVector::ZeroVector;
 	LastKnowPosition = FVector::ZeroVector;
 	TimeSinceLostLineOfSight = 0.f;
 	TimeToIdle = 5.f;
@@ -68,7 +73,17 @@ void AImpCharacter::Tick(float DeltaTime)
 		}
 		else if (GetCurrentState() == EEnemyState::Triggered)
 		{
-			if (CanSeePlayer())
+			if (bMoveAroundPlayer)
+			{
+				Debug::LogOnScreen("Moving Around Player");
+				if(bMoveOnce)
+					MoveAroundPlayer();
+				
+				MoveAroundTimer += DeltaTime;
+				if (MoveAroundTimer > 5.f)
+					bMoveAroundPlayer = false;
+			}
+			else if (CanSeePlayer())
 			{
 				// Reset values for extra search functions that are used when sight of the player has been lost.
 				bRandomSearch = true;
@@ -139,6 +154,8 @@ void AImpCharacter::Tick(float DeltaTime)
 			if (TimeSinceRotationStart > RotationTimer)
 			{
 				SetCurrentState(EEnemyState::Triggered);
+				PlayerPositionedWhenAggro = PlayerReferense->GetActorLocation();
+				PlayerForwardVectorWhenAggro = PlayerReferense->GetActorForwardVector();
 				LastKnowPosition = PlayerReferense->GetActorLocation();
 				TimeSinceRotationStart = 0.f;
 			}
@@ -298,6 +315,18 @@ float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	return DamageAmount;
 }
 
+void AImpCharacter::MoveAroundPlayer()
+{
+	FVector movePosition;
+	float Dist = GetDistanceToPlayer();
+
+	float RandRotation = FMath::FRandRange(-45.f, 45.f);
+	movePosition = PlayerPositionedWhenAggro;
+	movePosition += PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
+
+	NavSystem->SimpleMoveToLocation(GetController(), movePosition);
+	bMoveOnce = false;
+}
 void AImpCharacter::Reposition()
 {
 	//NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorForwardVector() * -200) + (GetActorRightVector() * 200));
@@ -325,7 +354,6 @@ void AImpCharacter::Reposition()
 
 	bRepositioned = false;
 }
-
 void AImpCharacter::FocusOnPosition()
 {
 	FVector Direction = PlayerReferense->GetActorLocation() - GetActorLocation();

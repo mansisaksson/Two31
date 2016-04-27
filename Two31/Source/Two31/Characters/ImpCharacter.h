@@ -51,6 +51,7 @@ protected:
 	void RotateTowardsPlayer();
 	void MoveToPlayersEstimatedPosition();
 
+	void MoveAroundPlayer();
 	void Reposition();
 	void FocusOnPosition();
 	void Attack();
@@ -93,9 +94,13 @@ private:
 	float TimeSinceMoveUpdate;
 	float ExtraTimeToMove;
 
+	float MoveAroundTimer;
+
 	bool bAttackOnCooldown;
 
 	FVector LastKnowPosition;
+	bool bMoveAroundPlayer;
+	bool bMoveOnce;
 	bool bRandomSearch;
 	bool bPlayerHasBeenSpotted;
 	bool bOldLineOfSight;
@@ -108,6 +113,9 @@ private:
 
 	float MaxWalkSpeed;
 	float HalfWalkSpeed;
+
+	FVector PlayerPositionedWhenAggro;
+	FVector PlayerForwardVectorWhenAggro;
 
 	FRotator OldRotation;
 };
