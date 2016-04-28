@@ -20,6 +20,8 @@ public:
 	virtual void FireShot(FVector TowardsLocation) override;
 
 protected:
+	virtual void OnWeaponHit_Implementation(FHitResult HitResult) override;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MuzzeFlash;
 

@@ -25,6 +25,11 @@ AWeapon::AWeapon()
 	WeaponDamage = 10;
 	ImpulsePowah = 9000.f;
 
+	MinDecalSize = 20.f;
+	MaxDecalSize = 40.f;
+	BloodDecalMinSize = 40.f;
+	BloodDecalMaxSize = 100.f;
+
 	bEquip = false;
 	bIsEquiped = false;
 	bReload = false;

@@ -68,7 +68,7 @@ public:
 protected:
 	UFUNCTION(BlueprintNativeEvent)
 	void OnWeaponHit(FHitResult HitResult);
-	void OnWeaponHit_Implementation(FHitResult HitResult);
+	virtual void OnWeaponHit_Implementation(FHitResult HitResult);
 	UFUNCTION(BlueprintNativeEvent)
 	void OnBeginFire();
 	void OnBeginFire_Implementation();
@@ -83,7 +83,13 @@ protected:
 	UAnimBlueprintGeneratedClass* PlayerAnimationBlueprint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* CultistAnimationBlueprint;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UParticleSystem* BloodParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UMaterialInterface* BloodDecal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UMaterialInterface* BulletDecal;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	EAmmoType AmmoType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -105,6 +111,14 @@ protected:
 	float UnequipTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float ImpulsePowah;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float MinDecalSize;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float MaxDecalSize;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float BloodDecalMinSize;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float BloodDecalMaxSize;
 
 	USkeletalMeshComponent* OwnerMesh;
 
