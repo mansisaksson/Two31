@@ -286,15 +286,24 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 
 		UMaterialInterface* DecalMat = NULL;
 		UParticleSystem* ImpactParticle = NULL;
-		if (HitResult.PhysMaterial->GetName() == "PM_Metal")
+
+		if (HitResult.PhysMaterial != NULL)
 		{
-			DecalMat = ImpactVisuals.MetalImpactDecal;
-			ImpactParticle = ImpactVisuals.MetalImpactParticle;
-		}
-		else if (HitResult.PhysMaterial->GetName() == "PM_Wood")
-		{
-			DecalMat = ImpactVisuals.WoodImpactDecal;
-			ImpactParticle = ImpactVisuals.WoodImpactParticle;
+			if (HitResult.PhysMaterial->GetName() == "PM_Metal")
+			{
+				DecalMat = ImpactVisuals.MetalImpactDecal;
+				ImpactParticle = ImpactVisuals.MetalImpactParticle;
+			}
+			else if (HitResult.PhysMaterial->GetName() == "PM_Wood")
+			{
+				DecalMat = ImpactVisuals.WoodImpactDecal;
+				ImpactParticle = ImpactVisuals.WoodImpactParticle;
+			}
+			else
+			{
+				DecalMat = ImpactVisuals.DefaultImpactDecal;
+				ImpactParticle = ImpactVisuals.DefaultImpactParticle;
+			}
 		}
 		else
 		{

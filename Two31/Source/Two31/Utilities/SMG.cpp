@@ -32,6 +32,7 @@ void ASMG::FireShot(FVector TowardsLocation)
 		collisionChannel = ECC_WorldDynamic;
 		FCollisionQueryParams collisionQuery;
 		collisionQuery.bTraceComplex = true;
+		collisionQuery.bReturnPhysicalMaterial = true;
 		FCollisionObjectQueryParams objectCollisionQuery;
 		objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
 		FCollisionResponseParams collisionResponse;
