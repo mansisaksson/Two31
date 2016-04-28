@@ -22,6 +22,9 @@ AImpCharacter::AImpCharacter()
 	DistOffsetInSearch = 500.f;
 	SideStepDistance = 200.f;
 
+	MaxDegreeLocatedRight = 70.f;
+	MinDegreeLocatedLeft = 110.f;
+
 	MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	HalfWalkSpeed = (GetCharacterMovement()->MaxWalkSpeed / 2);
 
@@ -342,19 +345,27 @@ void AImpCharacter::MoveAroundPlayer()
 	if (!(OverlappingImps.Num() == 0))
 	{
 		FVector movePosition;
+		FVector temp;
 		float Dist = GetDistanceToPlayer() - FMath::FRandRange(0, (GetDistanceToPlayer()/2));
+		//float Dist = GetDistanceToPlayer() + 5000.f;
 
 		for (int i = 0; i < 10; i++)
 		{
 			float RandRotation = FMath::FRandRange(MoveAroundLocationMin, MoveAroundLocationMax);
 			movePosition = PlayerPositionedWhenAggro;
-			movePosition += PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
+			//movePosition += PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
+			temp = movePosition + PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
+			while (WallInWay(temp))
+			{
+				Dist -= 300.f;
+				temp = movePosition + PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
+			}
 
-			if (PathFidningQuery(movePosition))
+			if (PathFidningQuery(temp))
 				break;
 		}
-		NavSystem->SimpleMoveToLocation(GetController(), movePosition);
-		MoveAroundLocation = movePosition;
+		NavSystem->SimpleMoveToLocation(GetController(), temp);
+		MoveAroundLocation = temp;
 	}
 	else
 		bMoveAroundPlayer = false;
@@ -395,6 +406,33 @@ void AImpCharacter::FocusOnPosition()
 	SetActorRotation(NewControlRotation);
 }
 
+bool AImpCharacter::WallInWay(FVector Position)
+{
+	const FName TraceTag("Debug Trace");
+	FHitResult result;
+	ECollisionChannel collisionChannel;
+	collisionChannel = ECC_WorldDynamic;
+	FCollisionQueryParams collisionQuery;
+	collisionQuery.TraceTag = TraceTag;
+	GetWorld()->DebugDrawTraceTag = TraceTag;
+	collisionQuery.bTraceComplex = true;
+	FCollisionObjectQueryParams objectCollisionQuery;
+	objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
+	FCollisionResponseParams collisionResponse;
+	collisionResponse = ECR_Block;
+	collisionQuery.AddIgnoredActor(this);
+
+	bool hitObject = GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), Position, collisionChannel, collisionQuery, collisionResponse);
+	if (hitObject)
+	{
+		if (result.GetActor() != NULL)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void AImpCharacter::GetPositionOfImps()
 {
 	// Function to determine how many nearby imps there are and there location to the current imp
@@ -426,11 +464,11 @@ void AImpCharacter::GetPositionOfImps()
 
 			float degree = FMath::Acos(radians);
 			degree = FMath::RadiansToDegrees(degree);
-			if (degree < 80.f)
+			if (degree < MaxDegreeLocatedRight)
 				imp->SetRunAroundDegree(MinFlankDegree, MaxFlankDegree);
-			else if (degree > 80.f && degree < 100.f)
+			else if (degree > MaxDegreeLocatedRight && degree < MinDegreeLocatedLeft)
 				imp->SetRunAroundDegree(-10.f, 10.f);
-			else if (degree > 100.f)
+			else if (degree > MinDegreeLocatedLeft)
 				imp->SetRunAroundDegree(-MaxFlankDegree, -MinFlankDegree);
 
 			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Degrees is %f"), degree));

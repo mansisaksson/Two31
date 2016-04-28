@@ -53,6 +53,8 @@ protected:
 
 	bool PathFidningQuery(FVector Position);
 
+	bool WallInWay(FVector Position);
+
 	void SetRunAroundDegree(float Min, float Max);
 	void MoveAroundPlayer();
 	void Reposition();
@@ -100,6 +102,15 @@ protected:
 	// Maximum amount of degrees the imp can attempt to run if flanking, only applies to imps on the left and right sides. Default at 90.f
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float MaxFlankDegree;
+
+	// 0 - MaxDegreeLocatedRight are the imps to the right of the current one. Standard is 70, lowering the value will create a smaller amount of imps flanking right.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	float MaxDegreeLocatedRight;
+	// MinDegreeLocatedLeft - 180 are the imps to the left of the current one. Standard is 110, increasing the value will create a smaller amount of imps flanking left.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	float MinDegreeLocatedLeft;
+
+
 private:
 	float TimeSinceRotationStart;
 	float TimeSinceLastAttack;
