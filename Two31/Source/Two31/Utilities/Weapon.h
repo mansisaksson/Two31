@@ -5,6 +5,26 @@
 #include "WeaponGlobals.h"
 #include "Weapon.generated.h"
 
+USTRUCT(BlueprintType)
+struct FImpactVisuals
+{
+	GENERATED_USTRUCT_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UParticleSystem* WoodImpactParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UMaterialInterface* WoodImpactDecal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UParticleSystem* MetalImpactParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UMaterialInterface* MetalImpactDecal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UParticleSystem* DefaultImpactParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UMaterialInterface* DefaultImpactDecal;
+};
+
 UCLASS()
 class TWO31_API AWeapon : public AActor
 {
@@ -84,11 +104,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* CultistAnimationBlueprint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* BloodParticle;
+	UParticleSystem* BloodParticle; // <--- Borde inte denna va i EnemyCharacter??
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UMaterialInterface* BloodDecal;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UMaterialInterface* BulletDecal;
+	FImpactVisuals ImpactVisuals;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	EAmmoType AmmoType;

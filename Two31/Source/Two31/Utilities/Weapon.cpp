@@ -279,20 +279,38 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 			}
 		}
 	}
-	else if (Cast<UDestructibleComponent>(HitResult.GetActor()))
-	{
-		// Apply Damage to the component
-		Cast<UDestructibleComponent>(HitResult.GetActor())->ApplyRadiusDamage(1.f, HitResult.Location, 1.f, ImpulsePowah, false);
-	}
 	else
 	{
-		// Spawn Decals
-		if (BulletDecal != NULL)
+		if (Cast<UDestructibleComponent>(HitResult.GetActor()))
+			Cast<UDestructibleComponent>(HitResult.GetActor())->ApplyRadiusDamage(1.f, HitResult.Location, 1.f, ImpulsePowah, false);
+
+		UMaterialInterface* DecalMat = NULL;
+		UParticleSystem* ImpactParticle = NULL;
+		if (HitResult.PhysMaterial->GetName() == "PM_Metal")
+		{
+			DecalMat = ImpactVisuals.MetalImpactDecal;
+			ImpactParticle = ImpactVisuals.MetalImpactParticle;
+		}
+		else if (HitResult.PhysMaterial->GetName() == "PM_Wood")
+		{
+			DecalMat = ImpactVisuals.WoodImpactDecal;
+			ImpactParticle = ImpactVisuals.WoodImpactParticle;
+		}
+		else
+		{
+			DecalMat = ImpactVisuals.DefaultImpactDecal;
+			ImpactParticle = ImpactVisuals.DefaultImpactParticle;
+		}
+
+		if (DecalMat != NULL)
 		{
 			float DecalSize = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
-			UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(BulletDecal, FVector(DecalSize, DecalSize, 1.f), HitResult.GetComponent(), TEXT("None"), HitResult.Location, HitResult.Normal.Rotation(), EAttachLocation::KeepWorldPosition);
+			UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, FVector(DecalSize, DecalSize, 1.f), HitResult.GetComponent(), TEXT("None"), HitResult.Location, HitResult.Normal.Rotation(), EAttachLocation::KeepWorldPosition);
 			DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
 		}
+
+		if (ImpactParticle != NULL)
+			UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, HitResult.Normal.Rotation());
 	}
 }
 void AWeapon::OnBeginFire_Implementation()

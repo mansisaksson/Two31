@@ -69,6 +69,7 @@ void AShotgun::FireShot(FVector TowardsLocation)
 		//collisionQuery.TraceTag = TraceTag;
 		//GetWorld()->DebugDrawTraceTag = TraceTag;
 		collisionQuery.bTraceComplex = true;
+		collisionQuery.bReturnPhysicalMaterial = true;
 		FCollisionObjectQueryParams objectCollisionQuery;
 		objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
 		FCollisionResponseParams collisionResponse;
