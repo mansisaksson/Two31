@@ -39,22 +39,21 @@ protected:
 	UFUNCTION()
 	virtual void OnSeePawn(APawn *OtherPawn);
 	UFUNCTION()
+	virtual void GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter);
+	UFUNCTION()
 	virtual void OnAttackBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
-	UFUNCTION()
 	bool CanSeePlayer();
-	UFUNCTION()
 	float GetDistanceToPlayer();
-	UFUNCTION()
 	bool AtLastKnownPosition();
-	UFUNCTION()
-	TArray<float> GetDistanceToImps();
+	void GetPositionOfImps();
 
 	void RotateTowardsPlayer();
 	void MoveToPlayersEstimatedPosition();
 
 	bool PathFidningQuery(FVector Position);
 
+	void SetRunAroundDegree(float Min, float Max);
 	void MoveAroundPlayer();
 	void Reposition();
 	void FocusOnPosition();
@@ -95,6 +94,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	bool bMoveAroundPlayer;
 
+	// Minimum amount of degrees the imp can attempt to run if flanking, only applies to imps on the left and right sides. Default at 50.f
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	float MinFlankDegree;
+	// Maximum amount of degrees the imp can attempt to run if flanking, only applies to imps on the left and right sides. Default at 90.f
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	float MaxFlankDegree;
 private:
 	float TimeSinceRotationStart;
 	float TimeSinceLastAttack;
@@ -121,6 +126,9 @@ private:
 
 	float MaxWalkSpeed;
 	float HalfWalkSpeed;
+
+	float MoveAroundLocationMin;
+	float MoveAroundLocationMax;
 
 	FVector PlayerPositionedWhenAggro;
 	FVector PlayerForwardVectorWhenAggro;

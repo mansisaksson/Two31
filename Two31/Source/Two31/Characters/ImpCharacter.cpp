@@ -1,5 +1,6 @@
 #include "Two31.h"
 #include "ImpCharacter.h"
+#include "Engine.h"
 #include "PlayerCharacter.h"
 
 AImpCharacter::AImpCharacter()
@@ -13,6 +14,10 @@ AImpCharacter::AImpCharacter()
 	TimeToMoveUpdate = 0.5f;
 	MoveAroundTimer = 0.f;
 
+	MinFlankDegree = 50.f;
+	MaxFlankDegree = 90.f;
+	MoveAroundLocationMin = -5.f;
+	MoveAroundLocationMax = 5.f;
 	MinDistanceRandomSearch = 0.f;
 	DistOffsetInSearch = 500.f;
 	SideStepDistance = 200.f;
@@ -78,7 +83,10 @@ void AImpCharacter::Tick(float DeltaTime)
 			if (bMoveAroundPlayer)
 			{
 				if (bMoveOnce)
+				{
+
 					MoveAroundPlayer();
+				}
 				else if (GetActorLocation().X > MoveAroundLocation.X - 50 && GetActorLocation().X < MoveAroundLocation.X + 50 && GetActorLocation().Y > MoveAroundLocation.Y - 50 && GetActorLocation().Y < MoveAroundLocation.Y + 50)
 				{
 					Debug::LogOnScreen("At location - moving towards");
@@ -89,6 +97,8 @@ void AImpCharacter::Tick(float DeltaTime)
 					Debug::LogOnScreen("Close to player - moving towards");
 					bMoveAroundPlayer = false;
 				}
+				else if (GetDistanceToPlayer() > 3000.f)
+					bMoveAroundPlayer = false;
 
 				// Failsafe if it takes too long to move to player
 				MoveAroundTimer += DeltaTime;
@@ -247,6 +257,7 @@ bool AImpCharacter::AtLastKnownPosition()
 		return true;
 	return false;
 }
+
 void AImpCharacter::ForceMovement(FVector Direction)
 {
 	bForceMovement = true;
@@ -256,6 +267,7 @@ void AImpCharacter::StopForcedMovement()
 {
 	bForceMovement = false;
 }
+
 void AImpCharacter::RotateTowardsPlayer()
 {
 	//Debug::LogOnScreen("rotating");
@@ -318,6 +330,7 @@ float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		SetCurrentState(EEnemyState::Search);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
+	GetPositionOfImps();
 
 	return DamageAmount;
 }
@@ -329,10 +342,11 @@ void AImpCharacter::MoveAroundPlayer()
 	if (!(OverlappingImps.Num() == 0))
 	{
 		FVector movePosition;
-		float Dist = GetDistanceToPlayer();
+		float Dist = GetDistanceToPlayer() - FMath::FRandRange(0, (GetDistanceToPlayer()/2));
+
 		for (int i = 0; i < 10; i++)
 		{
-			float RandRotation = FMath::FRandRange(-45.f, 45.f);
+			float RandRotation = FMath::FRandRange(MoveAroundLocationMin, MoveAroundLocationMax);
 			movePosition = PlayerPositionedWhenAggro;
 			movePosition += PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
 
@@ -381,11 +395,52 @@ void AImpCharacter::FocusOnPosition()
 	SetActorRotation(NewControlRotation);
 }
 
-TArray<float> AImpCharacter::GetDistanceToImps()
+void AImpCharacter::GetPositionOfImps()
 {
-	TArray<float> Distances;
+	// Function to determine how many nearby imps there are and there location to the current imp
+	// imps will attempt to flank the player based on the current imps position, imps to the right are given a random position further right and left vice versa
+	// imps that are either in-front or behind the current imp will either run slightly to the left or right then towards the player.
+	TArray<AActor*> OverlappingImps;
+	AlertRadius->GetOverlappingActors(OverlappingImps, AImpCharacter::GetClass());
 
-	return Distances;
+	for (size_t i = 0; i < OverlappingImps.Num(); i++)
+	{
+		if (Cast<AImpCharacter>(OverlappingImps[i]))
+		{
+			AImpCharacter* imp = Cast<AImpCharacter>(OverlappingImps[i]);
+
+			// This function determines the location of the second imp from the first by comparing the right vector of the second imp to the direction vector from the current to the other.
+			// The degree in the angle formed determines the other imps location to the current.
+			// 0 degrees = exactly right of, while 180 degrees = exactly left. In-front or behind are both 90 degrees.
+			// Right vector must be used instead of forward vector in order to differentiate between left and right.
+
+			FVector OtherImpRight = OverlappingImps[i]->GetActorRightVector();
+			FVector OtherImpLocation = OverlappingImps[i]->GetActorLocation();
+			FVector ThisImpLocation = GetActorLocation();
+			FVector Direction = OtherImpLocation - ThisImpLocation;
+
+			float DotProd = FVector::DotProduct(OtherImpRight, Direction);
+			float Length = OtherImpRight.Size() * Direction.Size();
+
+			float radians = DotProd / Length;
+
+			float degree = FMath::Acos(radians);
+			degree = FMath::RadiansToDegrees(degree);
+			if (degree < 80.f)
+				imp->SetRunAroundDegree(MinFlankDegree, MaxFlankDegree);
+			else if (degree > 80.f && degree < 100.f)
+				imp->SetRunAroundDegree(-10.f, 10.f);
+			else if (degree > 100.f)
+				imp->SetRunAroundDegree(-MaxFlankDegree, -MinFlankDegree);
+
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Degrees is %f"), degree));
+		}	
+	}
+}
+void AImpCharacter::SetRunAroundDegree(float Min, float Max)
+{
+	MoveAroundLocationMin = Min;
+	MoveAroundLocationMax = Max;
 }
 
 bool AImpCharacter::PathFidningQuery(FVector Position)
@@ -405,6 +460,11 @@ void AImpCharacter::Attack()
 
 }
 
+void AImpCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter)
+{
+	AEnemyCharacter::GetOverlappingActors(Sphere, ClassFilter);
+	GetPositionOfImps();
+}
 void AImpCharacter::OnAttackBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 	if (Cast<APlayerCharacter>(OtherActor))
