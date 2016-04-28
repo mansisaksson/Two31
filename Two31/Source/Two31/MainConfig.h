@@ -11,11 +11,7 @@ class TWO31_API UMainConfig : public UObject
 public:
 
 	UFUNCTION(BlueprintCallable, Category = "MainConfig")
-	static UMainConfig* getInstance()
-	{
-		static UMainConfig* Instance;
-		return Instance;
-	}
+	static UMainConfig* getInstance();
 
 	UFUNCTION(BlueprintCallable, Category = "MainConfig")
 	void save();
@@ -26,5 +22,7 @@ public:
 private:
 	UMainConfig();
 	~UMainConfig();
+
+	static UMainConfig* Instance;
 
 };
