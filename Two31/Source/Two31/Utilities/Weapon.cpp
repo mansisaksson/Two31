@@ -244,7 +244,56 @@ AActor* AWeapon::GetOwner()
 
 void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 {
+	if (Cast<AEnemyCharacter>(HitResult.GetActor()))
+	{
+		// Blood splat particles
+		if (BloodParticle != NULL)
+		{
+			UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(BloodParticle, HitResult.GetComponent(), TEXT("None"), HitResult.Location, HitResult.Normal.Rotation() * -1.f, EAttachLocation::KeepWorldPosition);
+			ParticleSystemComp->AddLocalRotation(FRotator(90.f, 0.f, 0.f));
+		}
 
+		// Blood decals
+		if (BloodDecal != NULL)
+		{
+			FHitResult result;
+			ECollisionChannel collisionChannel;
+			collisionChannel = ECC_WorldDynamic;
+			FCollisionQueryParams collisionQuery;
+			collisionQuery.bTraceComplex = true;
+			FCollisionObjectQueryParams objectCollisionQuery;
+			FCollisionResponseParams collisionResponse;
+			collisionResponse = ECR_Block;
+
+			collisionQuery.AddIgnoredActor(this);
+			collisionQuery.AddIgnoredActor(GetOwner());
+			collisionQuery.AddIgnoredActor(HitResult.GetActor());
+
+			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, HitResult.Location, HitResult.Location + FVector(0.f, 0.f, -1000.f), collisionChannel, collisionQuery, collisionResponse);
+
+			if (hitObject)
+			{
+				float DecalSize = (BloodDecalMaxSize - BloodDecalMinSize) * FMath::FRand() + BloodDecalMinSize;
+				UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), BloodDecal, FVector(DecalSize, DecalSize, 1.f), result.Location, result.Normal.Rotation() * -1.f);
+				DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+			}
+		}
+	}
+	else if (Cast<UDestructibleComponent>(HitResult.GetActor()))
+	{
+		// Apply Damage to the component
+		Cast<UDestructibleComponent>(HitResult.GetActor())->ApplyRadiusDamage(1.f, HitResult.Location, 1.f, ImpulsePowah, false);
+	}
+	else
+	{
+		// Spawn Decals
+		if (BulletDecal != NULL)
+		{
+			float DecalSize = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
+			UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(BulletDecal, FVector(DecalSize, DecalSize, 1.f), HitResult.GetComponent(), TEXT("None"), HitResult.Location, HitResult.Normal.Rotation(), EAttachLocation::KeepWorldPosition);
+			DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+		}
+	}
 }
 void AWeapon::OnBeginFire_Implementation()
 {
