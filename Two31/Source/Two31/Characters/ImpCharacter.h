@@ -51,6 +51,8 @@ protected:
 	void RotateTowardsPlayer();
 	void MoveToPlayersEstimatedPosition();
 
+	bool PathFidningQuery(FVector Position);
+
 	void MoveAroundPlayer();
 	void Reposition();
 	void FocusOnPosition();
@@ -87,6 +89,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float DistOffsetInSearch;
 
+	// Determines wehther the imp will attempt to run around the player ( if conditions allow for it ) or not. true == run around if possible.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	bool bMoveAroundPlayer;
+
 private:
 	float TimeSinceRotationStart;
 	float TimeSinceLastAttack;
@@ -99,7 +105,6 @@ private:
 	bool bAttackOnCooldown;
 
 	FVector LastKnowPosition;
-	bool bMoveAroundPlayer;
 	bool bMoveOnce;
 	bool bRandomSearch;
 	bool bPlayerHasBeenSpotted;
@@ -110,6 +115,7 @@ private:
 
 	bool bForceMovement;
 	FVector ForcedMovementDirection;
+	FVector MoveAroundLocation;
 
 	float MaxWalkSpeed;
 	float HalfWalkSpeed;

@@ -17,8 +17,8 @@ AImpCharacter::AImpCharacter()
 	DistOffsetInSearch = 500.f;
 	SideStepDistance = 200.f;
 
-	MaxWalkSpeed = CharacterMovement->MaxWalkSpeed;
-	HalfWalkSpeed = (CharacterMovement->MaxWalkSpeed / 2);
+	MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	HalfWalkSpeed = (GetCharacterMovement()->MaxWalkSpeed / 2);
 
 	bMoveAroundPlayer = true;
 	bMoveOnce = true;
@@ -28,6 +28,7 @@ AImpCharacter::AImpCharacter()
 
 	bForceMovement = false;
 	ForcedMovementDirection = FVector::ZeroVector;
+	MoveAroundLocation = FVector::ZeroVector;
 
 	RotationTimer = 0.4f;
 
@@ -73,12 +74,23 @@ void AImpCharacter::Tick(float DeltaTime)
 		}
 		else if (GetCurrentState() == EEnemyState::Triggered)
 		{
+			// Check if the imp should flank around the player - should only be capable of performing this task once.
 			if (bMoveAroundPlayer)
 			{
-				Debug::LogOnScreen("Moving Around Player");
-				if(bMoveOnce)
+				if (bMoveOnce)
 					MoveAroundPlayer();
-				
+				else if (GetActorLocation().X > MoveAroundLocation.X - 50 && GetActorLocation().X < MoveAroundLocation.X + 50 && GetActorLocation().Y > MoveAroundLocation.Y - 50 && GetActorLocation().Y < MoveAroundLocation.Y + 50)
+				{
+					Debug::LogOnScreen("At location - moving towards");
+					bMoveAroundPlayer = false;
+				}
+				else if (GetDistanceToPlayer() < 1000.f)
+				{
+					Debug::LogOnScreen("Close to player - moving towards");
+					bMoveAroundPlayer = false;
+				}
+
+				// Failsafe if it takes too long to move to player
 				MoveAroundTimer += DeltaTime;
 				if (MoveAroundTimer > 5.f)
 					bMoveAroundPlayer = false;
@@ -270,12 +282,7 @@ void AImpCharacter::MoveToPlayersEstimatedPosition()
 		newPos = GetActorLocation();
 		newPos += GetActorForwardVector().RotateAngleAxis(RandDir, FVector(0, 0, 1)) * RandDist;
 
-		FPathFindingQuery pathFindingQuery;
-		pathFindingQuery.bAllowPartialPaths = true;
-		pathFindingQuery.StartLocation = GetActorLocation();
-		pathFindingQuery.EndLocation = newPos;
-		pathFindingQuery.NavData = NavSystem->GetMainNavData();
-		if (NavSystem->TestPathSync(pathFindingQuery))
+		if (PathFidningQuery(newPos))
 			break;
 	}
 
@@ -317,14 +324,27 @@ float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 void AImpCharacter::MoveAroundPlayer()
 {
-	FVector movePosition;
-	float Dist = GetDistanceToPlayer();
+	TArray<AActor*> OverlappingImps;
+	AlertRadius->GetOverlappingActors(OverlappingImps, AImpCharacter::GetClass());
+	if (!(OverlappingImps.Num() == 0))
+	{
+		FVector movePosition;
+		float Dist = GetDistanceToPlayer();
+		for (int i = 0; i < 10; i++)
+		{
+			float RandRotation = FMath::FRandRange(-45.f, 45.f);
+			movePosition = PlayerPositionedWhenAggro;
+			movePosition += PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
 
-	float RandRotation = FMath::FRandRange(-45.f, 45.f);
-	movePosition = PlayerPositionedWhenAggro;
-	movePosition += PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
+			if (PathFidningQuery(movePosition))
+				break;
+		}
+		NavSystem->SimpleMoveToLocation(GetController(), movePosition);
+		MoveAroundLocation = movePosition;
+	}
+	else
+		bMoveAroundPlayer = false;
 
-	NavSystem->SimpleMoveToLocation(GetController(), movePosition);
 	bMoveOnce = false;
 }
 void AImpCharacter::Reposition()
@@ -359,6 +379,25 @@ void AImpCharacter::FocusOnPosition()
 	FVector Direction = PlayerReferense->GetActorLocation() - GetActorLocation();
 	FRotator NewControlRotation = Direction.Rotation();
 	SetActorRotation(NewControlRotation);
+}
+
+TArray<float> AImpCharacter::GetDistanceToImps()
+{
+	TArray<float> Distances;
+
+	return Distances;
+}
+
+bool AImpCharacter::PathFidningQuery(FVector Position)
+{
+	FPathFindingQuery pathFindingQuery;
+	pathFindingQuery.bAllowPartialPaths = true;
+	pathFindingQuery.StartLocation = GetActorLocation();
+	pathFindingQuery.EndLocation = Position;
+	pathFindingQuery.NavData = NavSystem->GetMainNavData();
+	if (NavSystem->TestPathSync(pathFindingQuery))
+		return true;
+	return false;
 }
 
 void AImpCharacter::Attack()
