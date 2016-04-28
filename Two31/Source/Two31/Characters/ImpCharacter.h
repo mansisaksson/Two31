@@ -47,6 +47,8 @@ protected:
 	float GetDistanceToPlayer();
 	UFUNCTION()
 	bool AtLastKnownPosition();
+	UFUNCTION()
+	TArray<float> GetDistanceToImps();
 
 	void RotateTowardsPlayer();
 	void MoveToPlayersEstimatedPosition();

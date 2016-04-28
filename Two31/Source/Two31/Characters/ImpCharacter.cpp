@@ -115,7 +115,7 @@ void AImpCharacter::Tick(float DeltaTime)
 						TimeSinceLastAttack = 0.f;
 						bAttackOnCooldown = false;
 						bRepositioned = true;
-						CharacterMovement->MaxWalkSpeed = MaxWalkSpeed;
+						GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 					}
 				}
 				else
@@ -364,7 +364,7 @@ void AImpCharacter::Reposition()
 
 	int32 Random = FMath::RandRange(0, 1);
 
-	CharacterMovement->MaxWalkSpeed = HalfWalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = HalfWalkSpeed;
 
 	if( Random == 0 )
 		NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * SideStepDistance));
