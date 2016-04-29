@@ -12,8 +12,6 @@ class TWO31_API AShotgun : public AWeapon
 protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = Visual, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* MuzzleFlashLocation;
-	UPROPERTY(VisibleDefaultsOnly, Category = Visual, meta = (AllowPrivateAccess = "true"))
-	USceneComponent* LaserSightLocation;
 
 public:
 	AShotgun();
@@ -45,6 +43,4 @@ protected:
 private:
 	float HeatParam;
 	UMaterialInstanceDynamic* MatInstance;
-
-	UParticleSystemComponent* LaserSightComponent;
 };
