@@ -110,6 +110,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float MinDegreeLocatedLeft;
 
+	// Distance the imp allowed from the player, the distance is the distance when triggered + this offset. If the imp is further away it will change move to location and run towards the player.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	float AllowedDistanceFromPlayerOffset;
 
 private:
 	float TimeSinceRotationStart;
@@ -140,6 +143,8 @@ private:
 
 	float MoveAroundLocationMin;
 	float MoveAroundLocationMax;
+
+	float AllowedDistanceFromPlayer;
 
 	FVector PlayerPositionedWhenAggro;
 	FVector PlayerForwardVectorWhenAggro;

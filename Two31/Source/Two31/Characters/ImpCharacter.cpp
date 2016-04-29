@@ -25,6 +25,9 @@ AImpCharacter::AImpCharacter()
 	MaxDegreeLocatedRight = 70.f;
 	MinDegreeLocatedLeft = 110.f;
 
+	AllowedDistanceFromPlayer = 2000.f;
+	AllowedDistanceFromPlayerOffset = 0.f;
+
 	MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	HalfWalkSpeed = (GetCharacterMovement()->MaxWalkSpeed / 2);
 
@@ -86,10 +89,7 @@ void AImpCharacter::Tick(float DeltaTime)
 			if (bMoveAroundPlayer)
 			{
 				if (bMoveOnce)
-				{
-
 					MoveAroundPlayer();
-				}
 				else if (GetActorLocation().X > MoveAroundLocation.X - 50 && GetActorLocation().X < MoveAroundLocation.X + 50 && GetActorLocation().Y > MoveAroundLocation.Y - 50 && GetActorLocation().Y < MoveAroundLocation.Y + 50)
 				{
 					Debug::LogOnScreen("At location - moving towards");
@@ -100,7 +100,7 @@ void AImpCharacter::Tick(float DeltaTime)
 					Debug::LogOnScreen("Close to player - moving towards");
 					bMoveAroundPlayer = false;
 				}
-				else if (GetDistanceToPlayer() > 3000.f)
+				else if (GetDistanceToPlayer() > AllowedDistanceFromPlayer)
 					bMoveAroundPlayer = false;
 
 				// Failsafe if it takes too long to move to player
@@ -347,18 +347,19 @@ void AImpCharacter::MoveAroundPlayer()
 		FVector movePosition;
 		FVector temp;
 		float Dist = GetDistanceToPlayer() - FMath::FRandRange(0, (GetDistanceToPlayer()/2));
+		AllowedDistanceFromPlayer = GetDistanceToPlayer() + AllowedDistanceFromPlayerOffset;
 		//float Dist = GetDistanceToPlayer() + 5000.f;
 
 		for (int i = 0; i < 10; i++)
 		{
 			float RandRotation = FMath::FRandRange(MoveAroundLocationMin, MoveAroundLocationMax);
 			movePosition = PlayerPositionedWhenAggro;
-			//movePosition += PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
 			temp = movePosition + PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
-			while (WallInWay(temp))
+
+			if (WallInWay(temp))
 			{
-				Dist -= 300.f;
-				temp = movePosition + PlayerReferense->GetActorForwardVector().RotateAngleAxis(RandRotation, FVector(0, 0, 1)) * Dist;
+				temp = PlayerReferense->GetActorLocation();
+				bMoveAroundPlayer = false;
 			}
 
 			if (PathFidningQuery(temp))
@@ -409,7 +410,7 @@ void AImpCharacter::FocusOnPosition()
 bool AImpCharacter::WallInWay(FVector Position)
 {
 	const FName TraceTag("Debug Trace");
-	FHitResult result;
+	TArray<FHitResult> results;
 	ECollisionChannel collisionChannel;
 	collisionChannel = ECC_WorldDynamic;
 	FCollisionQueryParams collisionQuery;
@@ -422,12 +423,16 @@ bool AImpCharacter::WallInWay(FVector Position)
 	collisionResponse = ECR_Block;
 	collisionQuery.AddIgnoredActor(this);
 
-	bool hitObject = GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), Position, collisionChannel, collisionQuery, collisionResponse);
+	bool hitObject = GetWorld()->LineTraceMultiByChannel(results, GetActorLocation(), Position, collisionChannel, collisionQuery, collisionResponse);
 	if (hitObject)
 	{
-		if (result.GetActor() != NULL)
+		for (size_t i = 0; i < results.Num(); i++)
 		{
-			return true;
+			if (results[i].GetActor() != NULL)
+			{
+				if (results[i].GetComponent() != NULL && results[i].GetComponent()->Mobility == EComponentMobility::Static)
+					return true;
+			}
 		}
 	}
 	return false;
