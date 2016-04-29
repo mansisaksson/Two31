@@ -13,7 +13,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = Visual, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* MuzzleFlashLocation;
 	UPROPERTY(VisibleDefaultsOnly, Category = Visual, meta = (AllowPrivateAccess = "true"))
-	UParticleSystemComponent* Lazer;
+	USceneComponent* LaserSightLocation;
 
 public:
 	AShotgun();
@@ -25,6 +25,8 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MuzzeFlash;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UParticleSystem* LaserBeam;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
 	int32 NumberOfShots;
@@ -43,4 +45,6 @@ protected:
 private:
 	float HeatParam;
 	UMaterialInstanceDynamic* MatInstance;
+
+	UParticleSystemComponent* LaserSightComponent;
 };

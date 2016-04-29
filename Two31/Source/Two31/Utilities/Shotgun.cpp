@@ -28,8 +28,8 @@ AShotgun::AShotgun()
 	MuzzleFlashLocation = CreateDefaultSubobject<USceneComponent>("MuzzleFlash");
 	MuzzleFlashLocation->AttachTo(WeaponMesh, TEXT("MuzzleFlash"));
 
-	Lazer = CreateDefaultSubobject<UParticleSystemComponent>("LazerSight");
-	Lazer->AttachTo(WeaponMesh, TEXT("LazerSight"), EAttachLocation::KeepRelativeOffset);
+	LaserSightLocation = CreateDefaultSubobject<UParticleSystemComponent>("LazerSightLocation");
+	LaserSightLocation->AttachTo(WeaponMesh, TEXT("LazerSight"), EAttachLocation::KeepRelativeOffset);
 }
 
 void AShotgun::BeginPlay()
@@ -38,6 +38,9 @@ void AShotgun::BeginPlay()
 	
 	MatInstance = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, WeaponMesh->GetMaterial(0));
 	WeaponMesh->SetMaterial(0, MatInstance);
+
+	if (LaserBeam != NULL)
+		LaserSightComponent = UGameplayStatics::SpawnEmitterAttached(LaserBeam, LaserSightComponent);
 }
 
 void AShotgun::Tick(float DeltaTime)
@@ -46,7 +49,10 @@ void AShotgun::Tick(float DeltaTime)
 	HeatParam = FMath::Clamp(HeatParam - DeltaTime * HeatDissipationScale, 0.f, 10.f);
 	MatInstance->SetScalarParameterValue(TEXT("HeatParam"), HeatParam);
 
-	//Lazer->SetBeamSourcePoint(0, FVector::ZeroVector, 0);
+	if (LaserSightComponent != NULL)
+	{
+		LaserSightComponent->SetBeamSourcePoint(0, FVector::ZeroVector, 0);
+	}
 }
 
 void AShotgun::FireShot(FVector TowardsLocation)
