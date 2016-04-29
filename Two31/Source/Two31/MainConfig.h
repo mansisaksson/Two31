@@ -5,24 +5,14 @@
 UCLASS(Config = Two31)
 class TWO31_API UMainConfig : public UObject
 {
+public:
 
 	GENERATED_BODY()
 
-public:
-
-	UFUNCTION(BlueprintCallable, Category = "MainConfig")
-	static UMainConfig* getInstance();
-
-	UFUNCTION(BlueprintCallable, Category = "MainConfig")
-	void save();
-
-	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	float testValue;
-
-private:
 	UMainConfig();
 	~UMainConfig();
 
-	static UMainConfig* Instance;
-
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	float testValue;
+	
 };
