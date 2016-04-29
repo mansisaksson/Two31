@@ -16,7 +16,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "MainConfig")
 	void Save();
 
+	/*
+		Configuration Values
+	*/
+
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	float testValue;
+	int32 GraphicsFOV;
 	
 };
