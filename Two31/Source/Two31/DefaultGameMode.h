@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MainConfig.h"
 #include "GameFramework/GameMode.h"
 #include "DefaultGameMode.generated.h"
 
@@ -11,4 +12,11 @@ class TWO31_API ADefaultGameMode : public AGameMode
 
 public:
 	ADefaultGameMode();
+
+	UFUNCTION(BlueprintCallable, Category = "Configuration")
+	UMainConfig* GetConfig();
+
+private:
+	UMainConfig* Config;
+
 };

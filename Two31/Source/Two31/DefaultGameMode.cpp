@@ -2,11 +2,12 @@
 #include "Characters/PlayerHUD.h"
 #include "DefaultGameMode.h"
 
-ADefaultGameMode::ADefaultGameMode()
-	: Super()
+ADefaultGameMode::ADefaultGameMode() : Super()
 {
-	
+	Config = NewObject<UMainConfig>(UMainConfig::StaticClass());
 }
 
-
-
+UMainConfig* ADefaultGameMode::GetConfig()
+{
+	return Config;
+}
