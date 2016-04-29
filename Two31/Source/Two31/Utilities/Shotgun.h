@@ -9,9 +9,12 @@ class TWO31_API AShotgun : public AWeapon
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Visual)
+protected:
+	UPROPERTY(VisibleDefaultsOnly, Category = Visual, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* MuzzleFlashLocation;
-	
+	UPROPERTY(VisibleDefaultsOnly, Category = Visual, meta = (AllowPrivateAccess = "true"))
+	UParticleSystemComponent* Lazer;
+
 public:
 	AShotgun();
 

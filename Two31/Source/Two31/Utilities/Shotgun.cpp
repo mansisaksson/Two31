@@ -27,6 +27,9 @@ AShotgun::AShotgun()
 
 	MuzzleFlashLocation = CreateDefaultSubobject<USceneComponent>("MuzzleFlash");
 	MuzzleFlashLocation->AttachTo(WeaponMesh, TEXT("MuzzleFlash"));
+
+	Lazer = CreateDefaultSubobject<UParticleSystemComponent>("LazerSight");
+	Lazer->AttachTo(WeaponMesh, TEXT("LazerSight"), EAttachLocation::KeepRelativeOffset);
 }
 
 void AShotgun::BeginPlay()
@@ -42,6 +45,8 @@ void AShotgun::Tick(float DeltaTime)
 	AWeapon::Tick(DeltaTime);
 	HeatParam = FMath::Clamp(HeatParam - DeltaTime * HeatDissipationScale, 0.f, 10.f);
 	MatInstance->SetScalarParameterValue(TEXT("HeatParam"), HeatParam);
+
+	//Lazer->SetBeamSourcePoint(0, FVector::ZeroVector, 0);
 }
 
 void AShotgun::FireShot(FVector TowardsLocation)

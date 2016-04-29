@@ -82,6 +82,9 @@ void APlayerCharacter::BeginPlay()
 	PlayerController->PlayerCameraManager->ViewPitchMax = ViewPitchMax;
 	PlayerController->PlayerCameraManager->ViewPitchMin = ViewPitchMin;
 
+	DefaultArmLocation = FPArmMesh->GetRelativeTransform().GetLocation();
+	DefaultArmRotation = FPArmMesh->GetRelativeTransform().Rotator();
+
 	EquipWeapon(StarterWeapon1);
 	EquipWeapon(StarterWeapon2);
 	EquipWeapon(StarterWeapon2);
@@ -120,8 +123,8 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 	else
 	{
 		FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, DefaultFOV, 10.f * DeltaSeconds);
-		FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), FRotator(-1.099945f, -104.020050f, 0.136789f), 10.f * DeltaSeconds));
-		FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), FVector(3.160810f, -9.322928f, -157.550308f), 10.f * DeltaSeconds));
+		FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), DefaultArmRotation, 10.f * DeltaSeconds));
+		FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), DefaultArmLocation, 10.f * DeltaSeconds));
 	}
 
 	if (bMeleeAttack)

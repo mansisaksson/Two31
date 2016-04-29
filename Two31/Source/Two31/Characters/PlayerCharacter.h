@@ -175,6 +175,9 @@ private:
 	float LastFootstep;
 	float TimeSinceMelee;
 
+	FVector DefaultArmLocation;
+	FRotator DefaultArmRotation;
+
 	FAmmo* CurrentAmmo;
 	class AWeapon* CurrentWeapon;
 	class APlayerController* PlayerController;
