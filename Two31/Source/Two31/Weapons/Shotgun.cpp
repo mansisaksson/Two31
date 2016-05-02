@@ -133,13 +133,13 @@ void AShotgun::FireShot(FVector TowardsLocation)
 
 				if (result.GetActor() != NULL)
 				{
+					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+					FDamageEvent DamageEvent(ValidDamageTypeClass);
+					result.GetActor()->TakeDamage(WeaponDamage * (1.0f - FMath::Clamp(result.Distance / Distance, 0.0f, 1.0f)), DamageEvent, result.GetActor()->GetInstigatorController(), this);
+					
 					if (Cast<AEnemyCharacter>(result.GetActor()))
 					{
 						AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
-						TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
-						FDamageEvent DamageEvent(ValidDamageTypeClass);
-						Enemy->TakeDamage(WeaponDamage * (1.0f - FMath::Clamp(result.Distance/Distance, 0.0f, 1.0f)), DamageEvent, result.GetActor()->GetInstigatorController(), this);
-						
 						FVector HitAngle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
 						HitAngle.Normalize();
 						Enemy->AddDelayedImpulse(HitAngle * ImpulsePowah, result.Location);
