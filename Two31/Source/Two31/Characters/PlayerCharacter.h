@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GameFramework/Character.h"
-#include "../Utilities/WeaponGlobals.h"
+#include "../Weapons/WeaponGlobals.h"
 #include "PlayerCharacter.generated.h"
 
 struct SInventory

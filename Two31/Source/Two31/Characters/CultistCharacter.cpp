@@ -1,6 +1,6 @@
 #include "Two31.h"
 #include "CultistCharacter.h"
-#include "../Utilities/Weapon.h"
+#include "../Weapons/Weapon.h"
 #include "PlayerCharacter.h"
 
 ACultistCharacter::ACultistCharacter()

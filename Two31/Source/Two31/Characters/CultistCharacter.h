@@ -1,6 +1,6 @@
 #pragma once
 #include "Characters/EnemyCharacter.h"
-#include "../Utilities/WeaponGlobals.h"
+#include "../Weapons/WeaponGlobals.h"
 #include "CultistCharacter.generated.h"
 
 struct SpottedPositions 
