@@ -48,7 +48,7 @@ public:
 	EQuality GraphicsEffects;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	int32 GraphicsFullscreen;
+	bool GraphicsFullscreen;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
 	int32 GraphicsFOV;
