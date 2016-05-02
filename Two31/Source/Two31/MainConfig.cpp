@@ -18,3 +18,8 @@ void UMainConfig::Save()
 {
 	SaveConfig();
 }
+
+void UMainConfig::Load()
+{
+	LoadConfig();
+}
