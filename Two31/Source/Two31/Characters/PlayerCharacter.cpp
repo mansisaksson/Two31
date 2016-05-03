@@ -33,10 +33,13 @@ APlayerCharacter::APlayerCharacter()
 	MeleeTime = 1.666667;
 	TimeSinceMelee = 0.f;
 
+	IndicatorLocation = 0.f;
+
 	WeaponSlots.SetNum(4);
 	HealthPacks.SetNum(0);
 	Items.SetNum(0);
 	Inventory.SetNum(0);
+	DamageIndication.SetNum(0);
 
 	bFireIsPressed = false;
 	bCanJump = true;
@@ -140,6 +143,16 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 		{
 			TimeSinceMelee = 0.f;
 			bMeleeAttack = false;
+		}
+	}
+
+	if (DamageIndication.Num() > 0)
+	{
+		for (size_t i = 0; i < DamageIndication.Num(); i++)
+		{
+			DamageIndication[i].Timer -= DeltaSeconds;
+			if (DamageIndication[i].Timer < 0)
+				DamageIndication.RemoveAt(i);
 		}
 	}
 }
@@ -334,14 +347,10 @@ bool APlayerCharacter::AddItem(AItemPickup* item)
 		for (size_t i = 0; i < Inventory.Num(); i++)
 		{
 			if (Inventory[i].ID == item->GetItemID())
-			{
-				//Debug::LogOnScreen(TEXT("Item duplicate, not picked up"));
 				bShouldAdd = false;
-			}
 		}
 		if (bShouldAdd)
 		{
-			//Items.Add(item->GetItemID());
 			SInventory toAdd;
 			toAdd.ID = item->GetItemID();
 			toAdd.Name = item->GetItemName();
@@ -351,7 +360,6 @@ bool APlayerCharacter::AddItem(AItemPickup* item)
 	}
 	else if (Inventory.Num() == 0)
 	{
-		//Items.Add(item->GetItemID());
 		SInventory toAdd;
 		toAdd.ID = item->GetItemID();
 		toAdd.Name = item->GetItemName();
@@ -534,7 +542,42 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	//if (CurrentHealth == 0)
 	//	bIsAlive = false;
 
+	FDamageIndicator indication;
+	indication.DamageLocation = GetDamageCauserLocation(DamageCauser);
+	indication.Timer = 2.f;
+	DamageIndication.Add(indication);
+
 	return DamageAmount;
+}
+
+float APlayerCharacter::GetDamageCauserLocation(AActor* DamageCauser)
+{
+	FVector Direction = GetActorLocation() - (DamageCauser->GetActorLocation());
+	Direction.Normalize();
+
+	float DotProd = FVector::DotProduct(Direction, GetActorForwardVector());
+	float DotProd2 = FVector::DotProduct(Direction, GetActorRightVector());
+
+	float DotDegree1 = FMath::Acos(DotProd);
+	float DotDegree2 = FMath::Acos(DotProd2);
+	DotDegree1 = FMath::RadiansToDegrees(DotDegree1);
+	DotDegree2 = FMath::RadiansToDegrees(DotDegree2);
+
+	if (DotDegree2 < 90.f)
+		DotDegree1 *= -1;
+
+	DotDegree1 = 180 - DotDegree1;
+
+	Debug::LogOnScreen(FString::Printf(TEXT("Dot 1: %f  ::  Dot 2: %f"), DotDegree1, DotDegree2));
+
+	return DotDegree1;
+}
+
+bool APlayerCharacter::ExistsDamagedIndicator()
+{
+	if (DamageIndication.Num() > 0)
+		return true;
+	return false;
 }
 
 void APlayerCharacter::PickedUpItem_Implementation(AActor* OtherActor)

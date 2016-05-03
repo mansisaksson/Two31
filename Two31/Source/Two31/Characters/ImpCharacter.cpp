@@ -392,10 +392,10 @@ void AImpCharacter::Reposition()
 
 	GetCharacterMovement()->MaxWalkSpeed = HalfWalkSpeed;
 
-	if( Random == 0 )
-		NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * SideStepDistance));
-	else if (Random == 1)
-		NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * -SideStepDistance));
+	//if( Random == 0 )
+	//	NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * SideStepDistance));
+	//else if (Random == 1)
+	//	NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation() + (GetActorRightVector() * -SideStepDistance));
 
 
 	bRepositioned = false;
