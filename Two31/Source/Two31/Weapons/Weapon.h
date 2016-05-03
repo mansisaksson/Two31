@@ -126,6 +126,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float WeaponDamage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float HeadshotMultiplier;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float EquipTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float UnequipTime;
