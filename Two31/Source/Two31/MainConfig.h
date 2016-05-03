@@ -19,33 +19,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "MainConfig")
 	void Load();
 
-	UENUM(BlueprintType)
-	enum class EQuality : uint8
-	{
-		LOW		UMETA(DisplayName = "Low"),
-		NORMAL	UMETA(DisplayName = "Normal"),
-		HIGH	UMETA(DisplayName = "High"),
-		EPIC	UMETA(DisplayName = "Epic")
-	};
-
 	/*
 		Configuration Values
 	*/
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	EQuality GraphicsAntiAliasing;
+	int32 GraphicsAntiAliasing;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	EQuality GraphicsPostProcessing;
+	int32 GraphicsPostProcessing;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	EQuality GraphicsShadows;
+	int32 GraphicsShadows;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	EQuality GraphicsTextures;
+	int32 GraphicsTextures;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	EQuality GraphicsEffects;
+	int32 GraphicsEffects;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
 	bool GraphicsFullscreen;

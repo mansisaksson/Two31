@@ -24,6 +24,7 @@ AWeapon::AWeapon()
 	timeSinceUnequip = 0.f;
 
 	WeaponDamage = 10;
+	HeadshotMultiplier = 1.0f;
 	ImpulsePowah = 9000.f;
 
 	MinDecalSize = 20.f;

@@ -30,7 +30,8 @@ void ASMG::FireShot(FVector TowardsLocation)
 
 		FHitResult result;
 		ECollisionChannel collisionChannel;
-		collisionChannel = ECC_WorldDynamic;
+		//collisionChannel = ECC_WorldDynamic;
+		collisionChannel = ECC_GameTraceChannel2;
 		FCollisionQueryParams collisionQuery;
 		collisionQuery.bTraceComplex = true;
 		collisionQuery.bReturnPhysicalMaterial = true;
@@ -70,10 +71,15 @@ void ASMG::FireShot(FVector TowardsLocation)
 			{
 				if (Cast<AEnemyCharacter>(result.GetActor()))
 				{
+					if( result.BoneName.GetPlainNameString() == "Head")
+						Debug::LogOnScreen(result.BoneName.GetPlainNameString());
 					AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
 					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 					FDamageEvent DamageEvent(ValidDamageTypeClass);
-					Enemy->TakeDamage(WeaponDamage, DamageEvent, result.GetActor()->GetInstigatorController(), this);
+					if (result.BoneName.GetPlainNameString() == "Head")
+						Enemy->TakeDamage(WeaponDamage * HeadshotMultiplier, DamageEvent, result.GetActor()->GetInstigatorController(), this);
+					else
+						Enemy->TakeDamage(WeaponDamage, DamageEvent, result.GetActor()->GetInstigatorController(), this);
 
 					FVector HitAngle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
 					HitAngle.Normalize();

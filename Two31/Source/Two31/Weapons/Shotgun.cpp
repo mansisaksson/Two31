@@ -65,7 +65,7 @@ void AShotgun::FireShot(FVector TowardsLocation)
 		//const FName TraceTag("Debug Trace");
 		FHitResult result;
 		ECollisionChannel collisionChannel;
-		collisionChannel = ECC_WorldDynamic;
+		collisionChannel = ECC_GameTraceChannel2;
 		FCollisionQueryParams collisionQuery;
 		//collisionQuery.TraceTag = TraceTag;
 		//GetWorld()->DebugDrawTraceTag = TraceTag;
@@ -137,8 +137,11 @@ void AShotgun::FireShot(FVector TowardsLocation)
 				{
 					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 					FDamageEvent DamageEvent(ValidDamageTypeClass);
-					result.GetActor()->TakeDamage(WeaponDamage * (1.0f - FMath::Clamp(result.Distance / Distance, 0.0f, 1.0f)), DamageEvent, result.GetActor()->GetInstigatorController(), this);
-					
+					if (result.BoneName.GetPlainNameString() == "Head")
+						result.GetActor()->TakeDamage((WeaponDamage * (1.0f - FMath::Clamp(result.Distance / Distance, 0.0f, 1.0f)) * HeadshotMultiplier), DamageEvent, result.GetActor()->GetInstigatorController(), this);
+					else
+						result.GetActor()->TakeDamage(WeaponDamage * (1.0f - FMath::Clamp(result.Distance / Distance, 0.0f, 1.0f)), DamageEvent, result.GetActor()->GetInstigatorController(), this);
+						
 					if (Cast<AEnemyCharacter>(result.GetActor()))
 					{
 						AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
