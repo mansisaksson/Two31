@@ -39,7 +39,7 @@ APlayerCharacter::APlayerCharacter()
 	Inventory.SetNum(0);
 
 	bFireIsPressed = false;
-	bCanJump = true;
+	bCanJump = false;
 	bADS = false;
 	bMeleeAttack = false;
 
@@ -58,6 +58,12 @@ APlayerCharacter::APlayerCharacter()
 
 	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("Noise Emitter"));
 
+	MeleeCollider = CreateDefaultSubobject<USphereComponent>(TEXT("MeleeCollider"));
+	MeleeCollider->AttachTo(RootComponent);
+	MeleeCollider->SetCollisionResponseToAllChannels(ECR_Overlap);
+	MeleeCollider->SetSphereRadius(30.f);
+	MeleeCollider->IgnoreActorWhenMoving(this, true);
+
 	LineOfSight_Chest = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Chest"));
 	LineOfSight_Chest->AttachTo(GetCapsuleComponent());
 	LineOfSight_Chest->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
@@ -69,7 +75,6 @@ APlayerCharacter::APlayerCharacter()
 	LineOfSight_Shoulder_Left = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Left"));
 	LineOfSight_Shoulder_Left->AttachTo(GetCapsuleComponent());
 	LineOfSight_Shoulder_Left->SetRelativeLocation(FVector(0.f, -40.f, 60.f));
-
 }
 
 void APlayerCharacter::BeginPlay()
@@ -84,6 +89,9 @@ void APlayerCharacter::BeginPlay()
 
 	DefaultArmLocation = FPArmMesh->GetRelativeTransform().GetLocation();
 	DefaultArmRotation = FPArmMesh->GetRelativeTransform().Rotator();
+
+	DefaultMeleeRadius = MeleeCollider->GetUnscaledSphereRadius();
+	MeleeCollider->SetSphereRadius(0.f);
 
 	EquipWeapon(StarterWeapon1);
 	EquipWeapon(StarterWeapon2);
@@ -135,6 +143,7 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 
 	if (bMeleeAttack)
 	{
+		MeleeCollider->SetSphereRadius(DefaultMeleeRadius);
 		TimeSinceMelee += DeltaSeconds;
 		if (TimeSinceMelee >= MeleeTime)
 		{
@@ -142,6 +151,8 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 			bMeleeAttack = false;
 		}
 	}
+	else
+		MeleeCollider->SetSphereRadius(0.f);
 }
 
 void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
