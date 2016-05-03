@@ -32,14 +32,17 @@ class TWO31_API APlayerCharacter : public ACharacter
 	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FPCamera;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	class UPawnNoiseEmitterComponent* NoiseEmitter;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	class USphereComponent* MeleeCollider;
+
+	UPROPERTY(VisibleDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* LineOfSight_Chest;
-	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* LineOfSight_Shoulder_Right;
-	UPROPERTY(VisibleDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* LineOfSight_Shoulder_Left;
 
 public:
@@ -194,6 +197,7 @@ private:
 	float MaxArmor;
 	float LastFootstep;
 	float TimeSinceMelee;
+	float DefaultMeleeRadius;
 
 	float IndicatorLocation;
 
