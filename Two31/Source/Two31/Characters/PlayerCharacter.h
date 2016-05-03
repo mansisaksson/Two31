@@ -10,6 +10,12 @@ struct SInventory
 	FString Name = "None";
 };
 
+struct SDamageIndicator
+{
+	int32 ID = 0;
+	FString Name = "None";
+};
+
 UCLASS()
 class TWO31_API APlayerCharacter : public ACharacter
 {
