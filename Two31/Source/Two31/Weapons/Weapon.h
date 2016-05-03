@@ -73,7 +73,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	uint8 GetAmmoType() { return (uint8)AmmoType; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	float GetTotalReloadTime() { return ReloadTime; }
+	float GetTotalReloadTime() { return TotalReloadTime; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetTimeSinceReload() { return timeSinceReloadStart; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
@@ -120,7 +120,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	bool bFullAuto;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float ReloadTime;
+	float FullReloadTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float FastReloadTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float RPM;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -145,6 +147,7 @@ protected:
 	int AmmoInClip;
 	int* AmmoPool;
 	
+	float TotalReloadTime;
 	float timeSinceReloadStart;
 	float timeSinceFire;
 	float timeSinceEquip;

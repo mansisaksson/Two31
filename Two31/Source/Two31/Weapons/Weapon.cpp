@@ -11,7 +11,8 @@ AWeapon::AWeapon()
 	ClipSize = 30;
 	RPM = 500;
 
-	ReloadTime = 2.f;
+	FullReloadTime = 2.f;
+	FastReloadTime = 1.5f;
 	EquipTime = 1.f;
 	UnequipTime = 1.f;
 
@@ -95,12 +96,15 @@ void AWeapon::Tick(float DeltaTime)
 		if (bCanFire && (!bFireIsPressed || timeSinceReloadStart > 0.f))
 		{
 			if (bAutoReload && AmmoInClip <= 0)
+			{
+				TotalReloadTime = FullReloadTime;
 				bReload = true;
+			}
 
 			if (bReload && (*AmmoPool) > 0)
 			{
 				timeSinceReloadStart += DeltaTime;
-				if (timeSinceReloadStart >= ReloadTime)
+				if (timeSinceReloadStart >= TotalReloadTime)
 				{
 					bReload = false;
 					timeSinceReloadStart = 0.f;
@@ -216,7 +220,14 @@ void AWeapon::FireShot(FVector TowardsLocation)
 void AWeapon::Reload()
 {
 	if (AmmoInClip < ClipSize)
+	{
+		if (AmmoInClip == 0)
+			TotalReloadTime = FullReloadTime;
+		else
+			TotalReloadTime = FastReloadTime;
 		bReload = true;
+	}
+		
 }
 void AWeapon::SetAmmoPool(int* AmmoPool)
 {

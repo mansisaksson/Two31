@@ -8,7 +8,8 @@ ASMG::ASMG()
 {
 	ClipSize = 30;
 	RPM = 500;
-	ReloadTime = 2.f;
+	FullReloadTime = 2.f;
+	FastReloadTime = 1.5f;
 	timeSinceFire = 0;
 }
 

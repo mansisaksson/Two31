@@ -114,18 +114,24 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 		LastFootstep = Now;
 	}
 
-	if (bADS)
+	if (CurrentWeapon != NULL)
 	{
-		FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, ADSFOV, 10.f * DeltaSeconds);
-		FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), FRotator(3.f, -108.2f, 0.f), 10.f * DeltaSeconds));
-		FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), FVector(0.f, -30.65f, -148.2f), 10.f * DeltaSeconds));
+		if (bADS && !CurrentWeapon->GetIsReloading())
+		{
+			FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, ADSFOV, 10.f * DeltaSeconds);
+			FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), FRotator(3.f, -108.2f, 0.f), 10.f * DeltaSeconds));
+			FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), FVector(0.f, -30.65f, -148.2f), 10.f * DeltaSeconds));
+		}
+		else
+		{
+			FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, DefaultFOV, 10.f * DeltaSeconds);
+			FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), DefaultArmRotation, 10.f * DeltaSeconds));
+			FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), DefaultArmLocation, 10.f * DeltaSeconds));
+		}
 	}
 	else
-	{
 		FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, DefaultFOV, 10.f * DeltaSeconds);
-		FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), DefaultArmRotation, 10.f * DeltaSeconds));
-		FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), DefaultArmLocation, 10.f * DeltaSeconds));
-	}
+	
 
 	if (bMeleeAttack)
 	{

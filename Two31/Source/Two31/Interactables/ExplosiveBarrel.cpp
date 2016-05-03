@@ -1,6 +1,6 @@
 #include "Two31.h"
 #include "ExplosiveBarrel.h"
-
+#include "../Characters/EnemyCharacter.h"
 
 AExplosiveBarrel::AExplosiveBarrel()
 {
@@ -55,16 +55,13 @@ void AExplosiveBarrel::OnExplosionBeginOverlap(AActor* OtherActor, UPrimitiveCom
 	FDamageEvent DamageEvent(ValidDamageTypeClass);
 	OtherActor->TakeDamage(ExposiveDamage * (1.0f - FMath::Clamp(Distance.Size() / DefaultExplosiveRadius, 0.0f, 1.0f)), DamageEvent, OtherActor->GetInstigatorController(), this);
 
-	//for (size_t i = 0; i < OtherActor->GetComponents().Num(); i++)
-	//{
-		//if (OtherActor->GetRootComponent()->Mobility == EComponentMobility::Movable && OtherActor->GetRootComponent()->IsSimulatingPhysics())
-		//{
-			//Debug::LogOnScreen("Impulse!");
-			FVector Angle = OtherActor->GetActorLocation() - GetActorLocation();
-			Angle.Normalize();
-			OtherComp->AddImpulseAtLocation(Angle * ImpulsePowah, OtherComp->GetComponentLocation());
-		//}
-	//}
+	FVector Angle = OtherComp->GetComponentLocation() - GetActorLocation();
+	Angle.Normalize();
+	if (AEnemyCharacter* enemy = Cast<AEnemyCharacter>(OtherActor))
+		enemy->AddDelayedImpulse(Angle * ImpulsePowah, enemy->GetActorLocation());
+
+	else if (OtherComp->Mobility == EComponentMobility::Movable && OtherComp->IsSimulatingPhysics())
+		OtherComp->AddImpulse(Angle * ImpulsePowah);
 }
 
 float AExplosiveBarrel::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)

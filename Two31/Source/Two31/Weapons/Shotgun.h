@@ -23,8 +23,6 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MuzzeFlash;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* LaserBeam;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
 	int32 NumberOfShots;

@@ -12,7 +12,8 @@ AShotgun::AShotgun()
 {
 	ClipSize = 4;
 	RPM = 60;
-	ReloadTime = 1.f;
+	FullReloadTime = 2.f;
+	FastReloadTime = 1.5f;
 	timeSinceFire = 0;
 	RadiusMin = 0.f;
 	RadiusMax = 10.f;
@@ -79,7 +80,8 @@ void AShotgun::FireShot(FVector TowardsLocation)
 
 		if (MuzzeFlash != NULL)
 		{
-			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, MuzzleFlashLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
+			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAttached(MuzzeFlash, MuzzleFlashLocation);
+			//UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, MuzzleFlashLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
 			FTransform particleTransform = particleComp->GetRelativeTransform();
 			particleTransform.SetScale3D(FVector(0.1f, 0.1f, 0.1f));
 			particleComp->SetRelativeTransform(particleTransform);
