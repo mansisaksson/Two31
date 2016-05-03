@@ -62,10 +62,12 @@ APlayerCharacter::APlayerCharacter()
 	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("Noise Emitter"));
 
 	MeleeCollider = CreateDefaultSubobject<USphereComponent>(TEXT("MeleeCollider"));
-	MeleeCollider->AttachTo(RootComponent);
+	MeleeCollider->AttachTo(FPCamera);
 	MeleeCollider->SetCollisionResponseToAllChannels(ECR_Overlap);
 	MeleeCollider->SetSphereRadius(30.f);
 	MeleeCollider->IgnoreActorWhenMoving(this, true);
+	MeleeCollider->bGenerateOverlapEvents = true;
+	MeleeCollider->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnMeleeBeginOverlap);
 
 	LineOfSight_Chest = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Chest"));
 	LineOfSight_Chest->AttachTo(GetCapsuleComponent());
@@ -78,6 +80,12 @@ APlayerCharacter::APlayerCharacter()
 	LineOfSight_Shoulder_Left = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Left"));
 	LineOfSight_Shoulder_Left->AttachTo(GetCapsuleComponent());
 	LineOfSight_Shoulder_Left->SetRelativeLocation(FVector(0.f, -40.f, 60.f));
+}
+
+void APlayerCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	
 }
 
 void APlayerCharacter::BeginPlay()
@@ -225,6 +233,11 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 				Item->Destroy();
 		}
 	}
+}
+
+void APlayerCharacter::OnMeleeBeginOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
+{
+	Debug::LogOnScreen("SHMACK!!");
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
