@@ -5,6 +5,7 @@
 ADefaultGameMode::ADefaultGameMode() : Super()
 {
 	Config = NewObject<UMainConfig>(UMainConfig::StaticClass());
+	Config->AddToRoot();
 }
 
 UMainConfig* ADefaultGameMode::GetConfig()

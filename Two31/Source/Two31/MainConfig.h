@@ -24,6 +24,15 @@ public:
 	*/
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	FString GraphicsResolution;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	bool GraphicsFullscreen;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	int32 GraphicsFOV;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
 	int32 GraphicsAntiAliasing;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
@@ -39,12 +48,9 @@ public:
 	int32 GraphicsEffects;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	bool GraphicsFullscreen;
+	float GraphicsRenderDistanceScale;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	int32 GraphicsFOV;
-
-	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
-	FString GraphicsResolution;
+	bool GraphicsVSync;
 	
 };
