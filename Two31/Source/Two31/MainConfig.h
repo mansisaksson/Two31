@@ -52,5 +52,26 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
 	bool GraphicsVSync;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	float AudioMaster;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	float AudioMusic;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	float AudioDialog;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	float AudioEnviroment;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	bool GameplaySubtitles;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	bool GameplayHints;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	bool GameplayProggMode;
 	
 };
