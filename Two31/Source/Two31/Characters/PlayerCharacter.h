@@ -10,16 +10,6 @@ struct SInventory
 	FString Name = "None";
 };
 
-USTRUCT(BlueprintType)
-struct FDamageIndicator
-{
-	GENERATED_USTRUCT_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DamageLocation = 0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Timer = 0;
-};
-
 UCLASS()
 class TWO31_API APlayerCharacter : public ACharacter
 {
@@ -104,10 +94,7 @@ public:
 	float GetIndicatorLocation() { return IndicatorLocation; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	bool ExistsDamagedIndicator();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	void GetDamageIndicatorArray(TArray<FDamageIndicator>& Indicator) { Indicator = DamageIndication; }
+	float GetIndicatorOpacity() { return IndicatorOpacity; }
 
 protected:
 	virtual void PostInitializeComponents() override;
@@ -188,6 +175,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	FAmmo ExplosiveAmmo;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float IndicatorDisplayTime;
+
 	float GetDamageCauserLocation(AActor* DamageCauser);
 private:
 	bool bFireIsPressed;
@@ -203,6 +193,8 @@ private:
 	float DefaultMeleeRadius;
 
 	float IndicatorLocation;
+	float IndicatorTimer;
+	float IndicatorOpacity;
 
 	FVector DefaultArmLocation;
 	FRotator DefaultArmRotation;
@@ -216,5 +208,4 @@ private:
 
 	TArray<int32> Items;
 	TArray<SInventory> Inventory;
-	TArray<FDamageIndicator> DamageIndication;
 };

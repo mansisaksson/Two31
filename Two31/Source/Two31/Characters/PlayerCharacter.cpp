@@ -34,12 +34,14 @@ APlayerCharacter::APlayerCharacter()
 	TimeSinceMelee = 0.f;
 
 	IndicatorLocation = 0.f;
+	IndicatorTimer = 0.f;
+	IndicatorDisplayTime = 2.f;
+	IndicatorOpacity = 0.f;
 
 	WeaponSlots.SetNum(4);
 	HealthPacks.SetNum(0);
 	Items.SetNum(0);
 	Inventory.SetNum(0);
-	DamageIndication.SetNum(0);
 
 	bFireIsPressed = false;
 	bCanJump = false;
@@ -165,14 +167,10 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 	else
 		MeleeCollider->SetSphereRadius(0.f);
 
-	if (DamageIndication.Num() > 0)
+	if (IndicatorTimer > 0.f)
 	{
-		for (size_t i = 0; i < DamageIndication.Num(); i++)
-		{
-			DamageIndication[i].Timer -= DeltaSeconds;
-			if (DamageIndication[i].Timer < 0)
-				DamageIndication.RemoveAt(i);
-		}
+		IndicatorTimer -= DeltaSeconds;
+		IndicatorOpacity = (IndicatorTimer/IndicatorDisplayTime);
 	}
 
 }
@@ -567,10 +565,13 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	//if (CurrentHealth == 0)
 	//	bIsAlive = false;
 
-	FDamageIndicator indication;
-	indication.DamageLocation = GetDamageCauserLocation(DamageCauser);
-	indication.Timer = 2.f;
-	DamageIndication.Add(indication);
+	//FDamageIndicator indication;
+	//indication.DamageLocation = GetDamageCauserLocation(DamageCauser);
+	//indication.Timer = 2.f;
+	//DamageIndication.Add(indication);
+
+	IndicatorLocation = GetDamageCauserLocation(DamageCauser);
+	IndicatorTimer = IndicatorDisplayTime;
 
 	return DamageAmount;
 }
@@ -596,13 +597,6 @@ float APlayerCharacter::GetDamageCauserLocation(AActor* DamageCauser)
 	Debug::LogOnScreen(FString::Printf(TEXT("Dot 1: %f  ::  Dot 2: %f"), DotDegree1, DotDegree2));
 
 	return DotDegree1;
-}
-
-bool APlayerCharacter::ExistsDamagedIndicator()
-{
-	if (DamageIndication.Num() > 0)
-		return true;
-	return false;
 }
 
 void APlayerCharacter::PickedUpItem_Implementation(AActor* OtherActor)
