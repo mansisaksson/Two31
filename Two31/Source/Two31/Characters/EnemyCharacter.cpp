@@ -110,6 +110,7 @@ void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* Clas
 
 float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 	if (CurrentHealth <= 0)
