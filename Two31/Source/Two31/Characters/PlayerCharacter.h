@@ -61,6 +61,8 @@ public:
 	float GetMaxArmor() { return MaxArmor; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetTimeSinceMelee() { return TimeSinceMelee; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetDefaultMeleeRadius() { return DefaultMeleeRadius; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	class AWeapon* GetCurrentWeapon() { return CurrentWeapon; }
@@ -96,8 +98,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetIndicatorOpacity() { return IndicatorOpacity; }
 
+	UFUNCTION(BlueprintCallable, Category = SetFunction)
+	void SetMeleeRadius(float Radius);
+
 protected:
-	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -150,6 +154,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float ADSFOV;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float MeleeDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float MeleePowah;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float MeleeTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -208,4 +216,5 @@ private:
 
 	TArray<int32> Items;
 	TArray<SInventory> Inventory;
+	TArray<AActor*> MeleedActors;
 };

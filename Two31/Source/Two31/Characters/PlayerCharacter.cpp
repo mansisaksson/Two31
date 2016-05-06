@@ -24,6 +24,8 @@ APlayerCharacter::APlayerCharacter()
 	DefaultFOV = 90.f;
 	ADSFOV = 60.f;
 	
+	MeleeDamage = 50.f;
+	MeleePowah = 90000.f;
 	CurrentHealth = 50.f;
 	MaxHealth = 100.f;
 	CurrentArmor = 35.f;
@@ -64,7 +66,7 @@ APlayerCharacter::APlayerCharacter()
 	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("Noise Emitter"));
 
 	MeleeCollider = CreateDefaultSubobject<USphereComponent>(TEXT("MeleeCollider"));
-	MeleeCollider->AttachTo(FPCamera);
+	MeleeCollider->AttachTo(FPArmMesh, TEXT("L_Wrist"));
 	MeleeCollider->SetCollisionResponseToAllChannels(ECR_Overlap);
 	MeleeCollider->SetSphereRadius(30.f);
 	MeleeCollider->IgnoreActorWhenMoving(this, true);
@@ -84,12 +86,6 @@ APlayerCharacter::APlayerCharacter()
 	LineOfSight_Shoulder_Left->SetRelativeLocation(FVector(0.f, -40.f, 60.f));
 }
 
-void APlayerCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	
-}
-
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -104,7 +100,7 @@ void APlayerCharacter::BeginPlay()
 	DefaultArmRotation = FPArmMesh->GetRelativeTransform().Rotator();
 
 	DefaultMeleeRadius = MeleeCollider->GetUnscaledSphereRadius();
-	MeleeCollider->SetSphereRadius(0.f);
+	SetMeleeRadius(0.f);
 
 	EquipWeapon(StarterWeapon1);
 	EquipWeapon(StarterWeapon2);
@@ -153,19 +149,16 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 	else
 		FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, DefaultFOV, 10.f * DeltaSeconds);
 	
-
 	if (bMeleeAttack)
 	{
-		MeleeCollider->SetSphereRadius(DefaultMeleeRadius);
 		TimeSinceMelee += DeltaSeconds;
 		if (TimeSinceMelee >= MeleeTime)
 		{
 			TimeSinceMelee = 0.f;
 			bMeleeAttack = false;
+			MeleedActors.Empty();
 		}
 	}
-	else
-		MeleeCollider->SetSphereRadius(0.f);
 
 	if (IndicatorTimer > 0.f)
 	{
@@ -235,7 +228,22 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 
 void APlayerCharacter::OnMeleeBeginOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
-	Debug::LogOnScreen("SHMACK!!");
+	if (!MeleedActors.Contains(OtherActor))
+	{
+		FVector Distance = OtherActor->GetActorLocation() - GetActorLocation();
+		TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+		FDamageEvent DamageEvent(ValidDamageTypeClass);
+		OtherActor->TakeDamage(MeleeDamage, DamageEvent, OtherActor->GetInstigatorController(), this);
+
+		FVector Angle = OtherComp->GetComponentLocation() - GetActorLocation();
+		Angle.Normalize();
+		if (AEnemyCharacter* enemy = Cast<AEnemyCharacter>(OtherActor))
+			enemy->AddDelayedImpulse(Angle * MeleePowah, enemy->GetActorLocation());
+
+		else if (OtherComp->Mobility == EComponentMobility::Movable && OtherComp->IsSimulatingPhysics())
+			OtherComp->AddImpulse(Angle * MeleePowah);
+	}
+	MeleedActors.Add(OtherActor);
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
@@ -607,3 +615,11 @@ void APlayerCharacter::PickedUpItem_Implementation(AActor* OtherActor)
 FString APlayerCharacter::GetItemName(AItemPickup* ItemToName) {  return ItemToName->GetItemName(); }
 int32 APlayerCharacter::GetItemID(AItemPickup* ItemToName) { return ItemToName->GetItemID(); }
 
+void APlayerCharacter::SetMeleeRadius(float Radius)
+{
+	if (Radius == 0.f)
+		MeleeCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	else
+		MeleeCollider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	MeleeCollider->SetSphereRadius(Radius);
+}
