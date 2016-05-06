@@ -16,7 +16,10 @@ class TWO31_API AImpCharacter : public AEnemyCharacter
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, Category = Collision)
-	class USphereComponent* AttackRadius;
+	class USphereComponent* L_ClawRadius;
+
+	UPROPERTY(VisibleAnywhere, Category = Collision)
+	class USphereComponent* R_ClawRadius;
 	
 public:
 	AImpCharacter();
@@ -32,6 +35,13 @@ public:
 	void ForceMovement(FVector Direction);
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void StopForcedMovement();
+	UFUNCTION(BlueprintCallable, Category = GetFunction)
+	bool GetPlayAttackAnimation() { return bPlayAttackAnimation; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetDefaultClawRadius() { return DefaultClawRadius; }
+
+	UFUNCTION(BlueprintCallable, Category = SetFunction)
+	void SetClawRadius(float LeftRadius, float RightRadius);
 
 protected:
 	UFUNCTION()
@@ -58,16 +68,22 @@ protected:
 	void SetRunAroundDegree(float Min, float Max);
 	void MoveAroundPlayer();
 	void Reposition();
-	void FocusOnPosition();
+	void FocusOnPosition(FVector Location);
 	void Attack();
 
 	virtual void Death();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
-	float AttackCooldown;
+	float AttackMoveCooldown;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
 	float AttackDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
+	float MinAttackRange;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
+	float MaxAttackRange;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
+	float LandCooldown;
 	// Time the imp takes to rotate when triggered
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Behaviour)
 	float RotationTimer;
@@ -115,17 +131,20 @@ protected:
 	float AllowedDistanceFromPlayerOffset;
 
 private:
+	float TimeSinceLand;
 	float TimeSinceRotationStart;
 	float TimeSinceLastAttack;
 	float TimeSinceLostLineOfSight;
 	float TimeSinceMoveUpdate;
 	float ExtraTimeToMove;
+	float DefaultClawRadius;
 
 	float MoveAroundTimer;
 
 	bool bAttackOnCooldown;
 
 	FVector LastKnowPosition;
+	bool bMoveCloser;
 	bool bMoveOnce;
 	bool bRandomSearch;
 	bool bPlayerHasBeenSpotted;
@@ -133,6 +152,7 @@ private:
 	bool bLineOfSight;
 	bool bMoveToLastKnown;
 	bool bRepositioned;
+	bool bPlayAttackAnimation;
 
 	bool bForceMovement;
 	FVector ForcedMovementDirection;

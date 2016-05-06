@@ -7,12 +7,15 @@ AImpCharacter::AImpCharacter()
 	: AEnemyCharacter()
 {
 	AttackDamage = 10.f;
-	AttackCooldown = 3.f;
+	AttackMoveCooldown = 0.5f;
+	MinAttackRange = 140.f;
+	MaxAttackRange = 200.f;
 	TimeSinceLastAttack = 0.f;
 	TimeSinceRotationStart = 0.f;
 	TimeSinceMoveUpdate = 0.f;
 	TimeToMoveUpdate = 0.5f;
 	MoveAroundTimer = 0.f;
+	LandCooldown = 0.5f;
 
 	MinFlankDegree = 50.f;
 	MaxFlankDegree = 90.f;
@@ -31,11 +34,13 @@ AImpCharacter::AImpCharacter()
 	MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	HalfWalkSpeed = (GetCharacterMovement()->MaxWalkSpeed / 2);
 
+	bMoveCloser = true;
 	bMoveAroundPlayer = true;
 	bMoveOnce = true;
 	bRandomSearch = true;
 	bMoveToLastKnown = true;
 	bRepositioned = true;
+	bPlayAttackAnimation = false;
 
 	bForceMovement = false;
 	ForcedMovementDirection = FVector::ZeroVector;
@@ -54,22 +59,31 @@ AImpCharacter::AImpCharacter()
 
 	bAttackOnCooldown = false;
 
-	AttackRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRadius"));
-	AttackRadius->AttachTo(GetMesh());
-	AttackRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	L_ClawRadius = CreateDefaultSubobject<USphereComponent>(TEXT("L_ClawRadius"));
+	L_ClawRadius->AttachTo(GetMesh(), TEXT("L_Claw"));
+	L_ClawRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	R_ClawRadius = CreateDefaultSubobject<USphereComponent>(TEXT("R_ClawRadius"));
+	R_ClawRadius->AttachTo(GetMesh(), TEXT("R_Claw"));
+	R_ClawRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AImpCharacter::PostInitializeComponents()
 {
 	AEnemyCharacter::PostInitializeComponents();
 
-	AttackRadius->OnComponentBeginOverlap.AddDynamic(this, &AImpCharacter::OnAttackBeginOverlap);
+	L_ClawRadius->OnComponentBeginOverlap.AddDynamic(this, &AImpCharacter::OnAttackBeginOverlap);
+	R_ClawRadius->OnComponentBeginOverlap.AddDynamic(this, &AImpCharacter::OnAttackBeginOverlap);
 }
 
 void AImpCharacter::BeginPlay()
 {
 	AEnemyCharacter::BeginPlay();
 	OldRotation = GetActorRotation();
+
+	DefaultClawRadius = L_ClawRadius->GetUnscaledSphereRadius();
+	TimeSinceLand = LandCooldown;
+	SetClawRadius(0.f, 0.f);
 }
 
 void AImpCharacter::Tick(float DeltaTime)
@@ -78,117 +92,131 @@ void AImpCharacter::Tick(float DeltaTime)
 
 	if (bIsAlive)
 	{
-		if (bForceMovement)
+		TimeSinceLand += DeltaTime;
+		if (GetCharacterMovement()->IsFalling())
+			TimeSinceLand = 0.f;
+		
+		if (TimeSinceLand >= LandCooldown)
 		{
-			GetController()->StopMovement();
-			AddMovementInput(ForcedMovementDirection, 1.0f, true);
-		}
-		else if (GetCurrentState() == EEnemyState::Triggered)
-		{
-			// Check if the imp should flank around the player - should only be capable of performing this task once.
-			if (bMoveAroundPlayer)
+			if (bForceMovement)
 			{
-				if (bMoveOnce)
-					MoveAroundPlayer();
-				else if (GetActorLocation().X > MoveAroundLocation.X - 50 && GetActorLocation().X < MoveAroundLocation.X + 50 && GetActorLocation().Y > MoveAroundLocation.Y - 50 && GetActorLocation().Y < MoveAroundLocation.Y + 50)
-				{
-					Debug::LogOnScreen("At location - moving towards");
-					bMoveAroundPlayer = false;
-				}
-				else if (GetDistanceToPlayer() < 1000.f)
-				{
-					Debug::LogOnScreen("Close to player - moving towards");
-					bMoveAroundPlayer = false;
-				}
-				else if (GetDistanceToPlayer() > AllowedDistanceFromPlayer)
-					bMoveAroundPlayer = false;
-
-				// Failsafe if it takes too long to move to player
-				MoveAroundTimer += DeltaTime;
-				if (MoveAroundTimer > 5.f)
-					bMoveAroundPlayer = false;
+				GetController()->StopMovement();
+				AddMovementInput(ForcedMovementDirection, 1.0f, true);
 			}
-			else if (CanSeePlayer())
+			else if (GetCurrentState() == EEnemyState::Triggered)
 			{
-				// Reset values for extra search functions that are used when sight of the player has been lost.
-				bRandomSearch = true;
-				bMoveToLastKnown = true;
-				ExtraTimeToMove = 0.f;
-
-				// Check whether the imp is able to attack the player or not.
-				// check attack cool-down and such
-				if (bAttackOnCooldown)
+				// Check if the imp should flank around the player - should only be capable of performing this task once.
+				if (bMoveAroundPlayer)
 				{
-					if(bRepositioned)
-						Reposition();
-					FocusOnPosition();
-					TimeSinceLastAttack += DeltaTime;
-					if (TimeSinceLastAttack > AttackCooldown)
+					if (bMoveOnce)
+						MoveAroundPlayer();
+					else if (GetActorLocation().X > MoveAroundLocation.X - 50 && GetActorLocation().X < MoveAroundLocation.X + 50 && GetActorLocation().Y > MoveAroundLocation.Y - 50 && GetActorLocation().Y < MoveAroundLocation.Y + 50)
 					{
+						Debug::LogOnScreen("At location - moving towards");
+						bMoveAroundPlayer = false;
+					}
+					else if (GetDistanceToPlayer() < 1000.f)
+					{
+						Debug::LogOnScreen("Close to player - moving towards");
+						bMoveAroundPlayer = false;
+					}
+					else if (GetDistanceToPlayer() > AllowedDistanceFromPlayer)
+						bMoveAroundPlayer = false;
+
+					// Failsafe if it takes too long to move to player
+					MoveAroundTimer += DeltaTime;
+					if (MoveAroundTimer > 5.f)
+						bMoveAroundPlayer = false;
+				}
+				else if (CanSeePlayer())
+				{
+					// Reset values for extra search functions that are used when sight of the player has been lost.
+					bRandomSearch = true;
+					bMoveToLastKnown = true;
+					ExtraTimeToMove = 0.f;
+
+					// Check distance to player
+					// if in range to attack then bplayAttackanimation = true
+					// else in range to attack = false && navsystem->simplemovetoActor
+					if (GetDistanceToPlayer() > MinAttackRange && bMoveCloser)
+					{
+						bPlayAttackAnimation = false;
+
+						TimeSinceLastAttack += DeltaTime;
+						if (TimeSinceLastAttack >= AttackMoveCooldown)
+							NavSystem->SimpleMoveToActor(GetController(), PlayerReferense);
+						else
+							FocusOnPosition(PlayerReferense->GetActorLocation());
+					}
+					else
+					{
+						if (GetDistanceToPlayer() > MaxAttackRange)
+							bMoveCloser = true;
+						else
+							bMoveCloser = false;
+
+						FocusOnPosition(PlayerReferense->GetActorLocation());
+
+						if (!bPlayAttackAnimation)
+							NavSystem->SimpleMoveToLocation(GetController(), GetActorLocation());
+
+						bPlayAttackAnimation = true;
 						TimeSinceLastAttack = 0.f;
-						bAttackOnCooldown = false;
-						bRepositioned = true;
-						GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 					}
 				}
 				else
 				{
-					// done via OnAttackBeginOverlap
-					Attack();
-					NavSystem->SimpleMoveToActor(GetController(), PlayerReferense);
-				}
-			}
-			else
-			{
-				// Allow the imp to obtain the players position for an extra X amount of time. ( ExtraTimeToGetLocation )
-				ExtraTimeToMove += DeltaTime;
-				if (ExtraTimeToMove < ExtraTimeToGetLocation)
-					LastKnowPosition = PlayerReferense->GetActorLocation();
+					// Allow the imp to obtain the players position for an extra X amount of time. ( ExtraTimeToGetLocation )
+					ExtraTimeToMove += DeltaTime;
+					if (ExtraTimeToMove < ExtraTimeToGetLocation)
+						LastKnowPosition = PlayerReferense->GetActorLocation();
 
-				// Check if the imp as the last known position (LKP), if not move it there
-				// once the imp has arrived at the LKP it should not longer attempt to move to the LKP and instead search for the player
-				if (AtLastKnownPosition() && bMoveToLastKnown)
-					bMoveToLastKnown = false;
-				else if (!AtLastKnownPosition() && bMoveToLastKnown)
-					NavSystem->SimpleMoveToLocation(GetController(), LastKnowPosition);
-				else
-				{
-					// Perform one random search based on the players LKP,
-					// if successful in locating the player, functions above will reset values 
-					// otherwise wait timeout to idle.
-					TimeSinceLostLineOfSight += DeltaTime;
-					if (TimeSinceLostLineOfSight < TimeToIdle && bRandomSearch)
+					// Check if the imp as the last known position (LKP), if not move it there
+					// once the imp has arrived at the LKP it should not longer attempt to move to the LKP and instead search for the player
+					if (AtLastKnownPosition() && bMoveToLastKnown)
+						bMoveToLastKnown = false;
+					else if (!AtLastKnownPosition() && bMoveToLastKnown)
+						NavSystem->SimpleMoveToLocation(GetController(), LastKnowPosition);
+					else
 					{
-						MoveToPlayersEstimatedPosition();
-						bRandomSearch = false;
-					}
-					else if (TimeSinceLostLineOfSight > TimeToIdle)
-					{
-						SetCurrentState(EEnemyState::Idle);
-						TimeSinceLostLineOfSight = 0.f;
-						bRandomSearch = true;
+						// Perform one random search based on the players LKP,
+						// if successful in locating the player, functions above will reset values 
+						// otherwise wait timeout to idle.
+						TimeSinceLostLineOfSight += DeltaTime;
+						if (TimeSinceLostLineOfSight < TimeToIdle && bRandomSearch)
+						{
+							MoveToPlayersEstimatedPosition();
+							bRandomSearch = false;
+						}
+						else if (TimeSinceLostLineOfSight > TimeToIdle)
+						{
+							SetCurrentState(EEnemyState::Idle);
+							TimeSinceLostLineOfSight = 0.f;
+							bRandomSearch = true;
+						}
 					}
 				}
 			}
-		}
-		else if (GetCurrentState() == EEnemyState::Search)
-		{
-			// Transition state from idle to triggered, the transition will end when the imp has rotated to face the player.
-			RotateTowardsPlayer();
-			TimeSinceRotationStart += DeltaTime;
-			if (TimeSinceRotationStart > RotationTimer)
+			else if (GetCurrentState() == EEnemyState::Search)
 			{
-				SetCurrentState(EEnemyState::Triggered);
-				PlayerPositionedWhenAggro = PlayerReferense->GetActorLocation();
-				PlayerForwardVectorWhenAggro = PlayerReferense->GetActorForwardVector();
-				LastKnowPosition = PlayerReferense->GetActorLocation();
-				TimeSinceRotationStart = 0.f;
+				// Transition state from idle to triggered, the transition will end when the imp has rotated to face the player.
+				RotateTowardsPlayer();
+				TimeSinceRotationStart += DeltaTime;
+				if (TimeSinceRotationStart > RotationTimer)
+				{
+					TimeSinceLastAttack = AttackMoveCooldown;
+					SetCurrentState(EEnemyState::Triggered);
+					PlayerPositionedWhenAggro = PlayerReferense->GetActorLocation();
+					PlayerForwardVectorWhenAggro = PlayerReferense->GetActorForwardVector();
+					LastKnowPosition = PlayerReferense->GetActorLocation();
+					TimeSinceRotationStart = 0.f;
+				}
 			}
-		}
-		else if (GetCurrentState() == EEnemyState::Idle)
-		{
-			// Go idle
-			//Debug::LogOnScreen("Idle");
+			else if (GetCurrentState() == EEnemyState::Idle)
+			{
+				// Go idle
+				//Debug::LogOnScreen("Idle");
+			}
 		}
 	}
 }
@@ -400,9 +428,9 @@ void AImpCharacter::Reposition()
 
 	bRepositioned = false;
 }
-void AImpCharacter::FocusOnPosition()
+void AImpCharacter::FocusOnPosition(FVector Location)
 {
-	FVector Direction = PlayerReferense->GetActorLocation() - GetActorLocation();
+	FVector Direction = Location - GetActorLocation();
 	FRotator NewControlRotation = Direction.Rotation();
 	SetActorRotation(NewControlRotation);
 }
@@ -510,23 +538,35 @@ void AImpCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassF
 }
 void AImpCharacter::OnAttackBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	if (Cast<APlayerCharacter>(OtherActor))
+	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{
-		APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor);
-		if (!bAttackOnCooldown)
-		{
-			Debug::LogOnScreen("Enemy attacking Player");
-			APlayerController* PlayerController = Cast<APlayerController>(Player->GetController());
-			TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
-			FDamageEvent DamageEvent(ValidDamageTypeClass);
-			Player->TakeDamage(AttackDamage, DamageEvent, PlayerController, this);
-			bAttackOnCooldown = true;
-		}
+		Debug::LogOnScreen("Imp attacking Player");
+		APlayerController* PlayerController = Cast<APlayerController>(Player->GetController());
+		TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+		FDamageEvent DamageEvent(ValidDamageTypeClass);
+		Player->TakeDamage(AttackDamage, DamageEvent, PlayerController, this);
 	}
 }
 
 void AImpCharacter::Death()
 {
 	AEnemyCharacter::Death();
-	AttackRadius->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SetClawRadius(0.f, 0.f);
+}
+
+// Denna funktion körs via animations-blueprinten för att synka upp den med attak-animationerna
+void AImpCharacter::SetClawRadius(float LeftRadius, float RightRadius)
+{ 
+	if (LeftRadius == 0.f)
+		L_ClawRadius->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	else
+		L_ClawRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	if (RightRadius == 0.f)
+		R_ClawRadius->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	else
+		R_ClawRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	L_ClawRadius->SetSphereRadius(LeftRadius);
+	R_ClawRadius->SetSphereRadius(RightRadius); 
 }
