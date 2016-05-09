@@ -67,6 +67,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	class AWeapon* GetCurrentWeapon() { return CurrentWeapon; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	class AWeapon* GetNextWeapon();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	bool GetADS() { return bADS; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetAmmoPool() { if (CurrentAmmo != NULL) { return CurrentAmmo->AmmoPool; } return 0; }

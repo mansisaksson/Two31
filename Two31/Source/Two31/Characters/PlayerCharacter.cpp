@@ -508,6 +508,24 @@ void APlayerCharacter::NextWeapon()
 
 	SelectWeaponSlot(tempIndex);
 }
+class AWeapon* APlayerCharacter::GetNextWeapon()
+{
+	int index = GetWeaponIndex() + 1;
+	if (index > WeaponSlots.Num() - 1)
+		index = 0;
+
+	int tempIndex = index;
+	while (WeaponSlots[tempIndex] == NULL)
+	{
+		tempIndex++;
+		if (tempIndex > WeaponSlots.Num() - 1)
+			tempIndex = 0;
+		if (tempIndex == index)
+			break;
+	}
+	
+	return WeaponSlots[tempIndex];
+}
 void APlayerCharacter::PreviousWeapon()
 {
 	int index = GetWeaponIndex() - 1;

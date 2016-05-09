@@ -48,6 +48,7 @@ public:
 	virtual void HolsterWeapon();
 	virtual void SetPlayerAnimations(USkeletalMeshComponent* PlayerMesh);
 	virtual void SetCultistAnimations(USkeletalMeshComponent* CultistMesh);
+	virtual FString GetWeaponName();
 
 	virtual void StartFire(FVector TowardsLocation);
 	virtual void UpdateFire(FVector TowardsLocation);
@@ -110,6 +111,8 @@ protected:
 	EAmmoType AmmoType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	int32 ClipSize;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	FString WeaponName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	bool bAutoReload;

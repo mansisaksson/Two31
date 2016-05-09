@@ -8,6 +8,8 @@ AWeapon::AWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	WeaponName = "Gun";
+
 	ClipSize = 30;
 	RPM = 500;
 
@@ -112,6 +114,11 @@ void AWeapon::Tick(float DeltaTime)
 			}
 		}
 	}
+}
+
+FString AWeapon::GetWeaponName()
+{
+	return WeaponName;
 }
 
 void AWeapon::EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* AmmoPool)
