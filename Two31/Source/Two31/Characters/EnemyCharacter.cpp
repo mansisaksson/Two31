@@ -151,6 +151,7 @@ void AEnemyCharacter::BloodEffects()
 float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnTakeDamage();
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 	if (CurrentHealth <= 0)
@@ -182,4 +183,9 @@ void AEnemyCharacter::SetCurrentState(EEnemyState State)
 {
 	UMusicManager::OnEnemyStateSwitch(EnemyState, State);
 	EnemyState = State;
+}
+
+void AEnemyCharacter::OnTakeDamage_Implementation()
+{
+
 }

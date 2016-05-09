@@ -56,6 +56,11 @@ protected:
 	UFUNCTION()
 	void GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter);
 
+	UFUNCTION(BlueprintNativeEvent)
+	void OnTakeDamage();
+	void OnTakeDamage_Implementation();
+	
+
 	void BloodEffects();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* BloodParticle;
