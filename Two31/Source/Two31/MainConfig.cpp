@@ -26,10 +26,36 @@ void UMainConfig::Load()
 
 void UMainConfig::Apply()
 {
+
+	if(GraphicsResolution.IsEmpty()){
+		GraphicsResolution = FString(TEXT("800x600"));
+	}
+
 	ExecCmd(FString::Printf(TEXT("fov %i"), GraphicsFOV));
+
+	if(GraphicsFullscreen){
+		ExecCmd(FString(TEXT("r.setRes " + GraphicsResolution + "f")));
+	}else{
+		ExecCmd(FString(TEXT("r.setRes " + GraphicsResolution + "w")));
+	}
+
+	ExecCmd(FString::Printf(TEXT("r.PostProcessAAQuality %i"), GraphicsAntiAliasing));
+	ExecCmd(FString::Printf(TEXT("r.ViewDistanceScale %f"), GraphicsRenderDistanceScale));
+	ExecCmd(FString::Printf(TEXT("sg.PostProcessQuality %i"), GraphicsPostProcessing));
+	ExecCmd(FString::Printf(TEXT("sg.ShadowQuality %i"), GraphicsShadows));
+	ExecCmd(FString::Printf(TEXT("sg.TextureQuality %i"), GraphicsTextures));
+	ExecCmd(FString::Printf(TEXT("sg.EffectsQuality %i"), GraphicsEffects));
+
+	if(GraphicsAntiAliasing){
+		ExecCmd(FString(TEXT("r.VSync 1")));
+	}else{
+		ExecCmd(FString(TEXT("r.VSync 0")));
+	}
+
 }
 
 void UMainConfig::ExecCmd(FString Command)
 {
-	GetWorld()->Exec(GetWorld(), Command.GetCharArray().GetData());
+	GEngine->Exec(GetWorld(), Command.GetCharArray().GetData());
+	Debug::LogOnScreen(Command);
 }
