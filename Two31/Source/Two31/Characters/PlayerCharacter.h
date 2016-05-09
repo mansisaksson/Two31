@@ -73,7 +73,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetMaxAmmo() { if (CurrentAmmo != NULL) { return CurrentAmmo->MaxAmmo; } return 0; }
 
-	// items, some to be removed
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	int32 GetAmountOfItems();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	FString GetItemName(class AItemPickup* ItemToName);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)

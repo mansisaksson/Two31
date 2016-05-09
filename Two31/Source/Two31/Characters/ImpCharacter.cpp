@@ -442,8 +442,8 @@ bool AImpCharacter::WallInWay(FVector Position)
 	ECollisionChannel collisionChannel;
 	collisionChannel = ECC_WorldDynamic;
 	FCollisionQueryParams collisionQuery;
-	collisionQuery.TraceTag = TraceTag;
-	GetWorld()->DebugDrawTraceTag = TraceTag;
+	//collisionQuery.TraceTag = TraceTag;
+	//GetWorld()->DebugDrawTraceTag = TraceTag;
 	collisionQuery.bTraceComplex = true;
 	FCollisionObjectQueryParams objectCollisionQuery;
 	objectCollisionQuery = FCollisionObjectQueryParams::DefaultObjectQueryParam;
