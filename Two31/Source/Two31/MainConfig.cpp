@@ -23,3 +23,13 @@ void UMainConfig::Load()
 {
 	LoadConfig();
 }
+
+void UMainConfig::Apply()
+{
+	ExecCmd(FString::Printf(TEXT("fov %i"), GraphicsFOV));
+}
+
+void UMainConfig::ExecCmd(FString Command)
+{
+	GetWorld()->Exec(GetWorld(), Command.GetCharArray().GetData());
+}

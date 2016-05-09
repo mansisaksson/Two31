@@ -19,6 +19,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "MainConfig")
 	void Load();
 
+	UFUNCTION(BlueprintCallable, Category = "MainConfig")
+	void Apply();
+
+private:
+	
+	void ExecCmd(FString Command);
+
+public:
+
 	/*
 		Configuration Values
 	*/
