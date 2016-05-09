@@ -17,6 +17,9 @@ AEnemyCharacter::AEnemyCharacter()
 	DespawnTimer = 3.f;
 	TimeSinceDeath = 0.f;
 
+	BloodDecalMinSize = 40.f;
+	BloodDecalMaxSize = 100.f;
+
 	EnemyState = EEnemyState::Idle;
 	UMusicManager::AddEnemy(EnemyState);
 
@@ -108,6 +111,43 @@ void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* Clas
 	}
 }
 
+void AEnemyCharacter::BloodEffects()
+{
+	// Blood splat particles
+	if (BloodParticle != NULL)
+	{
+		Debug::LogOnScreen("calling blood effects");
+		UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(BloodParticle, GetMesh() , TEXT("None"), GetActorLocation(), GetActorRotation().GetNormalized() * -1.f, EAttachLocation::KeepWorldPosition);
+		ParticleSystemComp->AddLocalRotation(FRotator(90.f, 0.f, 0.f));
+	}
+
+	// Blood decals
+	if (BloodDecal != NULL)
+	{
+		FHitResult result;
+		ECollisionChannel collisionChannel;
+		collisionChannel = ECC_WorldDynamic;
+		FCollisionQueryParams collisionQuery;
+		collisionQuery.bTraceComplex = true;
+		FCollisionObjectQueryParams objectCollisionQuery;
+		FCollisionResponseParams collisionResponse;
+		collisionResponse = ECR_Block;
+
+		collisionQuery.AddIgnoredActor(this);
+		collisionQuery.AddIgnoredActor(GetOwner());
+		//collisionQuery.AddIgnoredActor(HitResult.GetActor());
+
+		bool hitObject = GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + FVector(0.f, 0.f, -1000.f), collisionChannel, collisionQuery, collisionResponse);
+
+		if (hitObject)
+		{
+			float DecalSize = (BloodDecalMaxSize - BloodDecalMinSize) * FMath::FRand() + BloodDecalMinSize;
+			UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), BloodDecal, FVector(DecalSize, DecalSize, 1.f), result.Location, result.Normal.Rotation() * -1.f);
+			DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+		}
+	}
+}
+
 float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
@@ -115,7 +155,7 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 	if (CurrentHealth <= 0)
 		bIsAlive = false;
-
+	BloodEffects();
 	return DamageAmount;
 }
 

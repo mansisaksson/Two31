@@ -56,6 +56,16 @@ protected:
 	UFUNCTION()
 	void GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter);
 
+	void BloodEffects();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UParticleSystem* BloodParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UMaterialInterface* BloodDecal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float BloodDecalMinSize;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float BloodDecalMaxSize;
+
 	virtual void Death();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)

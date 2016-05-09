@@ -573,11 +573,6 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	//if (CurrentHealth == 0)
 	//	bIsAlive = false;
 
-	//FDamageIndicator indication;
-	//indication.DamageLocation = GetDamageCauserLocation(DamageCauser);
-	//indication.Timer = 2.f;
-	//DamageIndication.Add(indication);
-
 	IndicatorLocation = GetDamageCauserLocation(DamageCauser);
 	IndicatorTimer = IndicatorDisplayTime;
 
@@ -601,8 +596,6 @@ float APlayerCharacter::GetDamageCauserLocation(AActor* DamageCauser)
 		DotDegree1 *= -1;
 
 	DotDegree1 = 180 - DotDegree1;
-
-	Debug::LogOnScreen(FString::Printf(TEXT("Dot 1: %f  ::  Dot 2: %f"), DotDegree1, DotDegree2));
 
 	return DotDegree1;
 }

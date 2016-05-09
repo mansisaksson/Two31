@@ -29,8 +29,6 @@ AWeapon::AWeapon()
 
 	MinDecalSize = 20.f;
 	MaxDecalSize = 40.f;
-	BloodDecalMinSize = 40.f;
-	BloodDecalMaxSize = 100.f;
 
 	bEquip = false;
 	bIsEquiped = false;
@@ -256,83 +254,46 @@ AActor* AWeapon::GetOwner()
 
 void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 {
-	if (Cast<AEnemyCharacter>(HitResult.GetActor()))
+	if (Cast<UDestructibleComponent>(HitResult.GetActor()))
+		Cast<UDestructibleComponent>(HitResult.GetActor())->ApplyRadiusDamage(1.f, HitResult.Location, 1.f, ImpulsePowah, false);
+
+	UMaterialInterface* DecalMat = NULL;
+	UParticleSystem* ImpactParticle = NULL;
+
+	if (HitResult.PhysMaterial != NULL)
 	{
-		// Blood splat particles
-		if (BloodParticle != NULL)
+		if (HitResult.PhysMaterial->GetName() == "PM_Metal")
 		{
-			UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(BloodParticle, HitResult.GetComponent(), TEXT("None"), HitResult.Location, HitResult.Normal.Rotation() * -1.f, EAttachLocation::KeepWorldPosition);
-			ParticleSystemComp->AddLocalRotation(FRotator(90.f, 0.f, 0.f));
+			DecalMat = ImpactVisuals.MetalImpactDecal;
+			ImpactParticle = ImpactVisuals.MetalImpactParticle;
 		}
-
-		// Blood decals
-		if (BloodDecal != NULL)
+		else if (HitResult.PhysMaterial->GetName() == "PM_Wood")
 		{
-			FHitResult result;
-			ECollisionChannel collisionChannel;
-			collisionChannel = ECC_WorldDynamic;
-			FCollisionQueryParams collisionQuery;
-			collisionQuery.bTraceComplex = true;
-			FCollisionObjectQueryParams objectCollisionQuery;
-			FCollisionResponseParams collisionResponse;
-			collisionResponse = ECR_Block;
-
-			collisionQuery.AddIgnoredActor(this);
-			collisionQuery.AddIgnoredActor(GetOwner());
-			collisionQuery.AddIgnoredActor(HitResult.GetActor());
-
-			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, HitResult.Location, HitResult.Location + FVector(0.f, 0.f, -1000.f), collisionChannel, collisionQuery, collisionResponse);
-
-			if (hitObject)
-			{
-				float DecalSize = (BloodDecalMaxSize - BloodDecalMinSize) * FMath::FRand() + BloodDecalMinSize;
-				UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), BloodDecal, FVector(DecalSize, DecalSize, 1.f), result.Location, result.Normal.Rotation() * -1.f);
-				DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
-			}
-		}
-	}
-	else
-	{
-		if (Cast<UDestructibleComponent>(HitResult.GetActor()))
-			Cast<UDestructibleComponent>(HitResult.GetActor())->ApplyRadiusDamage(1.f, HitResult.Location, 1.f, ImpulsePowah, false);
-
-		UMaterialInterface* DecalMat = NULL;
-		UParticleSystem* ImpactParticle = NULL;
-
-		if (HitResult.PhysMaterial != NULL)
-		{
-			if (HitResult.PhysMaterial->GetName() == "PM_Metal")
-			{
-				DecalMat = ImpactVisuals.MetalImpactDecal;
-				ImpactParticle = ImpactVisuals.MetalImpactParticle;
-			}
-			else if (HitResult.PhysMaterial->GetName() == "PM_Wood")
-			{
-				DecalMat = ImpactVisuals.WoodImpactDecal;
-				ImpactParticle = ImpactVisuals.WoodImpactParticle;
-			}
-			else
-			{
-				DecalMat = ImpactVisuals.DefaultImpactDecal;
-				ImpactParticle = ImpactVisuals.DefaultImpactParticle;
-			}
+			DecalMat = ImpactVisuals.WoodImpactDecal;
+			ImpactParticle = ImpactVisuals.WoodImpactParticle;
 		}
 		else
 		{
 			DecalMat = ImpactVisuals.DefaultImpactDecal;
 			ImpactParticle = ImpactVisuals.DefaultImpactParticle;
 		}
-
-		if (DecalMat != NULL)
-		{
-			float DecalSize = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
-			UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, FVector(DecalSize, DecalSize, 1.f), HitResult.GetComponent(), TEXT("None"), HitResult.Location, HitResult.Normal.Rotation(), EAttachLocation::KeepWorldPosition);
-			DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
-		}
-
-		if (ImpactParticle != NULL)
-			UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, HitResult.Normal.Rotation());
 	}
+	else
+	{
+		DecalMat = ImpactVisuals.DefaultImpactDecal;
+		ImpactParticle = ImpactVisuals.DefaultImpactParticle;
+	}
+
+	if (DecalMat != NULL)
+	{
+		float DecalSize = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
+		UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, FVector(DecalSize, DecalSize, 1.f), HitResult.GetComponent(), TEXT("None"), HitResult.Location, HitResult.Normal.Rotation(), EAttachLocation::KeepWorldPosition);
+		DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+	}
+
+	if (ImpactParticle != NULL)
+		UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, HitResult.Normal.Rotation());
+
 }
 void AWeapon::OnBeginFire_Implementation()
 {

@@ -104,10 +104,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* CultistAnimationBlueprint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* BloodParticle; // <--- Borde inte denna va i EnemyCharacter??
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UMaterialInterface* BloodDecal;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	FImpactVisuals ImpactVisuals;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -139,10 +135,6 @@ protected:
 	float MinDecalSize;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float MaxDecalSize;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float BloodDecalMinSize;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float BloodDecalMaxSize;
 
 	USkeletalMeshComponent* OwnerMesh;
 
