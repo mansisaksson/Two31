@@ -431,6 +431,8 @@ void ACultistCharacter::Death()
 	{
 		if (WeaponSlots[i] != NULL)
 			WeaponSlots[i]->Destroy();
+
+		WeaponSlots[i] = NULL;
 	}
 }
 float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
