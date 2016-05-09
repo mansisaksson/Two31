@@ -605,6 +605,7 @@ void APlayerCharacter::PickedUpItem_Implementation(AActor* OtherActor)
 
 }
 
+int32 APlayerCharacter::GetAmountOfItems() { return Inventory.Num(); }
 FString APlayerCharacter::GetItemName(AItemPickup* ItemToName) {  return ItemToName->GetItemName(); }
 int32 APlayerCharacter::GetItemID(AItemPickup* ItemToName) { return ItemToName->GetItemID(); }
 
