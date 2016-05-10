@@ -27,6 +27,7 @@ APlayerCharacter::APlayerCharacter()
 	MeleeDamage = 50.f;
 	MeleePowah = 90000.f;
 	MaxHealth = 100.f;
+	ArmorAbsorption = 0.5f;
 	CurrentArmor = 35.f;
 	MaxArmor = 100.f;
 	MaxAmountOfHealthPacks = 3;
@@ -334,11 +335,28 @@ bool APlayerCharacter::PickupHealthPack(AHealthPickup* Healthpack)
 }
 bool APlayerCharacter::ChangeArmor(float pChange)
 {
-	if (CurrentArmor < MaxArmor)
+	// if the change is positive, check so you are not at max armor
+	if (pChange > 0)
 	{
-		CurrentArmor = FMath::Clamp((CurrentArmor + pChange), 0.f, MaxArmor);
-		return true;
+		if (CurrentArmor < MaxArmor)
+		{
+			CurrentArmor = FMath::Clamp((CurrentArmor + pChange), 0.f, MaxArmor);
+			return true;
+		}
 	}
+	// if the change is negative, check so you have armor to remove from
+	else
+	{
+		// check if change is greater than current armor
+		if (CurrentArmor < FMath::Abs(pChange))
+			return false;
+		else
+		{
+			CurrentArmor = FMath::Clamp((CurrentArmor + pChange), 0.f, MaxArmor);
+			return true;
+		}
+	}
+
 	return false;
 }
 bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
@@ -491,6 +509,16 @@ void APlayerCharacter::SelectWeaponSlot4()
 	SelectWeaponSlot(3);
 }
 
+int32 APlayerCharacter::GetAmountOfWeapons()
+{
+	int32 counter = 0;
+	for (int32 i = 0; i < WeaponSlots.Num(); i++)
+	{
+		if (WeaponSlots[i] != NULL)
+			counter++;
+	}
+	return counter;
+}
 void APlayerCharacter::NextWeapon()
 {
 	int index = GetWeaponIndex() + 1;
@@ -545,6 +573,7 @@ void APlayerCharacter::PreviousWeapon()
 
 	SelectWeaponSlot(tempIndex);
 }
+
 int APlayerCharacter::GetWeaponIndex()
 {
 	int index = -1;
@@ -588,9 +617,28 @@ void APlayerCharacter::UseHealthPack()
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
-	//if (CurrentHealth == 0)
-	//	bIsAlive = false;
+
+	ArmorAbsorption = FMath::Clamp(ArmorAbsorption, 0.f, 1.f);
+
+	float ArmorDamage = DamageAmount * ArmorAbsorption;
+	float HealthDamage = DamageAmount - ArmorDamage;
+	// Check if armor can take half the damage
+	if (!ChangeArmor(-ArmorDamage))
+	{
+		// if armor cannot take any damage then health takes all
+		if (CurrentArmor <= 0)
+			CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
+		else
+		{
+			// if armor can take some damage then determine how much and rest on health
+			// armor goes to 0 and health takes the leftover damage + half damage
+			float LeftOverDamage = ArmorDamage - CurrentArmor;
+			ChangeArmor(-(ArmorDamage - LeftOverDamage));
+			CurrentHealth = FMath::Clamp(CurrentHealth - (LeftOverDamage + HealthDamage), 0.f, 100.f);
+		}
+	}
+	else
+		CurrentHealth = FMath::Clamp(CurrentHealth - HealthDamage, 0.f, 100.f);
 
 	IndicatorLocation = GetDamageCauserLocation(DamageCauser);
 	IndicatorTimer = IndicatorDisplayTime;

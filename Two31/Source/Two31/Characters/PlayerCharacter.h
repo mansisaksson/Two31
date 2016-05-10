@@ -65,6 +65,8 @@ public:
 	float GetDefaultMeleeRadius() { return DefaultMeleeRadius; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	int32 GetAmountOfWeapons();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	class AWeapon* GetCurrentWeapon() { return CurrentWeapon; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	class AWeapon* GetNextWeapon();
@@ -146,6 +148,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float ArmorAbsorption;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float BaseTurnRate;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)

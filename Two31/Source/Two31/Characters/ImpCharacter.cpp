@@ -431,6 +431,7 @@ void AImpCharacter::Reposition()
 void AImpCharacter::FocusOnPosition(FVector Location)
 {
 	FVector Direction = Location - GetActorLocation();
+	Direction.Z = 0.f;
 	FRotator NewControlRotation = Direction.Rotation();
 	SetActorRotation(NewControlRotation);
 }
