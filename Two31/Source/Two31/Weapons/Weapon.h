@@ -20,6 +20,11 @@ struct FImpactVisuals
 	UMaterialInterface* MetalImpactDecal;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UParticleSystem* FleshImpactParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UMaterialInterface* FleshImpactDecal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* DefaultImpactParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UMaterialInterface* DefaultImpactDecal;
