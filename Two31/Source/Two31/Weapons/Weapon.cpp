@@ -279,6 +279,11 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 			DecalMat = ImpactVisuals.WoodImpactDecal;
 			ImpactParticle = ImpactVisuals.WoodImpactParticle;
 		}
+		else if (HitResult.PhysMaterial->GetName() == "PM_Flesh")
+		{
+			DecalMat = ImpactVisuals.FleshImpactDecal;
+			ImpactParticle = ImpactVisuals.FleshImpactParticle;
+		}
 		else
 		{
 			DecalMat = ImpactVisuals.DefaultImpactDecal;
@@ -294,8 +299,9 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 	if (DecalMat != NULL)
 	{
 		float DecalSize = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
-		UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, FVector(DecalSize, DecalSize, 1.f), HitResult.GetComponent(), TEXT("None"), HitResult.Location, HitResult.Normal.Rotation(), EAttachLocation::KeepWorldPosition);
+		UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, FVector(DecalSize, DecalSize, DecalSize / 2.f), HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, HitResult.Normal.Rotation() * -1, EAttachLocation::KeepWorldPosition);
 		DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+		DecalComp->SetWorldScale3D(FVector(1.f, 1.f, 1.f));
 	}
 
 	if (ImpactParticle != NULL)

@@ -144,6 +144,8 @@ protected:
 
 	void UseHealthPack();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float BaseTurnRate;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
@@ -196,7 +198,6 @@ private:
 	bool bMeleeAttack;
 
 	float CurrentHealth;
-	float MaxHealth;
 	float CurrentArmor;
 	float MaxArmor;
 	float LastFootstep;

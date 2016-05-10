@@ -26,7 +26,6 @@ APlayerCharacter::APlayerCharacter()
 	
 	MeleeDamage = 50.f;
 	MeleePowah = 90000.f;
-	CurrentHealth = 50.f;
 	MaxHealth = 100.f;
 	CurrentArmor = 35.f;
 	MaxArmor = 100.f;
@@ -106,6 +105,8 @@ void APlayerCharacter::BeginPlay()
 	EquipWeapon(StarterWeapon2);
 	EquipWeapon(StarterWeapon2);
 	EquipWeapon(StarterWeapon4);
+
+	CurrentHealth = MaxHealth;
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)
