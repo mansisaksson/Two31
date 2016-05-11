@@ -28,7 +28,7 @@ APlayerCharacter::APlayerCharacter()
 	MeleePowah = 90000.f;
 	MaxHealth = 100.f;
 	ArmorAbsorption = 0.5f;
-	CurrentArmor = 35.f;
+	StartingArmor = 100.f;
 	MaxArmor = 100.f;
 	MaxAmountOfHealthPacks = 3;
 	LastFootstep = 0.f;
@@ -108,6 +108,7 @@ void APlayerCharacter::BeginPlay()
 	EquipWeapon(StarterWeapon4);
 
 	CurrentHealth = MaxHealth;
+	CurrentArmor = StartingArmor;
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)

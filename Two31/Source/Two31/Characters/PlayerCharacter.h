@@ -149,6 +149,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float MaxHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float StartingArmor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float ArmorAbsorption;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
