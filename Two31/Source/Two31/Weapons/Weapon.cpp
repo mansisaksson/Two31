@@ -40,6 +40,14 @@ AWeapon::AWeapon()
 	bReadyToFire = false;
 	bFirstTimeEquiped = true;
 
+	HipTransform.SetLocation(FVector(3.160810f, -9.322928f, -157.550308f));
+	HipTransform.SetRotation(FRotator(-1.093220f, -108.702850f, -0.264890f).Quaternion());
+	HipTransform.SetScale3D(FVector(1.f, 1.f, 1.f));
+
+	ADSTransform.SetLocation(FVector(0.f, -30.65f, -148.2f));
+	ADSTransform.SetRotation(FRotator(3.f, -108.2f, 0.f).Quaternion());
+	ADSTransform.SetScale3D(FVector(1.f, 1.f, 1.f));
+
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetOnlyOwnerSee(false);
 	WeaponMesh->bCastDynamicShadow = false;
@@ -48,8 +56,6 @@ AWeapon::AWeapon()
 
 	BulletSpawnLocation = CreateDefaultSubobject<USceneComponent>("BulletSpawnLocation");
 	BulletSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
-
-	//AutoReceiveInput() <--- Gör detta sen
 }
 
 void AWeapon::BeginPlay()

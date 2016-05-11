@@ -489,7 +489,10 @@ void APlayerCharacter::SelectWeaponSlot(int index)
 		}
 
 		if (CurrentAmmo != NULL)
+		{
 			CurrentWeapon->EquipWeapon(FPArmMesh, &CurrentAmmo->AmmoPool);
+		}
+			
 	}
 }
 void APlayerCharacter::SelectWeaponSlot1()

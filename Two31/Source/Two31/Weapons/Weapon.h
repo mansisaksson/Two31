@@ -90,6 +90,12 @@ public:
 	USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	AActor* GetOwner();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	FTransform GetHipTransform() { return HipTransform; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	FTransform GetADSTransform() { return ADSTransform; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	int32 GetAmmoPool() { if (AmmoPool != NULL) return *AmmoPool; return 0; };
 
 protected:
 	UFUNCTION(BlueprintNativeEvent)
@@ -105,6 +111,10 @@ protected:
 	void OnStopFire();
 	void OnStopFire_Implementation();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	FTransform HipTransform;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	FTransform ADSTransform;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* PlayerAnimationBlueprint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
