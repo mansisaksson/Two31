@@ -70,7 +70,6 @@ void AEnemyCharacter::Tick(float DeltaTime)
 {
 	if (!bIsAlive)
 	{
-		Death();
 		TimeSinceDeath += DeltaTime;
 		if (TimeSinceDeath > DespawnTimer)
 			Destroy();
@@ -154,7 +153,10 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 	if (CurrentHealth <= 0)
+	{
 		bIsAlive = false;
+		Death();
+	}
 	BloodEffects();
 	return DamageAmount;
 }
