@@ -1,17 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "Weapons/Weapon.h"
 #include "GaussRifle.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class TWO31_API AGaussRifle : public AWeapon
 {
 	GENERATED_BODY()
+	
+	UPROPERTY(VisibleDefaultsOnly, Category = Visual, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* MuzzleSpawnLocation;
+
 public:
 	AGaussRifle();
 

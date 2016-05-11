@@ -173,6 +173,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float MeleeTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	float ADSSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	bool bCanJump;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	int32 MaxAmountOfHealthPacks;
@@ -214,9 +216,6 @@ private:
 	float IndicatorLocation;
 	float IndicatorTimer;
 	float IndicatorOpacity;
-
-	FVector DefaultArmLocation;
-	FRotator DefaultArmRotation;
 
 	FAmmo* CurrentAmmo;
 	class AWeapon* CurrentWeapon;
