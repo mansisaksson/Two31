@@ -6,6 +6,7 @@
 #include "../Pickups/HealthPickup.h"
 #include "../Pickups/ArmorPickup.h"
 #include "../Pickups/AmmoPickup.h"
+#include "../StatsPornManager.h"
 #include "../Characters/EnemyCharacter.h"
 #include "../Weapons/Weapon.h"
 #include "GameFramework/InputSettings.h"
@@ -107,6 +108,8 @@ void APlayerCharacter::BeginPlay()
 
 	CurrentHealth = MaxHealth;
 	CurrentArmor = StartingArmor;
+
+	UStatsPornManager::ClearStats();
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)
