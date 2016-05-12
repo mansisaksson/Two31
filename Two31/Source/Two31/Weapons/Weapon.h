@@ -12,22 +12,22 @@ struct FImpactVisuals
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* WoodImpactParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UMaterialInterface* WoodImpactDecal;
+	TArray<UMaterialInterface*> WoodImpactDecal;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MetalImpactParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UMaterialInterface* MetalImpactDecal;
+	TArray<UMaterialInterface*> MetalImpactDecal;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* FleshImpactParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UMaterialInterface* FleshImpactDecal;
+	TArray<UMaterialInterface*> FleshImpactDecal;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* DefaultImpactParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UMaterialInterface* DefaultImpactDecal;
+	TArray<UMaterialInterface*> DefaultImpactDecal;
 };
 
 UCLASS()

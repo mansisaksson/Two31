@@ -273,43 +273,41 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 	UMaterialInterface* DecalMat = NULL;
 	UParticleSystem* ImpactParticle = NULL;
 
+	float DecalScale = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
+	FVector DecalSize = FVector(DecalScale, DecalScale, 1.f);
+
 	if (HitResult.PhysMaterial != NULL)
 	{
 		if (HitResult.PhysMaterial->GetName() == "PM_Metal")
 		{
-			DecalMat = ImpactVisuals.MetalImpactDecal;
 			ImpactParticle = ImpactVisuals.MetalImpactParticle;
+			DecalMat = ImpactVisuals.MetalImpactDecal[FMath::RandRange(0, ImpactVisuals.MetalImpactDecal.Num())];
 		}
 		else if (HitResult.PhysMaterial->GetName() == "PM_Wood")
 		{
-			DecalMat = ImpactVisuals.WoodImpactDecal;
 			ImpactParticle = ImpactVisuals.WoodImpactParticle;
+			DecalMat = ImpactVisuals.WoodImpactDecal[FMath::RandRange(0, ImpactVisuals.WoodImpactDecal.Num())];
 		}
 		else if (HitResult.PhysMaterial->GetName() == "PM_Flesh")
 		{
-			DecalMat = ImpactVisuals.FleshImpactDecal;
 			ImpactParticle = ImpactVisuals.FleshImpactParticle;
+			DecalMat = ImpactVisuals.FleshImpactDecal[FMath::RandRange(0, ImpactVisuals.FleshImpactDecal.Num())];
 		}
 		else
 		{
-			DecalMat = ImpactVisuals.DefaultImpactDecal;
 			ImpactParticle = ImpactVisuals.DefaultImpactParticle;
+			DecalMat = ImpactVisuals.DefaultImpactDecal[FMath::RandRange(0, ImpactVisuals.DefaultImpactDecal.Num())];
+			DecalSize = FVector(DecalScale / 2.f, DecalScale / 2.f, DecalScale / 2.f);
 		}
 	}
 	else
 	{
-		DecalMat = ImpactVisuals.DefaultImpactDecal;
+		DecalMat = ImpactVisuals.DefaultImpactDecal[FMath::RandRange(0, ImpactVisuals.DefaultImpactDecal.Num())];
 		ImpactParticle = ImpactVisuals.DefaultImpactParticle;
 	}
 
 	if (DecalMat != NULL)
 	{
-		float DecalScale = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
-		FVector DecalSize = FVector(DecalScale, DecalScale, 1.f);
-
-		if (DecalMat == ImpactVisuals.FleshImpactDecal)
-			DecalSize = FVector(DecalScale / 2.f, DecalScale / 2.f, DecalScale / 2.f);
-
 		FVector Normal = (HitResult.Normal * -1);
 		UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, DecalSize, HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
 		DecalComp->SetWorldRotation(Normal.Rotation());
