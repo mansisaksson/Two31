@@ -358,6 +358,7 @@ bool APlayerCharacter::ChangeArmor(float pChange)
 		else
 		{
 			CurrentArmor = FMath::Clamp((CurrentArmor + pChange), 0.f, MaxArmor);
+			UStatsPornManager::IncreaseAmountOfArmorLost(-pChange);
 			return true;
 		}
 	}
@@ -648,10 +649,15 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 				float LeftOverDamage = ArmorDamage - CurrentArmor;
 				ChangeArmor(-(ArmorDamage - LeftOverDamage));
 				CurrentHealth = FMath::Clamp(CurrentHealth - (LeftOverDamage + HealthDamage), 0.f, 100.f);
+				UStatsPornManager::IncreaseAmountOfArmorLost((ArmorDamage - LeftOverDamage));
+				UStatsPornManager::IncreaseAmountOfHealthLost((LeftOverDamage + HealthDamage));
 			}
 		}
 		else
+		{
 			CurrentHealth = FMath::Clamp(CurrentHealth - HealthDamage, 0.f, 100.f);
+		}
+
 
 		IndicatorLocation = GetDamageCauserLocation(DamageCauser);
 		IndicatorTimer = IndicatorDisplayTime;
