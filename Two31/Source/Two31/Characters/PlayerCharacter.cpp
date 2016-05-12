@@ -656,6 +656,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		else
 		{
 			CurrentHealth = FMath::Clamp(CurrentHealth - HealthDamage, 0.f, 100.f);
+			UStatsPornManager::IncreaseAmountOfHealthLost(HealthDamage);
 		}
 
 
