@@ -99,6 +99,9 @@ Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStud
 !Two31/Plugins/FMODStudio/Binaries/Win64/ovrfmod.dll
 !Two31/Plugins/FMODStudio/Binaries/Win64/ovrfmod.lib
 
+Two31/Plugins/Substance/Intermediate/Build/Win64/UE4Editor/Development/SubstanceCore/SubstanceCorePrivatePCH.h
+Two31/Plugins/Substance/Intermediate/Build/Win64/UE4Editor/Development/SubstanceEditor/SubstanceCorePrivatePCH.h
+
 !Two31/Plugins/Substance/Source/SubstanceCore/lib/win32-msvc2013/release_md/Substance.lib
 !Two31/Plugins/Substance/Source/SubstanceCore/lib/win32-msvc2013-64/release_md/Substance.lib
 !Two31/Plugins/Substance/Source/SubstanceCore/lib/win32-msvc2015/release_md/Substance.lib
