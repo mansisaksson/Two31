@@ -5,29 +5,59 @@
 #include "WeaponGlobals.h"
 #include "Weapon.generated.h"
 
+//USTRUCT(BlueprintType)
+//struct FImpactVisuals
+//{
+//	GENERATED_USTRUCT_BODY()
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+//	UParticleSystem* WoodImpactParticle;
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+//	TArray<UMaterialInterface*> WoodImpactDecal;
+//
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+//	UParticleSystem* MetalImpactParticle;
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+//	TArray<UMaterialInterface*> MetalImpactDecal;
+//
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+//	UParticleSystem* FleshImpactParticle;
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+//	TArray<UMaterialInterface*> FleshImpactDecal;
+//
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+//	UParticleSystem* GlassImpactParticle;
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+//	TArray<UMaterialInterface*> GlassImpactDecal;
+//
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+//	UParticleSystem* DefaultImpactParticle;
+//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+//	TArray<UMaterialInterface*> DefaultImpactDecal;
+//};
+
 USTRUCT(BlueprintType)
-struct FImpactVisuals
+struct FImpactDecals
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UMaterialInterface* Decal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	FVector Size = FVector(10.f, 10.f, 1.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	float AddedRandXYSize = 10.f;
+};
+
+USTRUCT(BlueprintType)
+struct FImpactVisual
 {
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* WoodImpactParticle;
+	FString PhysicsMatName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	TArray<UMaterialInterface*> WoodImpactDecal;
-
+	UParticleSystem* ImpactParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* MetalImpactParticle;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	TArray<UMaterialInterface*> MetalImpactDecal;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* FleshImpactParticle;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	TArray<UMaterialInterface*> FleshImpactDecal;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* DefaultImpactParticle;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	TArray<UMaterialInterface*> DefaultImpactDecal;
+	TArray<FImpactDecals> ImpactDecals;
 };
 
 UCLASS()
@@ -120,7 +150,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* CultistAnimationBlueprint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	FImpactVisuals ImpactVisuals;
+	TArray<FImpactVisual> ImpactVisuals;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	EAmmoType AmmoType;
@@ -149,10 +179,6 @@ protected:
 	float UnequipTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float ImpulsePowah;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float MinDecalSize;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float MaxDecalSize;
 
 	USkeletalMeshComponent* OwnerMesh;
 

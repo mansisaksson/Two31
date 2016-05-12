@@ -29,9 +29,6 @@ AWeapon::AWeapon()
 	HeadshotMultiplier = 1.0f;
 	ImpulsePowah = 9000.f;
 
-	MinDecalSize = 20.f;
-	MaxDecalSize = 40.f;
-
 	bEquip = false;
 	bIsEquiped = false;
 	bReload = false;
@@ -56,6 +53,10 @@ AWeapon::AWeapon()
 
 	BulletSpawnLocation = CreateDefaultSubobject<USceneComponent>("BulletSpawnLocation");
 	BulletSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
+
+	FImpactVisual DefaultImpactVisual;
+	DefaultImpactVisual.PhysicsMatName = "Default";
+	ImpactVisuals.Add(DefaultImpactVisual);
 }
 
 void AWeapon::BeginPlay()
@@ -273,37 +274,54 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 	UMaterialInterface* DecalMat = NULL;
 	UParticleSystem* ImpactParticle = NULL;
 
-	float DecalScale = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
-	FVector DecalSize = FVector(DecalScale, DecalScale, 1.f);
+	float RandSize = 0.f;// = FMath::RandRange(0.f, DecalRandSize);
+	FVector DecalSize = FVector::ZeroVector;// = FVector(DecalScale, DecalScale, 1.f);
 
 	if (HitResult.PhysMaterial != NULL)
 	{
-		if (HitResult.PhysMaterial->GetName() == "PM_Metal")
+		for (size_t i = 0; i < ImpactVisuals.Num(); i++)
 		{
-			ImpactParticle = ImpactVisuals.MetalImpactParticle;
-			DecalMat = ImpactVisuals.MetalImpactDecal[FMath::RandRange(0, ImpactVisuals.MetalImpactDecal.Num())];
+			if (HitResult.PhysMaterial->GetName() == ImpactVisuals[i].PhysicsMatName)
+			{
+				ImpactParticle = ImpactVisuals[i].ImpactParticle;
+				if (ImpactVisuals[i].ImpactDecals.Num() > 0)
+				{
+					int index = FMath::RandRange(0, ImpactVisuals[i].ImpactDecals.Num() - 1);
+					DecalMat = ImpactVisuals[i].ImpactDecals[index].Decal;
+					DecalSize = ImpactVisuals[i].ImpactDecals[index].Size;
+					RandSize = FMath::RandRange(0.f, ImpactVisuals[i].ImpactDecals[index].AddedRandXYSize);
+				}
+			}
 		}
-		else if (HitResult.PhysMaterial->GetName() == "PM_Wood")
+
+		if (DecalMat == NULL)
 		{
-			ImpactParticle = ImpactVisuals.WoodImpactParticle;
-			DecalMat = ImpactVisuals.WoodImpactDecal[FMath::RandRange(0, ImpactVisuals.WoodImpactDecal.Num())];
+			for (size_t i = 0; i < ImpactVisuals.Num(); i++)
+			{
+				if (ImpactVisuals[i].PhysicsMatName == "Default")
+				{
+					if (ImpactVisuals[i].ImpactDecals.Num() > 0)
+					{
+						int index = FMath::RandRange(0, ImpactVisuals[i].ImpactDecals.Num() - 1);
+						DecalMat = ImpactVisuals[i].ImpactDecals[index].Decal;
+						DecalSize = ImpactVisuals[i].ImpactDecals[index].Size;
+						RandSize = FMath::RandRange(0.f, ImpactVisuals[i].ImpactDecals[index].AddedRandXYSize);
+					}
+					break;
+				}
+			}
 		}
-		else if (HitResult.PhysMaterial->GetName() == "PM_Flesh")
+		if (ImpactParticle == NULL)
 		{
-			ImpactParticle = ImpactVisuals.FleshImpactParticle;
-			DecalMat = ImpactVisuals.FleshImpactDecal[FMath::RandRange(0, ImpactVisuals.FleshImpactDecal.Num())];
+			for (size_t i = 0; i < ImpactVisuals.Num(); i++)
+			{
+				if (ImpactVisuals[i].PhysicsMatName == "Default")
+				{
+					ImpactParticle = ImpactVisuals[i].ImpactParticle;
+					break;
+				}
+			}
 		}
-		else
-		{
-			ImpactParticle = ImpactVisuals.DefaultImpactParticle;
-			DecalMat = ImpactVisuals.DefaultImpactDecal[FMath::RandRange(0, ImpactVisuals.DefaultImpactDecal.Num())];
-			DecalSize = FVector(DecalScale / 2.f, DecalScale / 2.f, DecalScale / 2.f);
-		}
-	}
-	else
-	{
-		DecalMat = ImpactVisuals.DefaultImpactDecal[FMath::RandRange(0, ImpactVisuals.DefaultImpactDecal.Num())];
-		ImpactParticle = ImpactVisuals.DefaultImpactParticle;
 	}
 
 	if (DecalMat != NULL)
