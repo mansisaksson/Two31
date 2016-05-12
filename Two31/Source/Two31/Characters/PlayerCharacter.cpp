@@ -627,7 +627,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	if (!((ADefaultGameMode*)GetWorld()->GetAuthGameMode())->GetConfig()->GameplayProggMode)
 	{
 		Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
+		UStatsPornManager::IncreaseAmountOfDamageTaken(DamageAmount);
 		ArmorAbsorption = FMath::Clamp(ArmorAbsorption, 0.f, 1.f);
 
 		float ArmorDamage = DamageAmount * ArmorAbsorption;
@@ -637,7 +637,10 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		{
 			// if armor cannot take any damage then health takes all
 			if (CurrentArmor <= 0)
+			{
 				CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
+				UStatsPornManager::IncreaseAmountOfHealthLost(DamageAmount);
+			}
 			else
 			{
 				// if armor can take some damage then determine how much and rest on health

@@ -48,11 +48,11 @@ public:
 		static int32 GetAmountOfShotsFired() { return AmountOfShotsFired; }
 
 	UFUNCTION(BlueprintCallable, Category = "IncreaseStatFunction")
-		static void IncreaseAmountOfDamageTaken() { AmountOfDamageTaken++; }
+		static void IncreaseAmountOfDamageTaken(int32 Damage) { AmountOfDamageTaken += Damage; }
 	UFUNCTION(BlueprintCallable, Category = "IncreaseStatFunction")
-		static void IncreaseAmountOfHealthLost() { AmountOfHealthLost++; }
+		static void IncreaseAmountOfHealthLost(int32 Health) { AmountOfHealthLost += Health; }
 	UFUNCTION(BlueprintCallable, Category = "IncreaseStatFunction")
-		static void IncreaseAmountOfArmorLost() { AmountOfArmorLost++; }
+		static void IncreaseAmountOfArmorLost(int32 Armor) { AmountOfArmorLost += Armor; }
 
 	UFUNCTION(BlueprintCallable, Category = "GetFunction")
 		static int32 GetAmountOfDamageTaken() { return AmountOfDamageTaken; }
