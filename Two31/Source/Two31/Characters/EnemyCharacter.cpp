@@ -4,6 +4,7 @@
 #include "../MusicManager.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../StatsPornManager.h"
+#include "../BloodParticleBall.h"
 #include "ImpCharacter.h"
 #include "AIController.h"
 #include "Engine.h"
@@ -129,6 +130,18 @@ void AEnemyCharacter::BloodEffects()
 	// Blood decals
 	if (BloodDecal != NULL)
 	{
+
+	UWorld* const World = GetWorld();
+	if(World)
+	{
+		ABloodParticleBall* ball = World->SpawnActor<ABloodParticleBall>(ABloodParticleBall::StaticClass());
+		//ball->SetActorRotation();
+		ball->GetProjectileMovement()->InitialSpeed = 10000.0f;
+		ball->LifetimeDestroy = 3.0f;
+	}
+
+
+		/*
 		FHitResult result;
 		ECollisionChannel collisionChannel;
 		collisionChannel = ECC_WorldDynamic;
@@ -150,6 +163,7 @@ void AEnemyCharacter::BloodEffects()
 			UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), BloodDecal, FVector(DecalSize, DecalSize, 1.f), result.Location, result.Normal.Rotation() * -1.f);
 			DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
 		}
+		*/
 	}
 }
 
