@@ -11,6 +11,7 @@
 #include "../Weapons/Weapon.h"
 #include "GameFramework/InputSettings.h"
 #include "Engine.h"
+#include "../DefaultGameMode.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -623,34 +624,38 @@ void APlayerCharacter::UseHealthPack()
 
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	ArmorAbsorption = FMath::Clamp(ArmorAbsorption, 0.f, 1.f);
-
-	float ArmorDamage = DamageAmount * ArmorAbsorption;
-	float HealthDamage = DamageAmount - ArmorDamage;
-	// Check if armor can take half the damage
-	if (!ChangeArmor(-ArmorDamage))
+	if (!((ADefaultGameMode*)GetWorld()->GetAuthGameMode())->GetConfig()->GameplayProggMode)
 	{
-		// if armor cannot take any damage then health takes all
-		if (CurrentArmor <= 0)
-			CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
-		else
+		Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+		ArmorAbsorption = FMath::Clamp(ArmorAbsorption, 0.f, 1.f);
+
+		float ArmorDamage = DamageAmount * ArmorAbsorption;
+		float HealthDamage = DamageAmount - ArmorDamage;
+		// Check if armor can take half the damage
+		if (!ChangeArmor(-ArmorDamage))
 		{
-			// if armor can take some damage then determine how much and rest on health
-			// armor goes to 0 and health takes the leftover damage + half damage
-			float LeftOverDamage = ArmorDamage - CurrentArmor;
-			ChangeArmor(-(ArmorDamage - LeftOverDamage));
-			CurrentHealth = FMath::Clamp(CurrentHealth - (LeftOverDamage + HealthDamage), 0.f, 100.f);
+			// if armor cannot take any damage then health takes all
+			if (CurrentArmor <= 0)
+				CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, 100.f);
+			else
+			{
+				// if armor can take some damage then determine how much and rest on health
+				// armor goes to 0 and health takes the leftover damage + half damage
+				float LeftOverDamage = ArmorDamage - CurrentArmor;
+				ChangeArmor(-(ArmorDamage - LeftOverDamage));
+				CurrentHealth = FMath::Clamp(CurrentHealth - (LeftOverDamage + HealthDamage), 0.f, 100.f);
+			}
 		}
+		else
+			CurrentHealth = FMath::Clamp(CurrentHealth - HealthDamage, 0.f, 100.f);
+
+		IndicatorLocation = GetDamageCauserLocation(DamageCauser);
+		IndicatorTimer = IndicatorDisplayTime;
+
+		return DamageAmount;
 	}
-	else
-		CurrentHealth = FMath::Clamp(CurrentHealth - HealthDamage, 0.f, 100.f);
-
-	IndicatorLocation = GetDamageCauserLocation(DamageCauser);
-	IndicatorTimer = IndicatorDisplayTime;
-
-	return DamageAmount;
+	return 0;
 }
 
 float APlayerCharacter::GetDamageCauserLocation(AActor* DamageCauser)
