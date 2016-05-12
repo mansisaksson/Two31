@@ -1,5 +1,6 @@
 #include "Two31.h"
 #include "SMG.h"
+#include "../StatsPornManager.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
 
@@ -27,6 +28,7 @@ void ASMG::FireShot(FVector TowardsLocation)
 	{
 		AmmoInClip--;
 		(*AmmoPool)--;
+		UStatsPornManager::IncreaseAmountOfShotsFired();
 
 		FHitResult result;
 		ECollisionChannel collisionChannel;

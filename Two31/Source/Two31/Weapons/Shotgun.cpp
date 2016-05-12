@@ -5,6 +5,7 @@
 #include "../Characters/EnemyCharacter.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
+#include "../StatsPornManager.h"
 #include "Kismet/KismetMaterialLibrary.h"
 
 AShotgun::AShotgun()
@@ -59,6 +60,8 @@ void AShotgun::FireShot(FVector TowardsLocation)
 	{
 		AmmoInClip--;
 		(*AmmoPool)--;
+		for (int i = 0; i < NumberOfShots; i++)
+			UStatsPornManager::IncreaseAmountOfShotsFired();
 		
 		HeatParam += HeatAccumulationScale;
 

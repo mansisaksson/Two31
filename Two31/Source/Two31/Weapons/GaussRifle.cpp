@@ -1,5 +1,6 @@
 #include "Two31.h"
 #include "GaussRifle.h"
+#include "../StatsPornManager.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
 
@@ -30,6 +31,7 @@ void AGaussRifle::FireShot(FVector TowardsLocation)
 	{
 		AmmoInClip--;
 		(*AmmoPool)--;
+		UStatsPornManager::IncreaseAmountOfShotsFired();
 
 		FHitResult result;
 		ECollisionChannel collisionChannel;

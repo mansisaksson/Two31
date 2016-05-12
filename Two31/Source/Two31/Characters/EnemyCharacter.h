@@ -86,6 +86,7 @@ protected:
 	float TimeSinceDeath;
 
 	bool bIsAlive;
+	bool bFirstTick;
 
 private:
 	UPROPERTY(EditAnywhere, Category = Gameplay)

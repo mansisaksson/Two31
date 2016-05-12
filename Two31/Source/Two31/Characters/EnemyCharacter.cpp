@@ -3,6 +3,7 @@
 #include "Perception/PawnSensingComponent.h"
 #include "../MusicManager.h"
 #include "../Characters/PlayerCharacter.h"
+#include "../StatsPornManager.h"
 #include "ImpCharacter.h"
 #include "AIController.h"
 #include "Engine.h"
@@ -13,6 +14,7 @@ AEnemyCharacter::AEnemyCharacter()
 
 	MaxHealth = 100.f;
 	bIsAlive = true;
+	bFirstTick = true;
 
 	DespawnTimer = 3.f;
 	TimeSinceDeath = 0.f;
@@ -68,9 +70,13 @@ void AEnemyCharacter::BeginPlay()
 
 void AEnemyCharacter::Tick(float DeltaTime)
 {
+	if (bFirstTick)
+	{
+		UStatsPornManager::IncreaseAmountOfEnemies();
+		bFirstTick = false;
+	}
 	if (!bIsAlive)
 	{
-		Death();
 		TimeSinceDeath += DeltaTime;
 		if (TimeSinceDeath > DespawnTimer)
 			Destroy();
@@ -154,7 +160,12 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 	if (CurrentHealth <= 0)
+	{
 		bIsAlive = false;
+		Death();
+		UStatsPornManager::IncreaseAmountOfEnemiesKilled();
+	}
+
 	BloodEffects();
 	return DamageAmount;
 }

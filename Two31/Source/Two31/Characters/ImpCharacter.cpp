@@ -1,5 +1,6 @@
 #include "Two31.h"
 #include "ImpCharacter.h"
+#include "../StatsPornManager.h"
 #include "Engine.h"
 #include "PlayerCharacter.h"
 
@@ -71,7 +72,6 @@ AImpCharacter::AImpCharacter()
 void AImpCharacter::PostInitializeComponents()
 {
 	AEnemyCharacter::PostInitializeComponents();
-
 	L_ClawRadius->OnComponentBeginOverlap.AddDynamic(this, &AImpCharacter::OnAttackBeginOverlap);
 	R_ClawRadius->OnComponentBeginOverlap.AddDynamic(this, &AImpCharacter::OnAttackBeginOverlap);
 }

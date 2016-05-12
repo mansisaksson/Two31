@@ -27,7 +27,7 @@ public:
 		static void IncreaseAmountOfEnemiesKilled() { AmountOfEnemiesKilled++; }
 
 	UFUNCTION(BlueprintCallable, Category = "GetFunction")
-		static int32 GetAmountOfEnemies() { Debug::LogOnScreen(FString::Printf(TEXT("Amount of Enemies %i"), AmountOfEnemiesKilled)); return AmountOfEnemies; }
+		static int32 GetAmountOfEnemies() { return AmountOfEnemies; }
 	UFUNCTION(BlueprintCallable, Category = "GetFunction")
 		static int32 GetAmountOfEnemiesKilled() { return AmountOfEnemiesKilled; }
 
