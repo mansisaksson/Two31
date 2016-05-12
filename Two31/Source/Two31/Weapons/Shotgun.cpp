@@ -60,8 +60,8 @@ void AShotgun::FireShot(FVector TowardsLocation)
 	{
 		AmmoInClip--;
 		(*AmmoPool)--;
-		for (int i = 0; i < NumberOfShots; i++)
-			UStatsPornManager::IncreaseAmountOfShotsFired();
+
+		UStatsPornManager::IncreaseAmountOfShotsFired();
 		
 		HeatParam += HeatAccumulationScale;
 
