@@ -304,10 +304,16 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 
 	if (DecalMat != NULL)
 	{
-		float DecalSize = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
-		UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, FVector(DecalSize, DecalSize, 1.f), HitResult.GetComponent(), TEXT("None"), HitResult.Location, HitResult.Normal.Rotation() * -1, EAttachLocation::KeepWorldPosition);
+		float DecalScale = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
+		FVector DecalSize = FVector(DecalScale, DecalScale, 1.f);
+
+		if (DecalMat == ImpactVisuals.FleshImpactDecal)
+			DecalSize = FVector(DecalScale / 2.f, DecalScale / 2.f, DecalScale / 2.f);
+
+		FVector Normal = (HitResult.Normal * -1);
+		UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, DecalSize, HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
+		DecalComp->SetWorldRotation(Normal.Rotation());
 		DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
-		//DecalComp->SetWorldScale3D(FVector(1, DecalSize, DecalSize));
 	}
 
 	if (ImpactParticle != NULL)
