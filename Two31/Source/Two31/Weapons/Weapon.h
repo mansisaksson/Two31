@@ -35,31 +35,6 @@
 //	TArray<UMaterialInterface*> DefaultImpactDecal;
 //};
 
-USTRUCT(BlueprintType)
-struct FImpactDecals
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UMaterialInterface* Decal;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	FVector Size = FVector(10.f, 10.f, 1.f);
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	float AddedRandXYSize = 10.f;
-};
-
-USTRUCT(BlueprintType)
-struct FImpactVisual
-{
-	GENERATED_USTRUCT_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	FString PhysicsMatName;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* ImpactParticle;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	TArray<FImpactDecals> ImpactDecals;
-};
-
 UCLASS()
 class TWO31_API AWeapon : public AActor
 {
