@@ -99,4 +99,7 @@ Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStud
 !Two31/Plugins/FMODStudio/Binaries/Win64/ovrfmod.dll
 !Two31/Plugins/FMODStudio/Binaries/Win64/ovrfmod.lib
 
-
+!Two31/Plugins/Substance/Binaries/Win64/UE4Editor-SubstanceCore.dll
+!Two31/Plugins/Substance/Binaries/Win64/UE4Editor-SubstanceEditor.dll
+!Two31/Plugins/Substance/Binaries/Win64/UE4-SubstanceCore.lib
+!Two31/Plugins/Substance/Binaries/Win64/UE4-SubstanceCore-Win64-Shipping.lib
