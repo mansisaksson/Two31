@@ -68,33 +68,7 @@ void AGaussRifle::FireShot(FVector TowardsLocation)
 		}
 
 		if (hitObject)
-		{
 			OnWeaponHit(result);
-
-			if (result.GetActor() != NULL)
-			{
-				TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
-				FDamageEvent DamageEvent(ValidDamageTypeClass);
-				if (result.BoneName.GetPlainNameString() == "Head")
-					result.GetActor()->TakeDamage((WeaponDamage * HeadshotMultiplier), DamageEvent, result.GetActor()->GetInstigatorController(), this);
-				else
-					result.GetActor()->TakeDamage(WeaponDamage, DamageEvent, result.GetActor()->GetInstigatorController(), this);
-
-				if (Cast<AEnemyCharacter>(result.GetActor()))
-				{
-					AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
-					FVector HitAngle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-					HitAngle.Normalize();
-					Enemy->AddDelayedImpulse(HitAngle * ImpulsePowah, result.Location);
-				}
-				else if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
-				{
-					FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-					Angle.Normalize();
-					result.GetComponent()->AddImpulseAtLocation(Angle * ImpulsePowah, result.Location);
-				}
-			}
-		}
 	}
 }
 

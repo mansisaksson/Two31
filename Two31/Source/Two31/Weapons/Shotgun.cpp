@@ -18,7 +18,6 @@ AShotgun::AShotgun()
 	timeSinceFire = 0;
 	RadiusMin = 0.f;
 	RadiusMax = 10.f;
-	Distance = 5000.f;
 	NumberOfShots = 8;
 	HeatParam = 0.f;
 	ImpulsePowah = 900.f;
@@ -65,13 +64,10 @@ void AShotgun::FireShot(FVector TowardsLocation)
 		
 		HeatParam += HeatAccumulationScale;
 
-		//const FName TraceTag("Debug Trace");
 		FHitResult result;
 		ECollisionChannel collisionChannel;
 		collisionChannel = ECC_GameTraceChannel2;
 		FCollisionQueryParams collisionQuery;
-		//collisionQuery.TraceTag = TraceTag;
-		//GetWorld()->DebugDrawTraceTag = TraceTag;
 		collisionQuery.bTraceComplex = true;
 		collisionQuery.bReturnPhysicalMaterial = true;
 		FCollisionObjectQueryParams objectCollisionQuery;
@@ -84,7 +80,6 @@ void AShotgun::FireShot(FVector TowardsLocation)
 		if (MuzzeFlash != NULL)
 		{
 			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAttached(MuzzeFlash, MuzzleFlashLocation);
-			//UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, MuzzleFlashLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
 			FTransform particleTransform = particleComp->GetRelativeTransform();
 			particleTransform.SetScale3D(FVector(0.1f, 0.1f, 0.1f));
 			particleComp->SetRelativeTransform(particleTransform);
@@ -128,38 +123,12 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			LocalUp.Normalize();
 			New = Forward.RotateAngleAxis(Vertical, Left);
 			New.Normalize();
-			FinalDirection = New * Distance;
+			FinalDirection = New * Range;
 
 			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), BulletSpawnLocation->GetComponentLocation() + FinalDirection, collisionChannel, collisionQuery, collisionResponse);
-
+			
 			if (hitObject)
-			{
 				OnWeaponHit(result);
-
-				if (result.GetActor() != NULL)
-				{
-					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
-					FDamageEvent DamageEvent(ValidDamageTypeClass);
-					if (result.BoneName.GetPlainNameString() == "Head")
-						result.GetActor()->TakeDamage((WeaponDamage * (1.0f - FMath::Clamp(result.Distance / Distance, 0.0f, 1.0f)) * HeadshotMultiplier), DamageEvent, result.GetActor()->GetInstigatorController(), this);
-					else
-						result.GetActor()->TakeDamage(WeaponDamage * (1.0f - FMath::Clamp(result.Distance / Distance, 0.0f, 1.0f)), DamageEvent, result.GetActor()->GetInstigatorController(), this);
-						
-					if (Cast<AEnemyCharacter>(result.GetActor()))
-					{
-						AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
-						FVector HitAngle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-						HitAngle.Normalize();
-						Enemy->AddDelayedImpulse(HitAngle * ImpulsePowah, result.Location);
-					}
-					else if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
-					{
-						FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-						Angle.Normalize();
-						result.GetComponent()->AddImpulseAtLocation(Angle * ImpulsePowah, result.Location);
-					}
-				}
-			}
 		}
 	}
 }

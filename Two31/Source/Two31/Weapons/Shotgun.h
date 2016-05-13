@@ -31,8 +31,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
 	float RadiusMin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
-	float Distance;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
 	float HeatDissipationScale;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
 	float HeatAccumulationScale;

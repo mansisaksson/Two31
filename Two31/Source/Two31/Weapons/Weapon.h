@@ -141,6 +141,8 @@ protected:
 	float RPM;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float WeaponDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+	float Range;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float HeadshotMultiplier;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
