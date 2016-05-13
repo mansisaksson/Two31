@@ -123,8 +123,8 @@ void AEnemyCharacter::BloodEffects()
 	// Blood splat particles
 	if (BloodParticle != NULL)
 	{
-		UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(BloodParticle, GetMesh() , TEXT("None"), GetActorLocation(), GetActorRotation().GetNormalized() * -1.f, EAttachLocation::KeepWorldPosition);
-		ParticleSystemComp->AddLocalRotation(FRotator(90.f, 0.f, 0.f));
+		//UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(BloodParticle, GetMesh() , TEXT("None"), GetActorLocation(), GetActorRotation().GetNormalized() * -1.f, EAttachLocation::KeepWorldPosition);
+		//ParticleSystemComp->AddLocalRotation(FRotator(90.f, 0.f, 0.f));
 	}
 
 	// Blood decals

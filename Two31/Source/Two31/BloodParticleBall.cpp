@@ -48,7 +48,7 @@ void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherCom
 
 	float speedPercentage = LifeTime / LifetimeDestroy;
 
-	float MaxDecalSize = 1000*speedPercentage;
+	float MaxDecalSize = 100*speedPercentage;
 	float MinDecalSize = MaxDecalSize;
 
 	if (Decal != NULL)
