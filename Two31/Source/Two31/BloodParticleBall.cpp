@@ -7,8 +7,8 @@ ABloodParticleBall::ABloodParticleBall()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
-	//CollisionComp->InitSphereRadius(0.1f);
-	CollisionComp->InitSphereRadius(10.0f);
+	CollisionComp->InitSphereRadius(0.1f);
+	//CollisionComp->InitSphereRadius(10.0f);
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	CollisionComp->OnComponentHit.AddDynamic(this, &ABloodParticleBall::OnHit);
 
@@ -21,8 +21,7 @@ ABloodParticleBall::ABloodParticleBall()
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
 	ProjectileMovement->UpdatedComponent = CollisionComp;
 	ProjectileMovement->InitialSpeed = Speed;
-	ProjectileMovement->MaxSpeed = 10000.f;
-	//ProjectileMovement->MaxSpeed = 9999999999999.f;
+	ProjectileMovement->MaxSpeed = 9999999999999.f;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = true;
 
@@ -55,9 +54,9 @@ void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherCom
 		}
 		else
 		{
-			float speedPercentage = LifeTime / LifetimeDestroy;
+			float speedPercentage = 1.0f - (LifeTime / LifetimeDestroy);
 
-			float MaxDecalSize = 100 * speedPercentage;
+			float MaxDecalSize = 60 * speedPercentage;
 			float MinDecalSize = MaxDecalSize;
 
 			if (Decal != NULL)

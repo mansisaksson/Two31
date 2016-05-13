@@ -285,7 +285,7 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 			HitAngle.Normalize();
 			Enemy->AddDelayedImpulse(HitAngle * ImpulsePowah, HitResult.Location);
 
-			Enemy->SpawnBloodEffects(HitResult.Location, HitResult.ImpactNormal, HitResult.GetActor());
+			Enemy->SpawnBloodEffects(HitResult, this);
 
 		}
 		else if (HitResult.GetComponent() != NULL && HitResult.GetComponent()->Mobility == EComponentMobility::Movable && HitResult.GetComponent()->IsSimulatingPhysics())

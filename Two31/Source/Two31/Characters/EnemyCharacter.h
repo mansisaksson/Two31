@@ -49,8 +49,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	virtual float GetHealth() { return CurrentHealth; }
 
-
-	void SpawnBloodEffects(FVector Location, FVector Normal, AActor* HitActor);
+	void SpawnBloodEffects(FHitResult HitResult, AActor* SourceActor);
 
 protected:
 	UFUNCTION()
