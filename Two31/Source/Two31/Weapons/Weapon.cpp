@@ -3,6 +3,7 @@
 #include "Engine.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
+#include "../BloodParticleBall.h"
 
 AWeapon::AWeapon()
 {
@@ -267,6 +268,7 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 {
 	if (HitResult.GetActor() != NULL)
 	{
+
 		// Deal Damage
 		TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 		FDamageEvent DamageEvent(ValidDamageTypeClass);
@@ -282,6 +284,9 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 			FVector HitAngle = (HitResult.Location - BulletSpawnLocation->GetComponentLocation());
 			HitAngle.Normalize();
 			Enemy->AddDelayedImpulse(HitAngle * ImpulsePowah, HitResult.Location);
+
+			Enemy->SpawnBloodEffects(HitResult.Location, HitResult.ImpactNormal, HitResult.GetActor());
+
 		}
 		else if (HitResult.GetComponent() != NULL && HitResult.GetComponent()->Mobility == EComponentMobility::Movable && HitResult.GetComponent()->IsSimulatingPhysics())
 		{

@@ -7,7 +7,8 @@ ABloodParticleBall::ABloodParticleBall()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
-	CollisionComp->InitSphereRadius(0.1f);
+	//CollisionComp->InitSphereRadius(0.1f);
+	CollisionComp->InitSphereRadius(10.0f);
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	CollisionComp->OnComponentHit.AddDynamic(this, &ABloodParticleBall::OnHit);
 
@@ -20,7 +21,8 @@ ABloodParticleBall::ABloodParticleBall()
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
 	ProjectileMovement->UpdatedComponent = CollisionComp;
 	ProjectileMovement->InitialSpeed = Speed;
-	ProjectileMovement->MaxSpeed = 9999999999999.f;
+	ProjectileMovement->MaxSpeed = 10000.f;
+	//ProjectileMovement->MaxSpeed = 9999999999999.f;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = true;
 
@@ -45,20 +47,29 @@ void ABloodParticleBall::Tick( float DeltaTime )
 
 void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
-
-	float speedPercentage = LifeTime / LifetimeDestroy;
-
-	float MaxDecalSize = 100*speedPercentage;
-	float MinDecalSize = MaxDecalSize;
-
-	if (Decal != NULL)
+	if ((OtherActor != NULL))
 	{
-		float DecalScale = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
-		FVector DecalSize = FVector(DecalScale, DecalScale, 1.f);
-		FVector Normal = (HitResult.Normal * -1);
-		UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(Decal, DecalSize, HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
-		DecalComp->SetWorldRotation(Normal.Rotation());
-		DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+		if (OtherActor->IsA(ABloodParticleBall::StaticClass()))
+		{
+			CollisionComp->MoveIgnoreActors.Add(OtherActor);
+		}
+		else
+		{
+			float speedPercentage = LifeTime / LifetimeDestroy;
+
+			float MaxDecalSize = 100 * speedPercentage;
+			float MinDecalSize = MaxDecalSize;
+
+			if (Decal != NULL)
+			{
+				float DecalScale = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
+				FVector DecalSize = FVector(DecalScale, DecalScale, 1.f);
+				FVector Normal = (HitResult.Normal * -1);
+				UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(Decal, DecalSize, HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
+				DecalComp->SetWorldRotation(Normal.Rotation());
+				DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+			}
+			Destroy();
+		}
 	}
-	Destroy();
 }

@@ -118,8 +118,9 @@ void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* Clas
 	}
 }
 
-void AEnemyCharacter::BloodEffects()
+void AEnemyCharacter::SpawnBloodEffects(FVector Location, FVector Normal, AActor* HitActor)
 {
+
 	// Blood splat particles
 	if (BloodParticle != NULL)
 	{
@@ -131,15 +132,31 @@ void AEnemyCharacter::BloodEffects()
 	if (BloodDecal != NULL)
 	{
 
-	UWorld* const World = GetWorld();
-	if(World)
-	{
-		ABloodParticleBall* ball = World->SpawnActor<ABloodParticleBall>(ABloodParticleBall::StaticClass());
-		//ball->SetActorRotation();
-		ball->GetProjectileMovement()->InitialSpeed = 10000.0f;
-		ball->LifetimeDestroy = 3.0f;
-	}
+		for (int i = 0; i < 1; i++)
+		{
+			// Blood Baloons
+			Debug::LogOnScreen("Hello");
+			UWorld* const World = GetWorld();
+			if (World)
+			{
+				ABloodParticleBall* ball = World->SpawnActor<ABloodParticleBall>(ABloodParticleBall::StaticClass());
+				ball->Decal = BloodDecal;
+				FVector NewLocation = FVector(Location.X, Location.Y, Location.Z+100);
+				ball->SetActorLocation(NewLocation);
+				
+				ball->GetProjectileMovement()->InitialSpeed = 10000.0f;
+				ball->LifetimeDestroy = 3.0f;
+				ball->CollisionComp->MoveIgnoreActors.Add(this);
 
+				FRotator Rotation = Normal.Rotation();
+				ball->SetActorRotation(Rotation);
+				ball->SetActorRelativeRotation(Rotation);
+
+				Debug::LogOnScreen(FString::Printf(TEXT("%f, %f, %f"), Rotation.Yaw, Rotation.Pitch, Rotation.Roll));
+				Debug::LogOnScreen(FString::Printf(TEXT("%f, %f, %f"), Normal.X, Normal.Y, Normal.Z));
+
+			}
+		}
 
 		/*
 		FHitResult result;
@@ -180,7 +197,6 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 		UStatsPornManager::IncreaseAmountOfEnemiesKilled();
 	}
 
-	BloodEffects();
 	return DamageAmount;
 }
 

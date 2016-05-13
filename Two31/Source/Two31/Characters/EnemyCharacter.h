@@ -48,6 +48,10 @@ public:
 	EEnemyState GetCurrentState() { return EnemyState; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	virtual float GetHealth() { return CurrentHealth; }
+
+
+	void SpawnBloodEffects(FVector Location, FVector Normal, AActor* HitActor);
+
 protected:
 	UFUNCTION()
 	virtual void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
@@ -61,7 +65,6 @@ protected:
 	void OnTakeDamage_Implementation();
 	
 
-	void BloodEffects();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* BloodParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
