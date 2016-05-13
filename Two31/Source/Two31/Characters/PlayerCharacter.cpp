@@ -26,6 +26,7 @@ APlayerCharacter::APlayerCharacter()
 	DefaultFOV = 90.f;
 	ADSFOV = 60.f;
 	
+	LevelCompletionTimer = 0.f;
 	MeleeDamage = 50.f;
 	MeleePowah = 90000.f;
 	MaxHealth = 100.f;
@@ -111,6 +112,7 @@ void APlayerCharacter::BeginPlay()
 	CurrentArmor = StartingArmor;
 
 	UStatsPornManager::ClearStats();
+
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)

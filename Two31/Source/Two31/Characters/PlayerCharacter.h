@@ -50,6 +50,14 @@ public:
 	USceneComponent* GetPlayerHitPoint_Shoulder_Left() { return LineOfSight_Shoulder_Left; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetLevelTimer() { return GetWorld()->TimeSeconds; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetLevelCompletionTimer() { return LevelCompletionTimer; }
+	UFUNCTION(BlueprintCallable, Category = SetFunction)
+	void SetLevelCompletionTimer() { LevelCompletionTimer = GetWorld()->TimeSeconds; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetHealth() { return CurrentHealth; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxHealth() { return MaxHealth; }
@@ -206,6 +214,7 @@ private:
 	bool bADS;
 	bool bMeleeAttack;
 
+	float LevelCompletionTimer;
 	float CurrentHealth;
 	float CurrentArmor;
 	float MaxArmor;
