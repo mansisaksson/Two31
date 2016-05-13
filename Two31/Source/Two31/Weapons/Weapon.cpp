@@ -53,10 +53,6 @@ AWeapon::AWeapon()
 
 	BulletSpawnLocation = CreateDefaultSubobject<USceneComponent>("BulletSpawnLocation");
 	BulletSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
-
-	FImpactVisual DefaultImpactVisual;
-	DefaultImpactVisual.PhysicsMatName = "Default";
-	ImpactVisuals.Add(DefaultImpactVisual);
 }
 
 void AWeapon::BeginPlay()

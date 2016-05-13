@@ -1,5 +1,6 @@
 #include "Two31.h"
 #include "Pickup.h"
+#include "../DefaultGameMode.h"
 
 APickup::APickup()
 {
@@ -22,4 +23,30 @@ APickup::APickup()
 
 	TriggerSphere->bGenerateOverlapEvents = true;
 	TriggerSphere->AttachTo(ItemMesh);
+
+	BobHeight = 1.f;
+	BobSpeed = 3.f;
+	RotSpeed = 10.f;
+}
+
+void APickup::BeginPlay() 
+{
+	DefaultGameMode = Cast<ADefaultGameMode>(GetWorld()->GetAuthGameMode());
+}
+
+void APickup::Tick(float DeltaTime)
+{
+	BobTimer += DeltaTime;
+	if (DefaultGameMode != NULL)
+	{
+		if (DefaultGameMode->GetConfig()->GameplayProggMode)
+		{
+			//Debug::LogOnScreen(FString::Printf(TEXT("Sin: %f"), FMath::Sin(BobTimer)));
+			SetActorLocation(GetActorLocation() + FVector(0.f, 0.f, FMath::Sin(BobTimer * BobSpeed) * BobHeight));
+
+			FRotator Rot = GetActorRotation();
+			Rot.Yaw += RotSpeed * DeltaTime;
+			SetActorRotation(Rot);
+		}
+	}
 }

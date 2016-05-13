@@ -17,4 +17,14 @@ protected:
 public:	
 	APickup();
 
+	void BeginPlay() override;
+	void Tick(float DeltaTime) override;
+
+private:
+	class ADefaultGameMode* DefaultGameMode;
+
+	float BobSpeed;
+	float BobHeight;
+	float BobTimer;
+	float RotSpeed;
 };
