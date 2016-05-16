@@ -137,6 +137,7 @@ protected:
 	void NextWeapon();
 	void PreviousWeapon();
 	int GetWeaponIndex();
+	FAmmo* GetAmmoOfType(EAmmoType AmmoType);
 
 	void MoveForward(float Val);
 	void MoveSideways(float Val);

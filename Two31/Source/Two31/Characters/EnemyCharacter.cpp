@@ -81,6 +81,12 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		TimeSinceDeath += DeltaTime;
 		if (TimeSinceDeath > DespawnTimer)
 			Destroy();
+
+		for (size_t i = 0; i < DelayedImpulses.Num(); i++) {
+			Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
+			GetMesh()->AddImpulseAtLocation(DelayedImpulses[i].Impulse, DelayedImpulses[i].Location);
+		}
+		//DelayedImpulses.Empty();
 	}
 	
 	DelayedImpulses.Empty();
@@ -195,12 +201,6 @@ void AEnemyCharacter::Death()
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	UMusicManager::RemoveEnemy(EnemyState);
-
-	for (size_t i = 0; i < DelayedImpulses.Num(); i++) {
-		Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
-		GetMesh()->AddImpulseAtLocation(DelayedImpulses[i].Impulse, DelayedImpulses[i].Location);
-	}
-	DelayedImpulses.Empty();
 }
 
 void AEnemyCharacter::SetCurrentState(EEnemyState State)
