@@ -7,7 +7,6 @@ Two31/.vs/*
 Two31/DerivedDataCache/*
 Two31/Intermediate/*
 Two31/Binaries/*
-!Two31/Saved/Config/Windows/Two31.ini
 Two31/Saved/*
 !Two31/Saved/Config/Windows/Two31.ini
 Two31/Build/*
