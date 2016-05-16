@@ -19,8 +19,6 @@ AGaussRifle::AGaussRifle()
 
 void AGaussRifle::FireShot(FVector TowardsLocation)
 {
-	AWeapon::FireShot(TowardsLocation);
-
 	if (AmmoPool == NULL)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No Ammo Pool assigned!"));
@@ -29,9 +27,10 @@ void AGaussRifle::FireShot(FVector TowardsLocation)
 
 	if ((*AmmoPool) > 0 && AmmoInClip > 0)
 	{
+		AWeapon::FireShot(TowardsLocation);
+
 		AmmoInClip--;
 		(*AmmoPool)--;
-		UStatsPornManager::IncreaseAmountOfShotsFired();
 
 		FHitResult result;
 		ECollisionChannel collisionChannel;
