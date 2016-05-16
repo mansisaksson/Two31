@@ -80,6 +80,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float DespawnTimer;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ZuperSecret)
+	class TSubclassOf<class AJetpack> Jetpack;
+
+	class ADefaultGameMode* DefaultGameMode;
 	UNavigationSystem* NavSystem;
 	class AAIController* AIController;
 	class APlayerCharacter* PlayerReferense;

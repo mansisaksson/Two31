@@ -8,6 +8,7 @@
 #include "ImpCharacter.h"
 #include "AIController.h"
 #include "Engine.h"
+#include "../DefaultGameMode.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -67,6 +68,7 @@ void AEnemyCharacter::BeginPlay()
 	if (AIController == NULL)
 		Debug::LogFatalError("AIController Not found!");
 
+	DefaultGameMode = Cast<ADefaultGameMode>(GetWorld()->GetAuthGameMode());
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)
@@ -131,9 +133,6 @@ void AEnemyCharacter::SpawnBloodEffects(FHitResult HitResult, AActor* SourceActo
 	{
 		for (int i = 0; i < 10; i++)
 		{
-
-
-
 			// Blood Baloons
 			UWorld* const World = GetWorld();
 			if (World)
@@ -147,12 +146,7 @@ void AEnemyCharacter::SpawnBloodEffects(FHitResult HitResult, AActor* SourceActo
 				ball->LifetimeDestroy = 1.5f;
 				ball->CollisionComp->MoveIgnoreActors.Add(this);
 				ball->GetProjectileMovement()->ProjectileGravityScale = 5.0;
-
 			}
-
-
-
-
 		}
 	}
 }
