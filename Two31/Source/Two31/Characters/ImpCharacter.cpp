@@ -323,7 +323,7 @@ void AImpCharacter::RotateTowardsPlayer()
 	TargetRotation *= Mask;
 	TargetRotation.Normalize();
 
-	SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation.Rotation(), 0.05f));
+	SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation.Rotation(), 0.05f * 2));
 }
 void AImpCharacter::MoveToPlayersEstimatedPosition()
 {
