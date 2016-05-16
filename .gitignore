@@ -7,10 +7,18 @@ Two31/.vs/*
 Two31/DerivedDataCache/*
 Two31/Intermediate/*
 Two31/Binaries/*
-Two31/Saved/
-!Two31/Saved/Config/Windows/Two31.ini
 Two31/Build/*
 !Two31/Build/**/*.ico		//Don't ignore icon files in Build
+
+
+// F******* Config
+Two31/Saved/*
+!Two31/Saved/Config/
+Two31/Saved/Config/*
+!Two31/Saved/Config/Windows/
+Two31/Saved/Config/Windows/*
+!Two31/Saved/Config/Windows/Two31.ini
+
 
 #Don't know what these are but I'll let them be for now
 SourceArt/**/*.png
