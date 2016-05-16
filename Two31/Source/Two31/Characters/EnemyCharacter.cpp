@@ -124,52 +124,36 @@ void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* Clas
 	}
 }
 
-void AEnemyCharacter::BloodEffects()
+void AEnemyCharacter::SpawnBloodEffects(FHitResult HitResult, AActor* SourceActor)
 {
-	// Blood splat particles
-	if (BloodParticle != NULL)
-	{
-		//UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(BloodParticle, GetMesh() , TEXT("None"), GetActorLocation(), GetActorRotation().GetNormalized() * -1.f, EAttachLocation::KeepWorldPosition);
-		//ParticleSystemComp->AddLocalRotation(FRotator(90.f, 0.f, 0.f));
-	}
-
 	// Blood decals
 	if (BloodDecal != NULL)
 	{
-
-	UWorld* const World = GetWorld();
-	if(World)
-	{
-		ABloodParticleBall* ball = World->SpawnActor<ABloodParticleBall>(ABloodParticleBall::StaticClass());
-		//ball->SetActorRotation();
-		ball->GetProjectileMovement()->InitialSpeed = 10000.0f;
-		ball->LifetimeDestroy = 3.0f;
-	}
-
-
-		/*
-		FHitResult result;
-		ECollisionChannel collisionChannel;
-		collisionChannel = ECC_WorldDynamic;
-		FCollisionQueryParams collisionQuery;
-		collisionQuery.bTraceComplex = true;
-		FCollisionObjectQueryParams objectCollisionQuery;
-		FCollisionResponseParams collisionResponse;
-		collisionResponse = ECR_Block;
-
-		collisionQuery.AddIgnoredActor(this);
-		collisionQuery.AddIgnoredActor(GetOwner());
-		//collisionQuery.AddIgnoredActor(HitResult.GetActor());
-
-		bool hitObject = GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + FVector(0.f, 0.f, -1000.f), collisionChannel, collisionQuery, collisionResponse);
-
-		if (hitObject)
+		for (int i = 0; i < 10; i++)
 		{
-			float DecalSize = (BloodDecalMaxSize - BloodDecalMinSize) * FMath::FRand() + BloodDecalMinSize;
-			UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), BloodDecal, FVector(DecalSize, DecalSize, 1.f), result.Location, result.Normal.Rotation() * -1.f);
-			DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+
+
+
+			// Blood Baloons
+			UWorld* const World = GetWorld();
+			if (World)
+			{
+				FVector Normal = HitResult.Normal * -1;
+				FRotator Rotation = Normal.Rotation();
+				Normal = Normal.RotateAngleAxis(FMath::RandRange(0.0, 20.0f), FVector(FMath::RandRange(0.0, 1.0f), FMath::RandRange(0.0, 1.0f), FMath::RandRange(0.0, 1.0f)));
+				ABloodParticleBall* ball = World->SpawnActor<ABloodParticleBall>(ABloodParticleBall::StaticClass(), HitResult.Location, HitResult.Normal.Rotation());
+				ball->Decal = BloodDecal;
+				ball->GetProjectileMovement()->InitialSpeed = 1000.0f;
+				ball->LifetimeDestroy = 1.5f;
+				ball->CollisionComp->MoveIgnoreActors.Add(this);
+				ball->GetProjectileMovement()->ProjectileGravityScale = 5.0;
+
+			}
+
+
+
+
 		}
-		*/
 	}
 }
 
@@ -186,7 +170,6 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 		UStatsPornManager::IncreaseAmountOfEnemiesKilled();
 	}
 
-	BloodEffects();
 	return DamageAmount;
 }
 
