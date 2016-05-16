@@ -48,6 +48,7 @@ APlayerCharacter::APlayerCharacter()
 	HealthPacks.SetNum(0);
 	Items.SetNum(0);
 	Inventory.SetNum(0);
+	VoiceActing.SetNum(0);
 
 	bFireIsPressed = false;
 	bCanJump = false;
@@ -709,4 +710,20 @@ void APlayerCharacter::SetMeleeRadius(float Radius)
 	else
 		MeleeCollider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	MeleeCollider->SetSphereRadius(Radius);
+}
+
+int32 APlayerCharacter::ChangeVoiceActing()
+{
+	int32 NewVoiceActing;
+	NewVoiceActing = VoiceActing[0];
+	VoiceActing.RemoveAt(0);
+	return NewVoiceActing;
+}
+int32 APlayerCharacter::GetVoiceActingSize()
+{
+	return VoiceActing.Num();
+}
+void APlayerCharacter::AddVoiceActingID(int32 ID)
+{
+	VoiceActing.Add(ID);
 }
