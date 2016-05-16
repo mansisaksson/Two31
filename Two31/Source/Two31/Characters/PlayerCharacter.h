@@ -114,6 +114,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = SetFunction)
 	void SetMeleeRadius(float Radius);
 
+	UFUNCTION(BlueprintCallable, Category = VoiceActing)
+	int32 ChangeVoiceActing();
+	UFUNCTION(BlueprintCallable, Category = VoiceActing)
+	int32 GetVoiceActingSize();
+	UFUNCTION(BlueprintCallable, Category = VoiceActing)
+	void AddVoiceActingID(int32 ID);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -237,4 +244,5 @@ private:
 	TArray<int32> Items;
 	TArray<SInventory> Inventory;
 	TArray<AActor*> MeleedActors;
+	TArray<int32> VoiceActing;
 };

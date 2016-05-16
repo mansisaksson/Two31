@@ -3,6 +3,7 @@
 #include "Engine.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
+#include "../StatsPornManager.h"
 #include "../BloodParticleBall.h"
 
 AWeapon::AWeapon()
@@ -225,7 +226,11 @@ void AWeapon::StopFire(FVector TowardsLocation)
 }
 void AWeapon::FireShot(FVector TowardsLocation)
 {
-
+	if (GetOwner() != NULL)
+	{
+		if (Cast<APlayerCharacter>(GetOwner()))
+			UStatsPornManager::IncreaseAmountOfShotsFired();
+	}
 }
 
 void AWeapon::Reload()
