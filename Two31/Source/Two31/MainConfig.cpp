@@ -6,7 +6,7 @@
 
 UMainConfig::UMainConfig()
 {
-	LoadConfig();
+	
 }
 
 UMainConfig::~UMainConfig()
