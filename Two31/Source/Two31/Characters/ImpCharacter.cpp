@@ -89,16 +89,15 @@ void AImpCharacter::BeginPlay()
 
 	if (Jetpack != NULL)
 	{
-		//if (DefaultGameMode->GetConfig()->GameplayProggMode)
-		//{
-
-		//pos:(X=21.795549,Y=30.619284,Z=5.023289)
-		//ROT:(Pitch=-83.495476,Yaw=74.854538,Roll=-89.920227)
-		//SCALE:(X=0.700000,Y=0.700000,Z=0.700000)
-			AJetpack* pack = GetWorld()->SpawnActor<AJetpack>(Jetpack, FVector(21.795549f, 30.619284, 5.023289f), FRotator(-83.495476f, 74.854538f,-89.920227f));
+		if (DefaultGameMode->GetConfig()->GameplayProggMode)
+		{
+			//pos:(X=21.795549,Y=30.619284,Z=5.023289)
+			//ROT:(Pitch=-83.495476,Yaw=74.854538,Roll=-89.920227)
+			//SCALE:(X=0.700000,Y=0.700000,Z=0.700000)
+			AJetpack* pack = GetWorld()->SpawnActor<AJetpack>(Jetpack, FVector(21.795549f, 30.619284, 5.023289f), FRotator(-83.495476f, 74.854538f, -89.920227f));
 			pack->AttachRootComponentTo(GetMesh(), TEXT("JetPack"));
 			pack->SetActorScale3D(FVector(0.7f, 0.7f, 0.7f));
-		//}
+		}
 	}
 }
 

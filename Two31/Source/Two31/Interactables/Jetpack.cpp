@@ -8,7 +8,7 @@ AJetpack::AJetpack()
 	SetRootComponent(JetMesh);
 
 	UpArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("UpArrow"));
-	UpArrow->AttachTo(UpArrow);
+	UpArrow->AttachTo(JetMesh);
 }
 
 void AJetpack::BeginPlay()

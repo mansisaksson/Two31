@@ -21,9 +21,6 @@ AEnemyCharacter::AEnemyCharacter()
 	DespawnTimer = 3.f;
 	TimeSinceDeath = 0.f;
 
-	BloodDecalMinSize = 40.f;
-	BloodDecalMaxSize = 100.f;
-
 	EnemyState = EEnemyState::Idle;
 	UMusicManager::AddEnemy(EnemyState);
 

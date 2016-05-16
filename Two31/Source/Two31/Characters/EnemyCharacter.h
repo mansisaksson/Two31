@@ -63,15 +63,8 @@ protected:
 	void OnTakeDamage();
 	void OnTakeDamage_Implementation();
 	
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* BloodParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UMaterialInterface* BloodDecal;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float BloodDecalMinSize;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float BloodDecalMaxSize;
 
 	virtual void Death();
 
