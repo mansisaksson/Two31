@@ -8,6 +8,7 @@
 #include "ImpCharacter.h"
 #include "AIController.h"
 #include "Engine.h"
+#include "../DefaultGameMode.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -67,6 +68,7 @@ void AEnemyCharacter::BeginPlay()
 	if (AIController == NULL)
 		Debug::LogFatalError("AIController Not found!");
 
+	DefaultGameMode = Cast<ADefaultGameMode>(GetWorld()->GetAuthGameMode());
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)
@@ -81,6 +83,12 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		TimeSinceDeath += DeltaTime;
 		if (TimeSinceDeath > DespawnTimer)
 			Destroy();
+
+		for (size_t i = 0; i < DelayedImpulses.Num(); i++) {
+			Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
+			GetMesh()->AddImpulseAtLocation(DelayedImpulses[i].Impulse, DelayedImpulses[i].Location);
+		}
+		//DelayedImpulses.Empty();
 	}
 	
 	DelayedImpulses.Empty();
@@ -125,9 +133,6 @@ void AEnemyCharacter::SpawnBloodEffects(FHitResult HitResult, AActor* SourceActo
 	{
 		for (int i = 0; i < 10; i++)
 		{
-
-
-
 			// Blood Baloons
 			UWorld* const World = GetWorld();
 			if (World)
@@ -141,12 +146,7 @@ void AEnemyCharacter::SpawnBloodEffects(FHitResult HitResult, AActor* SourceActo
 				ball->LifetimeDestroy = 1.5f;
 				ball->CollisionComp->MoveIgnoreActors.Add(this);
 				ball->GetProjectileMovement()->ProjectileGravityScale = 5.0;
-
 			}
-
-
-
-
 		}
 	}
 }
@@ -178,12 +178,6 @@ void AEnemyCharacter::Death()
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	UMusicManager::RemoveEnemy(EnemyState);
-
-	for (size_t i = 0; i < DelayedImpulses.Num(); i++) {
-		Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
-		GetMesh()->AddImpulseAtLocation(DelayedImpulses[i].Impulse, DelayedImpulses[i].Location);
-	}
-	DelayedImpulses.Empty();
 }
 
 void AEnemyCharacter::SetCurrentState(EEnemyState State)

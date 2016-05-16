@@ -13,7 +13,7 @@ struct FImpactDecals
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UMaterialInterface* Decal;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	FVector Size = FVector(10.f, 10.f, 1.f);
+	FVector Size = FVector(10.f, 10.f, 5.f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	float AddedRandXYSize = 10.f;
 };

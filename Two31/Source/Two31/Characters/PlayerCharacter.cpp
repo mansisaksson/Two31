@@ -458,15 +458,38 @@ bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 				const FVector SpawnLocation = FVector::ZeroVector;
 				WeaponSlots[i] = GetWorld()->SpawnActor<AWeapon>(Weapon, SpawnLocation, SpawnRotation);
 				WeaponSlots[i]->AttachRootComponentTo(FPArmMesh);
+				WeaponSlots[i]->SetAmmoPool(&GetAmmoOfType((EAmmoType)WeaponSlots[i]->GetAmmoType())->AmmoPool);
 				WeaponSlots[i]->HolsterWeapon();
 
 				if (CurrentWeapon == NULL)
 					SelectWeaponSlot(i);
+
 				return true;
 			}
 		}
 	}
 	return false;
+}
+FAmmo* APlayerCharacter::GetAmmoOfType(EAmmoType AmmoType)
+{
+	switch (AmmoType)
+	{
+	case EAmmoType::BulletAmmo:
+		return &BulletAmmo;
+		break;
+	case EAmmoType::ShotgunAmmo:
+		return &ShotgunAmmo;
+		break;
+	case EAmmoType::ExplosiveAmmo:
+		return &ExplosiveAmmo;
+		break;
+	case EAmmoType::PlasmaAmmo:
+		return &PlasmaAmmo;
+		break;
+	default:
+		return NULL;
+		break;
+	}
 }
 void APlayerCharacter::SelectWeaponSlot(int index)
 {
@@ -476,31 +499,10 @@ void APlayerCharacter::SelectWeaponSlot(int index)
 			CurrentWeapon->HolsterWeapon();
 
 		CurrentWeapon = WeaponSlots[index];
+		CurrentAmmo = GetAmmoOfType((EAmmoType)CurrentWeapon->GetAmmoType());
 		
-		switch ((EAmmoType)CurrentWeapon->GetAmmoType())
-		{
-		case EAmmoType::BulletAmmo:
-			CurrentAmmo = &BulletAmmo;
-			break;
-		case EAmmoType::ShotgunAmmo:
-			CurrentAmmo = &ShotgunAmmo;
-			break;
-		case EAmmoType::ExplosiveAmmo:
-			CurrentAmmo = &ExplosiveAmmo;
-			break;
-		case EAmmoType::PlasmaAmmo:
-			CurrentAmmo = &PlasmaAmmo;
-			break;
-		default:
-			CurrentAmmo = NULL;
-			break;
-		}
-
 		if (CurrentAmmo != NULL)
-		{
 			CurrentWeapon->EquipWeapon(FPArmMesh, &CurrentAmmo->AmmoPool);
-		}
-			
 	}
 }
 void APlayerCharacter::SelectWeaponSlot1()

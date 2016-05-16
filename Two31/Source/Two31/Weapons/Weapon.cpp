@@ -243,6 +243,9 @@ void AWeapon::Reload()
 void AWeapon::SetAmmoPool(int* AmmoPool)
 {
 	this->AmmoPool = AmmoPool;
+
+	if (bFirstTimeEquiped && AmmoPool != NULL)
+		FillClip();
 }
 void AWeapon::FillClip()
 {
