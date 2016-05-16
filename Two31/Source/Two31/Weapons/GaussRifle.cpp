@@ -3,6 +3,7 @@
 #include "../StatsPornManager.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
+#include "Kismet/KismetMaterialLibrary.h"
 
 AGaussRifle::AGaussRifle()
 	: AWeapon()
@@ -13,8 +14,30 @@ AGaussRifle::AGaussRifle()
 	FastReloadTime = 1.5f;
 	timeSinceFire = 0.f;
 
+	HeatParam = 0.f;
+
+	HeatDissipationScale = 0.2f;
+	HeatAccumulationScale = 0.3f;
+	MaxHeatAccumulation = 10.f;
+
 	MuzzleSpawnLocation = CreateDefaultSubobject<USceneComponent>("MuzzleSpawnLocation");
 	MuzzleSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
+}
+
+void AGaussRifle::BeginPlay()
+{
+	AWeapon::BeginPlay();
+
+	MatInstance = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, WeaponMesh->GetMaterial(0));
+	WeaponMesh->SetMaterial(0, MatInstance);
+}
+
+void AGaussRifle::Tick(float DeltaTime)
+{
+	AWeapon::Tick(DeltaTime);
+
+	HeatParam = FMath::Clamp(HeatParam - DeltaTime * HeatDissipationScale, 0.f, 10.f);
+	MatInstance->SetScalarParameterValue(TEXT("HeatParam"), HeatParam);
 }
 
 void AGaussRifle::FireShot(FVector TowardsLocation)
@@ -31,6 +54,8 @@ void AGaussRifle::FireShot(FVector TowardsLocation)
 
 		AmmoInClip--;
 		(*AmmoPool)--;
+
+		HeatParam += HeatAccumulationScale;
 
 		FHitResult result;
 		ECollisionChannel collisionChannel;

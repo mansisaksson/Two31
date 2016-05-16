@@ -6,6 +6,13 @@ ADefaultGameMode::ADefaultGameMode() : Super()
 {
 	Config = NewObject<UMainConfig>(UMainConfig::StaticClass());
 	Config->AddToRoot();
+	bEnableProgMod = false;
+}
+
+void ADefaultGameMode::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	GetConfig()->GameplayProggMode = bEnableProgMod;
 }
 
 UMainConfig* ADefaultGameMode::GetConfig()

@@ -21,6 +21,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	USceneComponent* GetOwnerComp();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	bool GetIsActive() { return bIsActive; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
