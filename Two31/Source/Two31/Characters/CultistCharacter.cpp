@@ -437,6 +437,8 @@ void ACultistCharacter::Death()
 }
 float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
+	AEnemyCharacter::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
 	if (GetCurrentState() != EEnemyState::Triggered)
 	{
 		SetCurrentState(EEnemyState::Triggered);
