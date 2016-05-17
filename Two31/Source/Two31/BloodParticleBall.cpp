@@ -10,7 +10,7 @@ ABloodParticleBall::ABloodParticleBall()
 	CollisionComp->InitSphereRadius(0.1f);
 	//CollisionComp->InitSphereRadius(10.0f);
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
-	CollisionComp->OnComponentHit.AddDynamic(this, &ABloodParticleBall::OnHit);
+	
 
 	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CollisionComp->CanCharacterStepUpOn = ECB_No;
@@ -27,6 +27,12 @@ ABloodParticleBall::ABloodParticleBall()
 
 	LifetimeDestroy = 3.0f;
 
+}
+
+void ABloodParticleBall::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	CollisionComp->OnComponentHit.AddDynamic(this, &ABloodParticleBall::OnHit);
 }
 
 void ABloodParticleBall::BeginPlay()
@@ -46,11 +52,14 @@ void ABloodParticleBall::Tick( float DeltaTime )
 
 void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
+	Debug::LogOnScreen("herpa ");
 	if ((OtherActor != NULL))
 	{
+		Debug::LogOnScreen("derp ");
 		if (OtherActor->IsA(ABloodParticleBall::StaticClass()))
 		{
-			CollisionComp->MoveIgnoreActors.Add(OtherActor);
+			//CollisionComp->MoveIgnoreActors.Add(OtherActor);
+			CollisionComp->IgnoreActorWhenMoving(OtherActor, true);
 		}
 		else
 		{
@@ -67,6 +76,7 @@ void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherCom
 				UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(Decal, DecalSize, HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
 				DecalComp->SetWorldRotation(Normal.Rotation());
 				DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+				Debug::LogOnScreen("hit ");
 			}
 			Destroy();
 		}

@@ -141,8 +141,10 @@ void AEnemyCharacter::SpawnBloodEffects(FHitResult HitResult, AActor* SourceActo
 				ball->Decal = BloodDecal;
 				ball->GetProjectileMovement()->InitialSpeed = 1000.0f;
 				ball->LifetimeDestroy = 1.5f;
-				ball->CollisionComp->MoveIgnoreActors.Add(this);
+				//ball->CollisionComp->MoveIgnoreActors.Add(this);
+				ball->CollisionComp->IgnoreActorWhenMoving(this, true);
 				ball->GetProjectileMovement()->ProjectileGravityScale = 5.0;
+				//Debug::LogOnScreen("spwaning blood");
 			}
 		}
 	}

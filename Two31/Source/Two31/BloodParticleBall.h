@@ -12,6 +12,7 @@ class TWO31_API ABloodParticleBall : public AActor
 	
 public:	
 	ABloodParticleBall();
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void Tick( float DeltaSeconds ) override;
 
