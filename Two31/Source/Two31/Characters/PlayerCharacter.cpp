@@ -365,7 +365,6 @@ bool APlayerCharacter::ChangeArmor(float pChange)
 			return true;
 		}
 	}
-
 	return false;
 }
 bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
