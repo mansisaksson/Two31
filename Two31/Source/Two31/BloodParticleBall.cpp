@@ -1,5 +1,6 @@
 
 #include "Two31.h"
+#include "Characters/PlayerCharacter.h"
 #include "BloodParticleBall.h"
 
 ABloodParticleBall::ABloodParticleBall()
@@ -52,11 +53,13 @@ void ABloodParticleBall::Tick( float DeltaTime )
 
 void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
 {
-	Debug::LogOnScreen("herpa ");
 	if ((OtherActor != NULL))
 	{
-		Debug::LogOnScreen("derp ");
-		if (OtherActor->IsA(ABloodParticleBall::StaticClass()))
+		if (Cast<APlayerCharacter>(OtherActor))
+		{
+			CollisionComp->IgnoreActorWhenMoving(OtherActor, true);
+		}
+		else if (OtherActor->IsA(ABloodParticleBall::StaticClass()))
 		{
 			//CollisionComp->MoveIgnoreActors.Add(OtherActor);
 			CollisionComp->IgnoreActorWhenMoving(OtherActor, true);
@@ -76,7 +79,6 @@ void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherCom
 				UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(Decal, DecalSize, HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
 				DecalComp->SetWorldRotation(Normal.Rotation());
 				DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
-				Debug::LogOnScreen("hit ");
 			}
 			Destroy();
 		}
