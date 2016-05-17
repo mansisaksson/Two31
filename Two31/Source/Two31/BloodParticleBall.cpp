@@ -1,6 +1,7 @@
 
 #include "Two31.h"
 #include "Characters/PlayerCharacter.h"
+#include "Characters/EnemyCharacter.h"
 #include "BloodParticleBall.h"
 
 ABloodParticleBall::ABloodParticleBall()
@@ -15,6 +16,8 @@ ABloodParticleBall::ABloodParticleBall()
 
 	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CollisionComp->CanCharacterStepUpOn = ECB_No;
+	CollisionComp->SetCanEverAffectNavigation(false);
+	CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	RootComponent = CollisionComp;
 
 	Speed = 1000.0f;
@@ -55,13 +58,8 @@ void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherCom
 {
 	if ((OtherActor != NULL))
 	{
-		if (Cast<APlayerCharacter>(OtherActor))
+		if (Cast<APlayerCharacter>(OtherActor) || Cast<AEnemyCharacter>(OtherActor) || OtherActor->IsA(ABloodParticleBall::StaticClass()))
 		{
-			CollisionComp->IgnoreActorWhenMoving(OtherActor, true);
-		}
-		else if (OtherActor->IsA(ABloodParticleBall::StaticClass()))
-		{
-			//CollisionComp->MoveIgnoreActors.Add(OtherActor);
 			CollisionComp->IgnoreActorWhenMoving(OtherActor, true);
 		}
 		else
