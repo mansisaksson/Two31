@@ -127,12 +127,12 @@ void AImpCharacter::Tick(float DeltaTime)
 						MoveAroundPlayer();
 					else if (GetActorLocation().X > MoveAroundLocation.X - 50 && GetActorLocation().X < MoveAroundLocation.X + 50 && GetActorLocation().Y > MoveAroundLocation.Y - 50 && GetActorLocation().Y < MoveAroundLocation.Y + 50)
 					{
-						Debug::LogOnScreen("At location - moving towards");
+						//Debug::LogOnScreen("At location - moving towards");
 						bMoveAroundPlayer = false;
 					}
 					else if (GetDistanceToPlayer() < 1000.f)
 					{
-						Debug::LogOnScreen("Close to player - moving towards");
+						//Debug::LogOnScreen("Close to player - moving towards");
 						bMoveAroundPlayer = false;
 					}
 					else if (GetDistanceToPlayer() > AllowedDistanceFromPlayer)
@@ -351,7 +351,7 @@ void AImpCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, floa
 {
 	if (GetCurrentState() == EEnemyState::Idle)
 	{
-		Debug::LogOnScreen("Aggro true - hear pawn");
+		//Debug::LogOnScreen("Aggro true - hear pawn");
 		SetCurrentState(EEnemyState::Search);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
@@ -360,7 +360,7 @@ void AImpCharacter::OnSeePawn(APawn *OtherPawn)
 {
 	if (GetCurrentState() == EEnemyState::Idle)
 	{
-		Debug::LogOnScreen("Aggro true - see pawn");
+		//Debug::LogOnScreen("Aggro true - see pawn");
 		SetCurrentState(EEnemyState::Search);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
@@ -372,7 +372,7 @@ float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	if (GetCurrentState() != EEnemyState::Triggered)
 	{
-		Debug::LogOnScreen("Aggro true - take DAMAGE");
+		//Debug::LogOnScreen("Aggro true - take DAMAGE");
 		SetCurrentState(EEnemyState::Search);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
@@ -556,7 +556,7 @@ void AImpCharacter::OnAttackBeginOverlap(class AActor* OtherActor, class UPrimit
 {
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{
-		Debug::LogOnScreen("Imp attacking Player");
+		//Debug::LogOnScreen("Imp attacking Player");
 		APlayerController* PlayerController = Cast<APlayerController>(Player->GetController());
 		TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 		FDamageEvent DamageEvent(ValidDamageTypeClass);

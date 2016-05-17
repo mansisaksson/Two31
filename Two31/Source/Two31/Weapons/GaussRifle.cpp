@@ -44,7 +44,7 @@ void AGaussRifle::FireShot(FVector TowardsLocation)
 {
 	if (AmmoPool == NULL)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No Ammo Pool assigned!"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No Ammo Pool assigned!"));
 		return;
 	}
 

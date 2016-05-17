@@ -186,7 +186,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		if (Cast<AWeaponPickup>(OtherActor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Weapon Pickup"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Weapon Pickup"));
 			AWeaponPickup* WeaponPickup = Cast<AWeaponPickup>(OtherActor);
 			if (EquipWeapon(WeaponPickup->GetWeapon()))
 			{
@@ -196,7 +196,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		}
 		else if (Cast<AHealthPickup>(OtherActor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Health Pickup"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Health Pickup"));
 			AHealthPickup* Healthpack = Cast<AHealthPickup>(OtherActor);
 			if (PickupHealthPack(Healthpack))
 			{
@@ -207,7 +207,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		}
 		else if (Cast<AArmorPickup>(OtherActor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Armor Pickup"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Armor Pickup"));
 			AArmorPickup* Armor = Cast<AArmorPickup>(OtherActor);
 			if (ChangeArmor(Armor->GetArmor()))
 			{
@@ -218,7 +218,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		}
 		else if (Cast<AAmmoPickup>(OtherActor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Ammo Pickup"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Ammo Pickup"));
 			AAmmoPickup* Ammo = Cast<AAmmoPickup>(OtherActor);
 			if (AddAmmo(Ammo->GetAmmoType(), Ammo->GetAmount()))
 			{
@@ -228,7 +228,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		}
 		else if (Cast<AItemPickup>(OtherActor))
 		{
-			Debug::LogOnScreen(TEXT("Item Pickup"));
+			//Debug::LogOnScreen(TEXT("Item Pickup"));
 			AItemPickup* Item = Cast<AItemPickup>(OtherActor);
 			if (AddItem(Item))
 				Item->Destroy();
@@ -323,7 +323,7 @@ void APlayerCharacter::OnMeleeAttack()
 	{
 		bMeleeAttack = true;
 		TimeSinceMelee = 0.f;
-		Debug::LogOnScreen("Meele!");
+		//Debug::LogOnScreen("Meele!");
 	}
 }
 
@@ -391,7 +391,7 @@ bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
 	}
 	if (AmmoToRefill != NULL && (AmmoToRefill->AmmoPool < AmmoToRefill->MaxAmmo))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Refill ammo"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Refill ammo"));
 		AmmoToRefill->AmmoPool = FMath::Clamp(AmmoToRefill->AmmoPool + Amount, 0, AmmoToRefill->MaxAmmo);
 		return true;
 	}
