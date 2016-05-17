@@ -34,7 +34,7 @@ AEnemyCharacter::AEnemyCharacter()
 	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
 
 	AlertRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AlertRadius"));
-	AlertRadius->AttachTo(GetMesh());
+	AlertRadius->AttachTo(GetCapsuleComponent());
 	AlertRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	AlertRadius->IgnoreActorWhenMoving(this, true);
 }
@@ -82,7 +82,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 			Destroy();
 
 		for (size_t i = 0; i < DelayedImpulses.Num(); i++) {
-			Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
+			//Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
 			GetMesh()->AddImpulseAtLocation(DelayedImpulses[i].Impulse, DelayedImpulses[i].Location);
 		}
 		//DelayedImpulses.Empty();
@@ -95,13 +95,13 @@ void AEnemyCharacter::OnHearNoise(APawn *OtherPawn, const FVector &Location, flo
 {
 	const FString VolumeDesc = FString::Printf(TEXT(" at volume %f"), Volume);
 	FString message = TEXT("Heard Actor ") + OtherPawn->GetName() + VolumeDesc;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
 }
 
 void AEnemyCharacter::OnSeePawn(APawn *OtherPawn)
 {
 	FString message = TEXT("Saw Pawn ") + OtherPawn->GetName();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
 }
 
 void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter)
@@ -141,8 +141,10 @@ void AEnemyCharacter::SpawnBloodEffects(FHitResult HitResult, AActor* SourceActo
 				ball->Decal = BloodDecal;
 				ball->GetProjectileMovement()->InitialSpeed = 1000.0f;
 				ball->LifetimeDestroy = 1.5f;
-				ball->CollisionComp->MoveIgnoreActors.Add(this);
+				//ball->CollisionComp->MoveIgnoreActors.Add(this);
+				ball->CollisionComp->IgnoreActorWhenMoving(this, true);
 				ball->GetProjectileMovement()->ProjectileGravityScale = 5.0;
+				//Debug::LogOnScreen("spwaning blood");
 			}
 		}
 	}

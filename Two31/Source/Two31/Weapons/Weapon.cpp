@@ -175,7 +175,7 @@ void AWeapon::SetPlayerAnimations(USkeletalMeshComponent* PlayerMesh)
 	OwnerMesh = PlayerMesh;
 	if (PlayerAnimationBlueprint != NULL && OwnerMesh != NULL)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Player Animations")));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Player Animations")));
 		OwnerMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 		OwnerMesh->SetAnimInstanceClass(PlayerAnimationBlueprint);
 	}
@@ -185,7 +185,7 @@ void AWeapon::SetCultistAnimations(USkeletalMeshComponent* CultistMesh)
 	OwnerMesh = CultistMesh;
 	if (PlayerAnimationBlueprint != NULL && OwnerMesh != NULL)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Cultist Animations")));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Cultist Animations")));
 		OwnerMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 		OwnerMesh->SetAnimInstanceClass(CultistAnimationBlueprint);
 	}

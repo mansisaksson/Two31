@@ -107,7 +107,7 @@ void ACultistCharacter::Tick(float DeltaTime)
 				SearchForPlayer(DeltaTime);
 			else
 			{
-				Debug::LogOnScreen("Done Searching, going idle");
+				//Debug::LogOnScreen("Done Searching, going idle");
 				SetCurrentState(EEnemyState::Idle);
 			}
 		}
@@ -316,14 +316,14 @@ void ACultistCharacter::GoToLastKnownPosition(float DeltaTime)
 {
 	if (TimeSinceRanToLastKnownPosition > TimeToMoveTooLastKnownPosititon)
 	{
-		Debug::LogOnScreen("Done Moving, Entering Search Mode");
+		//Debug::LogOnScreen("Done Moving, Entering Search Mode");
 		SetCurrentState(EEnemyState::Search);
 		TimeSinceStartSearch = 0.f;
 		LastFloorValue = -1.f;
 	}
 	else if (TimeSinceRanToLastKnownPosition == 0.f || (TimeSinceRanToLastKnownPosition > 1.5f && !bHasMovedToPlayer)) // Kommer gå till en uppdaterad position av spelaren i ett visst antal sekunder
 	{
-		Debug::LogOnScreen("Moving to player position");
+		//Debug::LogOnScreen("Moving to player position");
 		if (TimeSinceRanToLastKnownPosition > 1.5f)
 			bHasMovedToPlayer = true;
 		NavSystem->SimpleMoveToLocation(GetController(), PlayerReferense->GetActorLocation());
@@ -335,7 +335,7 @@ void ACultistCharacter::SearchForPlayer(float DeltaTime)
 {
 	if (LastFloorValue < FMath::FloorToInt(TimeSinceStartSearch / 3.f))
 	{
-		Debug::LogOnScreen("Run Search Thingy");
+		//Debug::LogOnScreen("Run Search Thingy");
 
 		float DistToPlayer = (GetActorLocation() - PlayerReferense->GetActorLocation()).Size();
 
@@ -437,6 +437,8 @@ void ACultistCharacter::Death()
 }
 float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
+	AEnemyCharacter::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
 	if (GetCurrentState() != EEnemyState::Triggered)
 	{
 		SetCurrentState(EEnemyState::Triggered);

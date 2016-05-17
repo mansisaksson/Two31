@@ -1,5 +1,6 @@
 
 #include "Two31.h"
+#include "Characters/PlayerCharacter.h"
 #include "BloodParticleBall.h"
 
 ABloodParticleBall::ABloodParticleBall()
@@ -10,7 +11,7 @@ ABloodParticleBall::ABloodParticleBall()
 	CollisionComp->InitSphereRadius(0.1f);
 	//CollisionComp->InitSphereRadius(10.0f);
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
-	CollisionComp->OnComponentHit.AddDynamic(this, &ABloodParticleBall::OnHit);
+	
 
 	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CollisionComp->CanCharacterStepUpOn = ECB_No;
@@ -27,6 +28,12 @@ ABloodParticleBall::ABloodParticleBall()
 
 	LifetimeDestroy = 3.0f;
 
+}
+
+void ABloodParticleBall::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	CollisionComp->OnComponentHit.AddDynamic(this, &ABloodParticleBall::OnHit);
 }
 
 void ABloodParticleBall::BeginPlay()
@@ -48,9 +55,14 @@ void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherCom
 {
 	if ((OtherActor != NULL))
 	{
-		if (OtherActor->IsA(ABloodParticleBall::StaticClass()))
+		if (Cast<APlayerCharacter>(OtherActor))
 		{
-			CollisionComp->MoveIgnoreActors.Add(OtherActor);
+			CollisionComp->IgnoreActorWhenMoving(OtherActor, true);
+		}
+		else if (OtherActor->IsA(ABloodParticleBall::StaticClass()))
+		{
+			//CollisionComp->MoveIgnoreActors.Add(OtherActor);
+			CollisionComp->IgnoreActorWhenMoving(OtherActor, true);
 		}
 		else
 		{
