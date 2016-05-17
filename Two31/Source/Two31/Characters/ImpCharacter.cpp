@@ -3,6 +3,8 @@
 #include "../StatsPornManager.h"
 #include "Engine.h"
 #include "PlayerCharacter.h"
+#include "../Interactables/Jetpack.h"
+#include "../DefaultGameMode.h"
 
 AImpCharacter::AImpCharacter()
 	: AEnemyCharacter()
@@ -84,6 +86,19 @@ void AImpCharacter::BeginPlay()
 	DefaultClawRadius = L_ClawRadius->GetUnscaledSphereRadius();
 	TimeSinceLand = LandCooldown;
 	SetClawRadius(0.f, 0.f);
+
+	if (Jetpack != NULL)
+	{
+		if (DefaultGameMode->GetConfig()->GameplayProggMode)
+		{
+			//pos:(X=21.795549,Y=30.619284,Z=5.023289)
+			//ROT:(Pitch=-83.495476,Yaw=74.854538,Roll=-89.920227)
+			//SCALE:(X=0.700000,Y=0.700000,Z=0.700000)
+			AJetpack* pack = GetWorld()->SpawnActor<AJetpack>(Jetpack, FVector(21.795549f, 30.619284, 5.023289f), FRotator(-83.495476f, 74.854538f, -89.920227f));
+			pack->AttachRootComponentTo(GetMesh(), TEXT("JetPack"));
+			pack->SetActorScale3D(FVector(0.7f, 0.7f, 0.7f));
+		}
+	}
 }
 
 void AImpCharacter::Tick(float DeltaTime)
@@ -112,12 +127,12 @@ void AImpCharacter::Tick(float DeltaTime)
 						MoveAroundPlayer();
 					else if (GetActorLocation().X > MoveAroundLocation.X - 50 && GetActorLocation().X < MoveAroundLocation.X + 50 && GetActorLocation().Y > MoveAroundLocation.Y - 50 && GetActorLocation().Y < MoveAroundLocation.Y + 50)
 					{
-						Debug::LogOnScreen("At location - moving towards");
+						//Debug::LogOnScreen("At location - moving towards");
 						bMoveAroundPlayer = false;
 					}
 					else if (GetDistanceToPlayer() < 1000.f)
 					{
-						Debug::LogOnScreen("Close to player - moving towards");
+						//Debug::LogOnScreen("Close to player - moving towards");
 						bMoveAroundPlayer = false;
 					}
 					else if (GetDistanceToPlayer() > AllowedDistanceFromPlayer)
@@ -308,7 +323,7 @@ void AImpCharacter::RotateTowardsPlayer()
 	TargetRotation *= Mask;
 	TargetRotation.Normalize();
 
-	SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation.Rotation(), 0.05f));
+	SetActorRotation(FMath::Lerp(GetActorRotation(), TargetRotation.Rotation(), 0.05f * 2));
 }
 void AImpCharacter::MoveToPlayersEstimatedPosition()
 {
@@ -336,7 +351,7 @@ void AImpCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, floa
 {
 	if (GetCurrentState() == EEnemyState::Idle)
 	{
-		Debug::LogOnScreen("Aggro true - hear pawn");
+		//Debug::LogOnScreen("Aggro true - hear pawn");
 		SetCurrentState(EEnemyState::Search);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
@@ -345,7 +360,7 @@ void AImpCharacter::OnSeePawn(APawn *OtherPawn)
 {
 	if (GetCurrentState() == EEnemyState::Idle)
 	{
-		Debug::LogOnScreen("Aggro true - see pawn");
+		//Debug::LogOnScreen("Aggro true - see pawn");
 		SetCurrentState(EEnemyState::Search);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
@@ -357,7 +372,7 @@ float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	if (GetCurrentState() != EEnemyState::Triggered)
 	{
-		Debug::LogOnScreen("Aggro true - take DAMAGE");
+		//Debug::LogOnScreen("Aggro true - take DAMAGE");
 		SetCurrentState(EEnemyState::Search);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
@@ -541,7 +556,7 @@ void AImpCharacter::OnAttackBeginOverlap(class AActor* OtherActor, class UPrimit
 {
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{
-		Debug::LogOnScreen("Imp attacking Player");
+		//Debug::LogOnScreen("Imp attacking Player");
 		APlayerController* PlayerController = Cast<APlayerController>(Player->GetController());
 		TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
 		FDamageEvent DamageEvent(ValidDamageTypeClass);

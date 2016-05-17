@@ -13,8 +13,13 @@ class TWO31_API ADefaultGameMode : public AGameMode
 public:
 	ADefaultGameMode();
 
+	void PostInitializeComponents() override;
+
 	UFUNCTION(BlueprintCallable, Category = "Configuration")
 	UMainConfig* GetConfig();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+	bool bEnableProgMod;
 
 private:
 	UMainConfig* Config;

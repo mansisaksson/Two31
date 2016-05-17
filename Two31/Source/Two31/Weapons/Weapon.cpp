@@ -3,6 +3,8 @@
 #include "Engine.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
+#include "../StatsPornManager.h"
+#include "../BloodParticleBall.h"
 
 AWeapon::AWeapon()
 {
@@ -26,6 +28,7 @@ AWeapon::AWeapon()
 	timeSinceUnequip = 0.f;
 
 	WeaponDamage = 10;
+	Range = 5000.f;
 	HeadshotMultiplier = 1.0f;
 	ImpulsePowah = 9000.f;
 
@@ -53,10 +56,6 @@ AWeapon::AWeapon()
 
 	BulletSpawnLocation = CreateDefaultSubobject<USceneComponent>("BulletSpawnLocation");
 	BulletSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
-
-	FImpactVisual DefaultImpactVisual;
-	DefaultImpactVisual.PhysicsMatName = "Default";
-	ImpactVisuals.Add(DefaultImpactVisual);
 }
 
 void AWeapon::BeginPlay()
@@ -176,7 +175,7 @@ void AWeapon::SetPlayerAnimations(USkeletalMeshComponent* PlayerMesh)
 	OwnerMesh = PlayerMesh;
 	if (PlayerAnimationBlueprint != NULL && OwnerMesh != NULL)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Player Animations")));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Player Animations")));
 		OwnerMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 		OwnerMesh->SetAnimInstanceClass(PlayerAnimationBlueprint);
 	}
@@ -186,7 +185,7 @@ void AWeapon::SetCultistAnimations(USkeletalMeshComponent* CultistMesh)
 	OwnerMesh = CultistMesh;
 	if (PlayerAnimationBlueprint != NULL && OwnerMesh != NULL)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Cultist Animations")));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Cultist Animations")));
 		OwnerMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 		OwnerMesh->SetAnimInstanceClass(CultistAnimationBlueprint);
 	}
@@ -227,7 +226,11 @@ void AWeapon::StopFire(FVector TowardsLocation)
 }
 void AWeapon::FireShot(FVector TowardsLocation)
 {
-
+	if (GetOwner() != NULL)
+	{
+		if (Cast<APlayerCharacter>(GetOwner()))
+			UStatsPornManager::IncreaseAmountOfShotsFired();
+	}
 }
 
 void AWeapon::Reload()
@@ -245,6 +248,9 @@ void AWeapon::Reload()
 void AWeapon::SetAmmoPool(int* AmmoPool)
 {
 	this->AmmoPool = AmmoPool;
+
+	if (bFirstTimeEquiped && AmmoPool != NULL)
+		FillClip();
 }
 void AWeapon::FillClip()
 {
@@ -268,14 +274,47 @@ AActor* AWeapon::GetOwner()
 
 void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 {
+	if (HitResult.GetActor() != NULL)
+	{
+
+		// Deal Damage
+		TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+		FDamageEvent DamageEvent(ValidDamageTypeClass);
+		if (HitResult.BoneName.GetPlainNameString() == "Head")
+			HitResult.GetActor()->TakeDamage((WeaponDamage * (1.0f - FMath::Clamp(HitResult.Distance / Range, 0.0f, 1.0f)) * HeadshotMultiplier), DamageEvent, HitResult.GetActor()->GetInstigatorController(), this);
+		else
+			HitResult.GetActor()->TakeDamage(WeaponDamage * (1.0f - FMath::Clamp(HitResult.Distance / Range, 0.0f, 1.0f)), DamageEvent, HitResult.GetActor()->GetInstigatorController(), this);
+
+		// Add Impulses
+		if (Cast<AEnemyCharacter>(HitResult.GetActor()))
+		{
+			AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(HitResult.GetActor());
+			FVector HitAngle = (HitResult.Location - BulletSpawnLocation->GetComponentLocation());
+			HitAngle.Normalize();
+			Enemy->AddDelayedImpulse(HitAngle * ImpulsePowah, HitResult.Location);
+
+			Enemy->SpawnBloodEffects(HitResult, this);
+
+		}
+		else if (HitResult.GetComponent() != NULL && HitResult.GetComponent()->Mobility == EComponentMobility::Movable && HitResult.GetComponent()->IsSimulatingPhysics())
+		{
+			FVector Angle = (HitResult.Location - BulletSpawnLocation->GetComponentLocation());
+			Angle.Normalize();
+			HitResult.GetComponent()->AddImpulseAtLocation(Angle * ImpulsePowah, HitResult.Location);
+		}
+	}
+
+	// Destroy Destructibles
 	if (Cast<UDestructibleComponent>(HitResult.GetActor()))
 		Cast<UDestructibleComponent>(HitResult.GetActor())->ApplyRadiusDamage(1.f, HitResult.Location, 1.f, ImpulsePowah, false);
 
+
+	// Decals/Impact effects
 	UMaterialInterface* DecalMat = NULL;
 	UParticleSystem* ImpactParticle = NULL;
 
-	float RandSize = 0.f;// = FMath::RandRange(0.f, DecalRandSize);
-	FVector DecalSize = FVector::ZeroVector;// = FVector(DecalScale, DecalScale, 1.f);
+	float RandSize = 0.f;
+	FVector DecalSize = FVector::ZeroVector;
 
 	if (HitResult.PhysMaterial != NULL)
 	{

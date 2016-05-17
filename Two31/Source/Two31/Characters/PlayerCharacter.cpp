@@ -26,6 +26,7 @@ APlayerCharacter::APlayerCharacter()
 	DefaultFOV = 90.f;
 	ADSFOV = 60.f;
 	
+	LevelCompletionTimer = 0.f;
 	MeleeDamage = 50.f;
 	MeleePowah = 90000.f;
 	MaxHealth = 100.f;
@@ -47,6 +48,7 @@ APlayerCharacter::APlayerCharacter()
 	HealthPacks.SetNum(0);
 	Items.SetNum(0);
 	Inventory.SetNum(0);
+	VoiceActing.SetNum(0);
 
 	bFireIsPressed = false;
 	bCanJump = false;
@@ -111,6 +113,7 @@ void APlayerCharacter::BeginPlay()
 	CurrentArmor = StartingArmor;
 
 	UStatsPornManager::ClearStats();
+
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)
@@ -183,7 +186,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		if (Cast<AWeaponPickup>(OtherActor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Weapon Pickup"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Weapon Pickup"));
 			AWeaponPickup* WeaponPickup = Cast<AWeaponPickup>(OtherActor);
 			if (EquipWeapon(WeaponPickup->GetWeapon()))
 			{
@@ -193,7 +196,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		}
 		else if (Cast<AHealthPickup>(OtherActor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Health Pickup"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Health Pickup"));
 			AHealthPickup* Healthpack = Cast<AHealthPickup>(OtherActor);
 			if (PickupHealthPack(Healthpack))
 			{
@@ -204,7 +207,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		}
 		else if (Cast<AArmorPickup>(OtherActor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Armor Pickup"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Armor Pickup"));
 			AArmorPickup* Armor = Cast<AArmorPickup>(OtherActor);
 			if (ChangeArmor(Armor->GetArmor()))
 			{
@@ -215,7 +218,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		}
 		else if (Cast<AAmmoPickup>(OtherActor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Ammo Pickup"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Ammo Pickup"));
 			AAmmoPickup* Ammo = Cast<AAmmoPickup>(OtherActor);
 			if (AddAmmo(Ammo->GetAmmoType(), Ammo->GetAmount()))
 			{
@@ -225,7 +228,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 		}
 		else if (Cast<AItemPickup>(OtherActor))
 		{
-			Debug::LogOnScreen(TEXT("Item Pickup"));
+			//Debug::LogOnScreen(TEXT("Item Pickup"));
 			AItemPickup* Item = Cast<AItemPickup>(OtherActor);
 			if (AddItem(Item))
 				Item->Destroy();
@@ -320,7 +323,7 @@ void APlayerCharacter::OnMeleeAttack()
 	{
 		bMeleeAttack = true;
 		TimeSinceMelee = 0.f;
-		Debug::LogOnScreen("Meele!");
+		//Debug::LogOnScreen("Meele!");
 	}
 }
 
@@ -388,7 +391,7 @@ bool APlayerCharacter::AddAmmo(EAmmoType Ammo, int Amount)
 	}
 	if (AmmoToRefill != NULL && (AmmoToRefill->AmmoPool < AmmoToRefill->MaxAmmo))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Refill ammo"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Refill ammo"));
 		AmmoToRefill->AmmoPool = FMath::Clamp(AmmoToRefill->AmmoPool + Amount, 0, AmmoToRefill->MaxAmmo);
 		return true;
 	}
@@ -456,15 +459,38 @@ bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 				const FVector SpawnLocation = FVector::ZeroVector;
 				WeaponSlots[i] = GetWorld()->SpawnActor<AWeapon>(Weapon, SpawnLocation, SpawnRotation);
 				WeaponSlots[i]->AttachRootComponentTo(FPArmMesh);
+				WeaponSlots[i]->SetAmmoPool(&GetAmmoOfType((EAmmoType)WeaponSlots[i]->GetAmmoType())->AmmoPool);
 				WeaponSlots[i]->HolsterWeapon();
 
 				if (CurrentWeapon == NULL)
 					SelectWeaponSlot(i);
+
 				return true;
 			}
 		}
 	}
 	return false;
+}
+FAmmo* APlayerCharacter::GetAmmoOfType(EAmmoType AmmoType)
+{
+	switch (AmmoType)
+	{
+	case EAmmoType::BulletAmmo:
+		return &BulletAmmo;
+		break;
+	case EAmmoType::ShotgunAmmo:
+		return &ShotgunAmmo;
+		break;
+	case EAmmoType::ExplosiveAmmo:
+		return &ExplosiveAmmo;
+		break;
+	case EAmmoType::PlasmaAmmo:
+		return &PlasmaAmmo;
+		break;
+	default:
+		return NULL;
+		break;
+	}
 }
 void APlayerCharacter::SelectWeaponSlot(int index)
 {
@@ -474,31 +500,10 @@ void APlayerCharacter::SelectWeaponSlot(int index)
 			CurrentWeapon->HolsterWeapon();
 
 		CurrentWeapon = WeaponSlots[index];
+		CurrentAmmo = GetAmmoOfType((EAmmoType)CurrentWeapon->GetAmmoType());
 		
-		switch ((EAmmoType)CurrentWeapon->GetAmmoType())
-		{
-		case EAmmoType::BulletAmmo:
-			CurrentAmmo = &BulletAmmo;
-			break;
-		case EAmmoType::ShotgunAmmo:
-			CurrentAmmo = &ShotgunAmmo;
-			break;
-		case EAmmoType::ExplosiveAmmo:
-			CurrentAmmo = &ExplosiveAmmo;
-			break;
-		case EAmmoType::PlasmaAmmo:
-			CurrentAmmo = &PlasmaAmmo;
-			break;
-		default:
-			CurrentAmmo = NULL;
-			break;
-		}
-
 		if (CurrentAmmo != NULL)
-		{
 			CurrentWeapon->EquipWeapon(FPArmMesh, &CurrentAmmo->AmmoPool);
-		}
-			
 	}
 }
 void APlayerCharacter::SelectWeaponSlot1()
@@ -705,4 +710,20 @@ void APlayerCharacter::SetMeleeRadius(float Radius)
 	else
 		MeleeCollider->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	MeleeCollider->SetSphereRadius(Radius);
+}
+
+int32 APlayerCharacter::ChangeVoiceActing()
+{
+	int32 NewVoiceActing;
+	NewVoiceActing = VoiceActing[0];
+	VoiceActing.RemoveAt(0);
+	return NewVoiceActing;
+}
+int32 APlayerCharacter::GetVoiceActingSize()
+{
+	return VoiceActing.Num();
+}
+void APlayerCharacter::AddVoiceActingID(int32 ID)
+{
+	VoiceActing.Add(ID);
 }

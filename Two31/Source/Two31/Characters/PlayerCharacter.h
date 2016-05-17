@@ -50,6 +50,14 @@ public:
 	USceneComponent* GetPlayerHitPoint_Shoulder_Left() { return LineOfSight_Shoulder_Left; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetLevelTimer() { return GetWorld()->TimeSeconds; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	float GetLevelCompletionTimer() { return LevelCompletionTimer; }
+	UFUNCTION(BlueprintCallable, Category = SetFunction)
+	void SetLevelCompletionTimer() { LevelCompletionTimer = GetWorld()->TimeSeconds; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetHealth() { return CurrentHealth; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxHealth() { return MaxHealth; }
@@ -106,6 +114,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = SetFunction)
 	void SetMeleeRadius(float Radius);
 
+	UFUNCTION(BlueprintCallable, Category = VoiceActing)
+	int32 ChangeVoiceActing();
+	UFUNCTION(BlueprintCallable, Category = VoiceActing)
+	int32 GetVoiceActingSize();
+	UFUNCTION(BlueprintCallable, Category = VoiceActing)
+	void AddVoiceActingID(int32 ID);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -137,6 +152,7 @@ protected:
 	void NextWeapon();
 	void PreviousWeapon();
 	int GetWeaponIndex();
+	FAmmo* GetAmmoOfType(EAmmoType AmmoType);
 
 	void MoveForward(float Val);
 	void MoveSideways(float Val);
@@ -206,6 +222,7 @@ private:
 	bool bADS;
 	bool bMeleeAttack;
 
+	float LevelCompletionTimer;
 	float CurrentHealth;
 	float CurrentArmor;
 	float MaxArmor;
@@ -227,4 +244,5 @@ private:
 	TArray<int32> Items;
 	TArray<SInventory> Inventory;
 	TArray<AActor*> MeleedActors;
+	TArray<int32> VoiceActing;
 };

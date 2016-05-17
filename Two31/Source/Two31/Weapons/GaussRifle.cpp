@@ -3,6 +3,7 @@
 #include "../StatsPornManager.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
+#include "Kismet/KismetMaterialLibrary.h"
 
 AGaussRifle::AGaussRifle()
 	: AWeapon()
@@ -13,25 +14,48 @@ AGaussRifle::AGaussRifle()
 	FastReloadTime = 1.5f;
 	timeSinceFire = 0.f;
 
+	HeatParam = 0.f;
+
+	HeatDissipationScale = 0.2f;
+	HeatAccumulationScale = 0.3f;
+	MaxHeatAccumulation = 10.f;
+
 	MuzzleSpawnLocation = CreateDefaultSubobject<USceneComponent>("MuzzleSpawnLocation");
 	MuzzleSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
 }
 
+void AGaussRifle::BeginPlay()
+{
+	AWeapon::BeginPlay();
+
+	MatInstance = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, WeaponMesh->GetMaterial(0));
+	WeaponMesh->SetMaterial(0, MatInstance);
+}
+
+void AGaussRifle::Tick(float DeltaTime)
+{
+	AWeapon::Tick(DeltaTime);
+
+	HeatParam = FMath::Clamp(HeatParam - DeltaTime * HeatDissipationScale, 0.f, 10.f);
+	MatInstance->SetScalarParameterValue(TEXT("HeatParam"), HeatParam);
+}
+
 void AGaussRifle::FireShot(FVector TowardsLocation)
 {
-	AWeapon::FireShot(TowardsLocation);
-
 	if (AmmoPool == NULL)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No Ammo Pool assigned!"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No Ammo Pool assigned!"));
 		return;
 	}
 
 	if ((*AmmoPool) > 0 && AmmoInClip > 0)
 	{
+		AWeapon::FireShot(TowardsLocation);
+
 		AmmoInClip--;
 		(*AmmoPool)--;
-		UStatsPornManager::IncreaseAmountOfShotsFired();
+
+		HeatParam += HeatAccumulationScale;
 
 		FHitResult result;
 		ECollisionChannel collisionChannel;
@@ -68,33 +92,7 @@ void AGaussRifle::FireShot(FVector TowardsLocation)
 		}
 
 		if (hitObject)
-		{
 			OnWeaponHit(result);
-
-			if (result.GetActor() != NULL)
-			{
-				TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
-				FDamageEvent DamageEvent(ValidDamageTypeClass);
-				if (result.BoneName.GetPlainNameString() == "Head")
-					result.GetActor()->TakeDamage((WeaponDamage * HeadshotMultiplier), DamageEvent, result.GetActor()->GetInstigatorController(), this);
-				else
-					result.GetActor()->TakeDamage(WeaponDamage, DamageEvent, result.GetActor()->GetInstigatorController(), this);
-
-				if (Cast<AEnemyCharacter>(result.GetActor()))
-				{
-					AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
-					FVector HitAngle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-					HitAngle.Normalize();
-					Enemy->AddDelayedImpulse(HitAngle * ImpulsePowah, result.Location);
-				}
-				else if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
-				{
-					FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-					Angle.Normalize();
-					result.GetComponent()->AddImpulseAtLocation(Angle * ImpulsePowah, result.Location);
-				}
-			}
-		}
 	}
 }
 

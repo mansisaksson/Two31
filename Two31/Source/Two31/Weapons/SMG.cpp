@@ -16,19 +16,18 @@ ASMG::ASMG()
 
 void ASMG::FireShot(FVector TowardsLocation)
 {
-	AWeapon::FireShot(TowardsLocation);
-
 	if (AmmoPool == NULL)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No Ammo Pool assigned!"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("No Ammo Pool assigned!"));
 		return;
 	}
 
 	if ((*AmmoPool) > 0 && AmmoInClip > 0)
 	{
+		AWeapon::FireShot(TowardsLocation);
+
 		AmmoInClip--;
 		(*AmmoPool)--;
-		UStatsPornManager::IncreaseAmountOfShotsFired();
 
 		FHitResult result;
 		ECollisionChannel collisionChannel;
@@ -49,7 +48,6 @@ void ASMG::FireShot(FVector TowardsLocation)
 		if (MuzzeFlash != NULL)
 		{
 			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAttached(MuzzeFlash, BulletSpawnLocation);
-			//UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, BulletSpawnLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
 			particleComp->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 		}
 
@@ -64,43 +62,6 @@ void ASMG::FireShot(FVector TowardsLocation)
 		}
 
 		if (hitObject)
-		{
 			OnWeaponHit(result);
-			if (MuzzeFlash != NULL)
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, result.Location, FRotator::ZeroRotator, true);
-
-			if (result.GetActor() != NULL)
-			{
-				if (Cast<AEnemyCharacter>(result.GetActor()))
-				{
-					if( result.BoneName.GetPlainNameString() == "Head")
-						Debug::LogOnScreen(result.BoneName.GetPlainNameString());
-					AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(result.GetActor());
-					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
-					FDamageEvent DamageEvent(ValidDamageTypeClass);
-					if (result.BoneName.GetPlainNameString() == "Head")
-						Enemy->TakeDamage(WeaponDamage * HeadshotMultiplier, DamageEvent, result.GetActor()->GetInstigatorController(), this);
-					else
-						Enemy->TakeDamage(WeaponDamage, DamageEvent, result.GetActor()->GetInstigatorController(), this);
-
-					FVector HitAngle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-					HitAngle.Normalize();
-					Enemy->AddDelayedImpulse(HitAngle * ImpulsePowah, result.Location);
-				}
-				else if (Cast<APlayerCharacter>(result.GetActor()))
-				{
-					APlayerCharacter* Player = Cast<APlayerCharacter>(result.GetActor());
-					TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
-					FDamageEvent DamageEvent(ValidDamageTypeClass);
-					Player->TakeDamage(WeaponDamage, DamageEvent, result.GetActor()->GetInstigatorController(), this);
-				}
-				else if (result.GetComponent() != NULL && result.GetComponent()->Mobility == EComponentMobility::Movable && result.GetComponent()->IsSimulatingPhysics())
-				{
-					FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
-					Angle.Normalize();
-					result.GetComponent()->AddImpulseAtLocation(Angle * ImpulsePowah, result.Location);
-				}
-			}
-		}
 	}
 }

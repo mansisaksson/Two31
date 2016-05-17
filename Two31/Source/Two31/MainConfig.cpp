@@ -6,7 +6,7 @@
 
 UMainConfig::UMainConfig()
 {
-	LoadConfig();
+	
 }
 
 UMainConfig::~UMainConfig()
@@ -57,5 +57,5 @@ void UMainConfig::Apply()
 void UMainConfig::ExecCmd(FString Command)
 {
 	GEngine->Exec(GetWorld(), Command.GetCharArray().GetData());
-	Debug::LogOnScreen(Command);
+	//Debug::LogOnScreen(Command);
 }

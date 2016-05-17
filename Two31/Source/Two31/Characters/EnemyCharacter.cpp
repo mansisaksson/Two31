@@ -8,6 +8,7 @@
 #include "ImpCharacter.h"
 #include "AIController.h"
 #include "Engine.h"
+#include "../DefaultGameMode.h"
 
 AEnemyCharacter::AEnemyCharacter()
 {
@@ -19,9 +20,6 @@ AEnemyCharacter::AEnemyCharacter()
 
 	DespawnTimer = 3.f;
 	TimeSinceDeath = 0.f;
-
-	BloodDecalMinSize = 40.f;
-	BloodDecalMaxSize = 100.f;
 
 	EnemyState = EEnemyState::Idle;
 	UMusicManager::AddEnemy(EnemyState);
@@ -36,7 +34,7 @@ AEnemyCharacter::AEnemyCharacter()
 	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
 
 	AlertRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AlertRadius"));
-	AlertRadius->AttachTo(GetMesh());
+	AlertRadius->AttachTo(GetCapsuleComponent());
 	AlertRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	AlertRadius->IgnoreActorWhenMoving(this, true);
 }
@@ -67,6 +65,7 @@ void AEnemyCharacter::BeginPlay()
 	if (AIController == NULL)
 		Debug::LogFatalError("AIController Not found!");
 
+	DefaultGameMode = Cast<ADefaultGameMode>(GetWorld()->GetAuthGameMode());
 }
 
 void AEnemyCharacter::Tick(float DeltaTime)
@@ -81,6 +80,12 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		TimeSinceDeath += DeltaTime;
 		if (TimeSinceDeath > DespawnTimer)
 			Destroy();
+
+		for (size_t i = 0; i < DelayedImpulses.Num(); i++) {
+			//Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
+			GetMesh()->AddImpulseAtLocation(DelayedImpulses[i].Impulse, DelayedImpulses[i].Location);
+		}
+		//DelayedImpulses.Empty();
 	}
 	
 	DelayedImpulses.Empty();
@@ -90,13 +95,13 @@ void AEnemyCharacter::OnHearNoise(APawn *OtherPawn, const FVector &Location, flo
 {
 	const FString VolumeDesc = FString::Printf(TEXT(" at volume %f"), Volume);
 	FString message = TEXT("Heard Actor ") + OtherPawn->GetName() + VolumeDesc;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
 }
 
 void AEnemyCharacter::OnSeePawn(APawn *OtherPawn)
 {
 	FString message = TEXT("Saw Pawn ") + OtherPawn->GetName();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
 }
 
 void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter)
@@ -118,52 +123,30 @@ void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* Clas
 	}
 }
 
-void AEnemyCharacter::BloodEffects()
+void AEnemyCharacter::SpawnBloodEffects(FHitResult HitResult, AActor* SourceActor)
 {
-	// Blood splat particles
-	if (BloodParticle != NULL)
-	{
-		UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAttached(BloodParticle, GetMesh() , TEXT("None"), GetActorLocation(), GetActorRotation().GetNormalized() * -1.f, EAttachLocation::KeepWorldPosition);
-		ParticleSystemComp->AddLocalRotation(FRotator(90.f, 0.f, 0.f));
-	}
-
 	// Blood decals
 	if (BloodDecal != NULL)
 	{
-
-	UWorld* const World = GetWorld();
-	if(World)
-	{
-		ABloodParticleBall* ball = World->SpawnActor<ABloodParticleBall>(ABloodParticleBall::StaticClass());
-		//ball->SetActorRotation();
-		ball->GetProjectileMovement()->InitialSpeed = 10000.0f;
-		ball->LifetimeDestroy = 3.0f;
-	}
-
-
-		/*
-		FHitResult result;
-		ECollisionChannel collisionChannel;
-		collisionChannel = ECC_WorldDynamic;
-		FCollisionQueryParams collisionQuery;
-		collisionQuery.bTraceComplex = true;
-		FCollisionObjectQueryParams objectCollisionQuery;
-		FCollisionResponseParams collisionResponse;
-		collisionResponse = ECR_Block;
-
-		collisionQuery.AddIgnoredActor(this);
-		collisionQuery.AddIgnoredActor(GetOwner());
-		//collisionQuery.AddIgnoredActor(HitResult.GetActor());
-
-		bool hitObject = GetWorld()->LineTraceSingleByChannel(result, GetActorLocation(), GetActorLocation() + FVector(0.f, 0.f, -1000.f), collisionChannel, collisionQuery, collisionResponse);
-
-		if (hitObject)
+		for (int i = 0; i < 10; i++)
 		{
-			float DecalSize = (BloodDecalMaxSize - BloodDecalMinSize) * FMath::FRand() + BloodDecalMinSize;
-			UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), BloodDecal, FVector(DecalSize, DecalSize, 1.f), result.Location, result.Normal.Rotation() * -1.f);
-			DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+			// Blood Baloons
+			UWorld* const World = GetWorld();
+			if (World)
+			{
+				FVector Normal = HitResult.Normal * -1;
+				FRotator Rotation = Normal.Rotation();
+				Normal = Normal.RotateAngleAxis(FMath::RandRange(0.0, 20.0f), FVector(FMath::RandRange(0.0, 1.0f), FMath::RandRange(0.0, 1.0f), FMath::RandRange(0.0, 1.0f)));
+				ABloodParticleBall* ball = World->SpawnActor<ABloodParticleBall>(ABloodParticleBall::StaticClass(), HitResult.Location, HitResult.Normal.Rotation());
+				ball->Decal = BloodDecal;
+				ball->GetProjectileMovement()->InitialSpeed = 1000.0f;
+				ball->LifetimeDestroy = 1.5f;
+				//ball->CollisionComp->MoveIgnoreActors.Add(this);
+				ball->CollisionComp->IgnoreActorWhenMoving(this, true);
+				ball->GetProjectileMovement()->ProjectileGravityScale = 5.0;
+				//Debug::LogOnScreen("spwaning blood");
+			}
 		}
-		*/
 	}
 }
 
@@ -180,7 +163,6 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 		UStatsPornManager::IncreaseAmountOfEnemiesKilled();
 	}
 
-	BloodEffects();
 	return DamageAmount;
 }
 
@@ -195,12 +177,6 @@ void AEnemyCharacter::Death()
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	UMusicManager::RemoveEnemy(EnemyState);
-
-	for (size_t i = 0; i < DelayedImpulses.Num(); i++) {
-		Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
-		GetMesh()->AddImpulseAtLocation(DelayedImpulses[i].Impulse, DelayedImpulses[i].Location);
-	}
-	DelayedImpulses.Empty();
 }
 
 void AEnemyCharacter::SetCurrentState(EEnemyState State)

@@ -48,6 +48,9 @@ public:
 	EEnemyState GetCurrentState() { return EnemyState; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	virtual float GetHealth() { return CurrentHealth; }
+
+	void SpawnBloodEffects(FHitResult HitResult, AActor* SourceActor);
+
 protected:
 	UFUNCTION()
 	virtual void OnHearNoise(APawn *OtherActor, const FVector &Location, float Volume);
@@ -60,16 +63,8 @@ protected:
 	void OnTakeDamage();
 	void OnTakeDamage_Implementation();
 	
-
-	void BloodEffects();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* BloodParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UMaterialInterface* BloodDecal;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float BloodDecalMinSize;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	float BloodDecalMaxSize;
 
 	virtual void Death();
 
@@ -78,6 +73,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float DespawnTimer;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ZuperSecret)
+	class TSubclassOf<class AJetpack> Jetpack;
+
+	class ADefaultGameMode* DefaultGameMode;
 	UNavigationSystem* NavSystem;
 	class AAIController* AIController;
 	class APlayerCharacter* PlayerReferense;

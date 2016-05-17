@@ -20,10 +20,6 @@
 		{
 			"Name": "FMODStudio",
 			"Enabled": true
-		},
-		{
-			"Name": "Substance",
-			"Enabled": true
 		}
 	]
 }

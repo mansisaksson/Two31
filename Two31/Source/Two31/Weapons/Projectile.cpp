@@ -39,7 +39,7 @@ void AProjectile::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVec
 	{
 		if (Cast<AEnemyCharacter>(OtherActor))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Damaging Enemy"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, TEXT("Damaging Enemy"));
 			AEnemyCharacter* Enemy = Cast<AEnemyCharacter>(OtherActor);
 			APlayerController* PlayerController = Cast<APlayerController>(OtherActor->GetInstigatorController());
 			TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());

@@ -5,35 +5,30 @@
 #include "WeaponGlobals.h"
 #include "Weapon.generated.h"
 
-//USTRUCT(BlueprintType)
-//struct FImpactVisuals
-//{
-//	GENERATED_USTRUCT_BODY()
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-//	UParticleSystem* WoodImpactParticle;
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-//	TArray<UMaterialInterface*> WoodImpactDecal;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-//	UParticleSystem* MetalImpactParticle;
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-//	TArray<UMaterialInterface*> MetalImpactDecal;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-//	UParticleSystem* FleshImpactParticle;
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-//	TArray<UMaterialInterface*> FleshImpactDecal;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-//	UParticleSystem* GlassImpactParticle;
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-//	TArray<UMaterialInterface*> GlassImpactDecal;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-//	UParticleSystem* DefaultImpactParticle;
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-//	TArray<UMaterialInterface*> DefaultImpactDecal;
-//};
+USTRUCT(BlueprintType)
+struct FImpactDecals
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UMaterialInterface* Decal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	FVector Size = FVector(10.f, 10.f, 5.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	float AddedRandXYSize = 10.f;
+};
+
+USTRUCT(BlueprintType)
+struct FImpactVisual
+{
+	GENERATED_USTRUCT_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	FString PhysicsMatName = "Default";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	UParticleSystem* ImpactParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	TArray<FImpactDecals> ImpactDecals;
+};
 
 UCLASS()
 class TWO31_API AWeapon : public AActor
@@ -146,6 +141,8 @@ protected:
 	float RPM;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float WeaponDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+	float Range;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float HeadshotMultiplier;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)

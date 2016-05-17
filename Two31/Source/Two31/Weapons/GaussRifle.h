@@ -14,6 +14,9 @@ class TWO31_API AGaussRifle : public AWeapon
 public:
 	AGaussRifle();
 
+	void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
 	virtual void FireShot(FVector TowardsLocation) override;
 
 protected:
@@ -22,6 +25,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* BulletTrail;
 
-private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+	float HeatDissipationScale;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+	float HeatAccumulationScale;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
+	float MaxHeatAccumulation;
 
+private:
+	float HeatParam;
+	UMaterialInstanceDynamic* MatInstance;
 };
