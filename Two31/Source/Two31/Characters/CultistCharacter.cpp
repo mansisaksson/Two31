@@ -210,7 +210,8 @@ void ACultistCharacter::FocusOnPosition(float DeltaTime, FVector Position)
 	FRotator NewControlRotation = Direction.Rotation();
 
 	NewControlRotation.Yaw = FRotator::ClampAxis(NewControlRotation.Yaw);
-	FaceRotation(FMath::Lerp(OldRotation, NewControlRotation, TurnRate * DeltaTime));
+	CurrentControlRotation = FMath::Lerp(OldRotation, NewControlRotation, TurnRate * DeltaTime);
+	FaceRotation(CurrentControlRotation);
 	OldRotation = GetActorRotation();
 }
 void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
