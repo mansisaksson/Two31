@@ -58,13 +58,13 @@ public:
 	void SetLevelCompletionTimer() { LevelCompletionTimer = GetWorld()->TimeSeconds; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	float GetHealth() { return FMath::CeilToInt(CurrentHealth); }
+	float GetHealth() { return FMath::CeilToFloat(CurrentHealth); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxHealth() { return MaxHealth; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetHealthPacks() { return HealthPacks.Num(); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	float GetArmor() { return FMath::CeilToInt(CurrentArmor); }
+	float GetArmor() { return FMath::CeilToFloat(CurrentArmor); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxArmor() { return MaxArmor; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
