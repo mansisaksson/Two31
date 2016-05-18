@@ -31,7 +31,6 @@ public:
 
 	UFUNCTION()
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
-	UFUNCTION(BlueprintCallable, Category = )
 
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void ForceMovement(FVector Direction);
