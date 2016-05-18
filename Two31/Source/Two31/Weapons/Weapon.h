@@ -52,7 +52,7 @@ public:
 	virtual void EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* AmmoPool);
 	virtual void HolsterWeapon();
 	virtual void SetPlayerAnimations(USkeletalMeshComponent* PlayerMesh);
-	virtual void SetCultistAnimations(USkeletalMeshComponent* CultistMesh);
+	virtual void SetCultistOwnerMesh(USkeletalMeshComponent* CultistMesh);
 	virtual FString GetWeaponName();
 
 	virtual void StartFire(FVector TowardsLocation);
@@ -118,7 +118,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* PlayerAnimationBlueprint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UAnimBlueprintGeneratedClass* CultistAnimationBlueprint;
+	FVector CultistLocOffset;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	FRotator CultistRotOffset;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	TArray<FImpactVisual> ImpactVisuals;
 

@@ -137,9 +137,11 @@ void AWeapon::EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* AmmoPool)
 	}
 	else if (Cast<ACultistCharacter>(SkeletalMesh->GetAttachmentRootActor()))
 	{
-		SetCultistAnimations(SkeletalMesh);
-		WeaponMesh->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
-		WeaponMesh->SetRelativeLocation(FVector(-9.f, 5.f, -2.f));
+		SetCultistOwnerMesh(SkeletalMesh);
+		WeaponMesh->SetRelativeRotation(CultistRotOffset);
+		WeaponMesh->SetRelativeLocation(CultistLocOffset);
+		//WeaponMesh->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+		//WeaponMesh->SetRelativeLocation(FVector(-9.f, 5.f, -2.f));
 	}
 
 	SetAmmoPool(AmmoPool);
@@ -180,15 +182,9 @@ void AWeapon::SetPlayerAnimations(USkeletalMeshComponent* PlayerMesh)
 		OwnerMesh->SetAnimInstanceClass(PlayerAnimationBlueprint);
 	}
 }
-void AWeapon::SetCultistAnimations(USkeletalMeshComponent* CultistMesh)
+void AWeapon::SetCultistOwnerMesh(USkeletalMeshComponent* CultistMesh)
 {
 	OwnerMesh = CultistMesh;
-	if (PlayerAnimationBlueprint != NULL && OwnerMesh != NULL)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::White, FString::Printf(TEXT("Changing Cultist Animations")));
-		OwnerMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-		OwnerMesh->SetAnimInstanceClass(CultistAnimationBlueprint);
-	}
 }
 
 void AWeapon::StartFire(FVector TowardsLocation)
