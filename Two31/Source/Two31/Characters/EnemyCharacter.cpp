@@ -153,7 +153,6 @@ void AEnemyCharacter::SpawnBloodEffects(FHitResult HitResult, AActor* SourceActo
 float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	OnTakeDamage();
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 	if (CurrentHealth <= 0)
@@ -163,6 +162,7 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 		UStatsPornManager::IncreaseAmountOfEnemiesKilled();
 	}
 
+	OnTakeDamage();
 	return DamageAmount;
 }
 
