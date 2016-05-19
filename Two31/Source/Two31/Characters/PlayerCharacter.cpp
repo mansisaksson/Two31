@@ -148,12 +148,32 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 			FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), CurrentWeapon->GetADSTransform().GetLocation(), ADSSpeed * DeltaSeconds));
 			FPArmMesh->SetRelativeScale3D(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetScale3D(), CurrentWeapon->GetADSTransform().GetScale3D(), ADSSpeed * DeltaSeconds));
 		}
-		else
+		else if (!CurrentWeapon->GetIsReloading())
 		{
 			FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, DefaultFOV, 10.f * DeltaSeconds);
 			FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), CurrentWeapon->GetHipTransform().Rotator(), ADSSpeed * DeltaSeconds));
 			FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), CurrentWeapon->GetHipTransform().GetLocation(), ADSSpeed * DeltaSeconds));
 			FPArmMesh->SetRelativeScale3D(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetScale3D(), CurrentWeapon->GetHipTransform().GetScale3D(), ADSSpeed * DeltaSeconds));
+		}
+		else
+		{
+			FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, DefaultFOV, 10.f * DeltaSeconds);
+
+			FVector Pos = CurrentWeapon->GetHipTransform().GetLocation();
+			if (CurrentWeapon->GetReloadTransform().GetLocation() != FVector::ZeroVector)
+				Pos = CurrentWeapon->GetReloadTransform().GetLocation();
+
+			FRotator Rot = CurrentWeapon->GetHipTransform().Rotator();
+			if (CurrentWeapon->GetReloadTransform().Rotator() != FRotator::ZeroRotator)
+				Rot = CurrentWeapon->GetReloadTransform().Rotator();
+
+			FVector Sca = CurrentWeapon->GetHipTransform().GetScale3D();
+			if (CurrentWeapon->GetReloadTransform().GetScale3D() != FVector(1.f, 1.f, 1.f))
+				Sca = CurrentWeapon->GetReloadTransform().GetScale3D();
+
+			FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), Rot, ADSSpeed * DeltaSeconds));
+			FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), Pos, ADSSpeed * DeltaSeconds));
+			FPArmMesh->SetRelativeScale3D(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetScale3D(), Sca, ADSSpeed * DeltaSeconds));
 		}
 	}
 	else
