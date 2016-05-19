@@ -81,7 +81,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		if (TimeSinceDeath > DespawnTimer)
 			Destroy();
 
-		for (size_t i = 0; i < DelayedImpulses.Num(); i++) {
+		for (int32 i = 0; i < DelayedImpulses.Num(); i++) {
 			//Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
 			GetMesh()->AddImpulseAtLocation(DelayedImpulses[i].Impulse, DelayedImpulses[i].Location);
 		}
@@ -108,7 +108,7 @@ void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* Clas
 {
 	TArray<AActor*> OverlappingEnemies;
 	Sphere->GetOverlappingActors(OverlappingEnemies, ClassFilter);
-	for (size_t i = 0; i < OverlappingEnemies.Num(); i++)
+	for (int32 i = 0; i < OverlappingEnemies.Num(); i++)
 	{
 		if (Cast<AImpCharacter>(OverlappingEnemies[i]))
 		{

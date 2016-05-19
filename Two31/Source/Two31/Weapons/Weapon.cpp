@@ -313,7 +313,7 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 
 	if (HitResult.PhysMaterial != NULL)
 	{
-		for (size_t i = 0; i < ImpactVisuals.Num(); i++)
+		for (int32 i = 0; i < ImpactVisuals.Num(); i++)
 		{
 			if (HitResult.PhysMaterial->GetName() == ImpactVisuals[i].PhysicsMatName)
 			{
@@ -330,7 +330,7 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 
 		if (DecalMat == NULL)
 		{
-			for (size_t i = 0; i < ImpactVisuals.Num(); i++)
+			for (int32 i = 0; i < ImpactVisuals.Num(); i++)
 			{
 				if (ImpactVisuals[i].PhysicsMatName == "Default")
 				{
@@ -347,7 +347,7 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 		}
 		if (ImpactParticle == NULL)
 		{
-			for (size_t i = 0; i < ImpactVisuals.Num(); i++)
+			for (int32 i = 0; i < ImpactVisuals.Num(); i++)
 			{
 				if (ImpactVisuals[i].PhysicsMatName == "Default")
 				{

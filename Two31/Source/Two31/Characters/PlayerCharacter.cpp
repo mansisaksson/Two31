@@ -422,7 +422,7 @@ bool APlayerCharacter::AddItem(AItemPickup* item)
 	if (Inventory.Num() < 4 && Inventory.Num() > 0 )
 	{
 		bool  bShouldAdd = true;
-		for (size_t i = 0; i < Inventory.Num(); i++)
+		for (int32 i = 0; i < Inventory.Num(); i++)
 		{
 			if (Inventory[i].ID == item->GetItemID())
 				bShouldAdd = false;
@@ -457,7 +457,7 @@ int32 APlayerCharacter::GetItem(int32 itemID)
 }
 bool APlayerCharacter::PlayerHasItem(int32 ItemID)
 {
-	for (size_t i = 0; i < Inventory.Num(); i++)
+	for (int32 i = 0; i < Inventory.Num(); i++)
 	{
 		if (Inventory[i].ID == ItemID)
 			return true;
@@ -470,7 +470,7 @@ bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 {
 	if (Weapon != NULL)
 	{
-		for (size_t i = 0; i < WeaponSlots.Num(); i++)
+		for (int32 i = 0; i < WeaponSlots.Num(); i++)
 		{
 			if (WeaponSlots[i] == NULL)
 			{
@@ -610,7 +610,7 @@ void APlayerCharacter::PreviousWeapon()
 int APlayerCharacter::GetWeaponIndex()
 {
 	int index = -1;
-	for (size_t i = 0; i < WeaponSlots.Num(); i++)
+	for (int32 i = 0; i < WeaponSlots.Num(); i++)
 	{
 		if (CurrentWeapon == WeaponSlots[i])
 			index = i;
