@@ -440,8 +440,6 @@ float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 {
 	AEnemyCharacter::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	Debug::LogOnScreen("Cultist take damage");
-
 	if (GetCurrentState() != EEnemyState::Triggered)
 	{
 		SetCurrentState(EEnemyState::Triggered);

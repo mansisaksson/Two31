@@ -356,8 +356,9 @@ bool APlayerCharacter::PickupHealthPack(AHealthPickup* Healthpack)
 	}
 	else if (CurrentHealth == MaxHealth && HealthPacks.Num() < MaxAmountOfHealthPacks)
 	{
-		HealthPacks.Add(Healthpack->GetHealth());
-		return true;
+		//HealthPacks.Add(Healthpack->GetHealth());
+		//return true;
+		return false;
 	}
 	return false;
 }
