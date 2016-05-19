@@ -382,7 +382,7 @@ bool ACultistCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 {
 	if (Weapon != NULL)
 	{
-		for (size_t i = 0; i < WeaponSlots.Num(); i++)
+		for (int32 i = 0; i < WeaponSlots.Num(); i++)
 		{
 			if (WeaponSlots[i] == NULL)
 			{
@@ -416,7 +416,7 @@ void ACultistCharacter::SelectWeaponSlot(int index)
 int ACultistCharacter::GetWeaponIndex()
 {
 	int index = -1;
-	for (size_t i = 0; i < WeaponSlots.Num(); i++)
+	for (int32 i = 0; i < WeaponSlots.Num(); i++)
 	{
 		if (CurrentWeapon == WeaponSlots[i])
 			index = i;
@@ -427,8 +427,8 @@ int ACultistCharacter::GetWeaponIndex()
 void ACultistCharacter::Death()
 {
 	AEnemyCharacter::Death();
-	Debug::LogOnScreen("Cultist Death");
-	for (size_t i = 0; i < WeaponSlots.Num(); i++)
+
+	for (int32 i = 0; i < WeaponSlots.Num(); i++)
 	{
 		if (WeaponSlots[i] != NULL)
 			WeaponSlots[i]->Destroy();
