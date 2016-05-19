@@ -208,7 +208,6 @@ void ACultistCharacter::FocusOnPosition(float DeltaTime, FVector Position)
 {
 	FVector Direction = Position - GetActorLocation();
 	FRotator NewControlRotation = Direction.Rotation();
-
 	NewControlRotation.Yaw = FRotator::ClampAxis(NewControlRotation.Yaw);
 	CurrentControlRotation = FMath::Lerp(OldRotation, NewControlRotation, TurnRate * DeltaTime);
 	FaceRotation(CurrentControlRotation);
@@ -428,6 +427,7 @@ int ACultistCharacter::GetWeaponIndex()
 void ACultistCharacter::Death()
 {
 	AEnemyCharacter::Death();
+	Debug::LogOnScreen("Cultist Death");
 	for (size_t i = 0; i < WeaponSlots.Num(); i++)
 	{
 		if (WeaponSlots[i] != NULL)
@@ -440,18 +440,20 @@ float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 {
 	AEnemyCharacter::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	Debug::LogOnScreen("Cultist take damage");
+
 	if (GetCurrentState() != EEnemyState::Triggered)
 	{
 		SetCurrentState(EEnemyState::Triggered);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
-	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
+	//CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 
 	TimeSinceRandMovement += TimeToRandMove * (AvoidDamage / 100.f);
 	if (TimeSinceRandMovement >= TimeToRandMove)
 		bRandMoveAwayFromPlayer = true;
 
-	if (CurrentHealth == 0)
-		bIsAlive = false;
+	//if (CurrentHealth == 0)
+	//	bIsAlive = false;
 	return DamageAmount;
 }
