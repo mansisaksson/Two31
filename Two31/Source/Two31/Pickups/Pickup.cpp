@@ -31,11 +31,13 @@ APickup::APickup()
 
 void APickup::BeginPlay() 
 {
+	Super::BeginPlay();
 	DefaultGameMode = Cast<ADefaultGameMode>(GetWorld()->GetAuthGameMode());
 }
 
 void APickup::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
 	BobTimer += DeltaTime;
 	if (DefaultGameMode != NULL)
 	{

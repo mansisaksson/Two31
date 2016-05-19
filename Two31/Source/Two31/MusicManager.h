@@ -14,17 +14,20 @@ public:
 
 	GENERATED_BODY()
 
-	UFUNCTION(BlueprintCallable, Category = "Default")
+	UFUNCTION(BlueprintCallable, Category = "MusicManager")
 	static void OnEnemyStateSwitch(EEnemyState CurrentState, EEnemyState NewState);
 
-	UFUNCTION(BlueprintCallable, Category = "Default")
+	UFUNCTION(BlueprintCallable, Category = "MusicManager")
 	static void RemoveEnemy(EEnemyState CurrentState);
 
-	UFUNCTION(BlueprintCallable, Category = "Default")
+	UFUNCTION(BlueprintCallable, Category = "MusicManager")
 	static void AddEnemy(EEnemyState CurrentState);
 
-	UFUNCTION(BlueprintCallable, Category = "Default")
+	UFUNCTION(BlueprintCallable, Category = "MusicManager")
 	static int32 GetNumberOfEnemiesInState(EEnemyState State);
+
+	UFUNCTION(BlueprintCallable, Category = "MusicManager")
+	static void ClearBuffer();
 
 	static const int32 NumberOfStates = static_cast<int32>(EEnemyState::NumberOfStates) - 1;
 	static int32 StateCounter[];
