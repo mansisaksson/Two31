@@ -33,6 +33,9 @@ public:
 	*/
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	bool FirstTime;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
 	FString GraphicsResolution;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
