@@ -58,7 +58,7 @@ public:
 	void SetLevelCompletionTimer() { LevelCompletionTimer = GetWorld()->TimeSeconds; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
-	float GetHealth() { return FMath::CeilToFloat(CurrentHealth); }
+	float GetHealth() { return (FMath::CeilToFloat(CurrentHealth) < 1.0f && FMath::CeilToFloat(CurrentHealth) > 0.0f) ? 1.0f : FMath::CeilToFloat(CurrentHealth); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	float GetMaxHealth() { return MaxHealth; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
