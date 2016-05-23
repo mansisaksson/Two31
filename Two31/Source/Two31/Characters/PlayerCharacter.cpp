@@ -6,6 +6,7 @@
 #include "../Pickups/HealthPickup.h"
 #include "../Pickups/ArmorPickup.h"
 #include "../Pickups/AmmoPickup.h"
+#include "../Interactables/Confetti.h"
 #include "../StatsPornManager.h"
 #include "../Characters/EnemyCharacter.h"
 #include "../Weapons/Weapon.h"
@@ -252,6 +253,13 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 			AItemPickup* Item = Cast<AItemPickup>(OtherActor);
 			if (AddItem(Item))
 				Item->Destroy();
+		}
+		else if (Cast<AConfetti>(OtherActor))
+		{
+			AConfetti* confetti = Cast<AConfetti>(OtherActor);
+			TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+			FDamageEvent DamageEvent(ValidDamageTypeClass);
+			confetti->TakeDamage(0.f, DamageEvent, OtherActor->GetInstigatorController(), this);
 		}
 	}
 }
