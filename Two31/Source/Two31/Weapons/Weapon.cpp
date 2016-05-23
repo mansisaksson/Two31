@@ -3,7 +3,7 @@
 #include "Engine.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
-#include "../Interactables/Confetti.h"
+//#include "../Interactables/Confetti.h"
 #include "../StatsPornManager.h"
 #include "../BloodParticleBall.h"
 
