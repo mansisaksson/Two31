@@ -652,7 +652,6 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 {
 	if (!((ADefaultGameMode*)GetWorld()->GetAuthGameMode())->GetConfig()->GameplayProggMode)
 	{
-		Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 		UStatsPornManager::IncreaseAmountOfDamageTaken(DamageAmount);
 		ArmorAbsorption = FMath::Clamp(ArmorAbsorption, 0.f, 1.f);
 
@@ -687,6 +686,8 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 		IndicatorLocation = GetDamageCauserLocation(DamageCauser);
 		IndicatorTimer = IndicatorDisplayTime;
+
+		Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 		return DamageAmount;
 	}
