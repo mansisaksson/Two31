@@ -372,10 +372,11 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 				DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
 				DecalComp->FadeScreenSize = 0.f;
 			}
-	}
+		}
 
-	if (ImpactParticle != NULL)
-		UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, HitResult.Normal.Rotation());
+		if (ImpactParticle != NULL)
+			UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, HitResult.Normal.Rotation());
+	}
 }
 void AWeapon::OnBeginFire_Implementation()
 {

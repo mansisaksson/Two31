@@ -49,7 +49,10 @@ UJsonFieldData* UJsonFieldData::Create(UObject* WorldContextObject) {
 	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject);
 
 	// Construct the object and return it
-	UJsonFieldData* fieldData = (UJsonFieldData*)StaticConstructObject(UJsonFieldData::StaticClass());
+	
+	//UJsonFieldData* fieldData = (UJsonFieldData*)StaticConstructObject(UJsonFieldData::StaticClass());
+	UJsonFieldData* fieldData = NewObject<UJsonFieldData>(UJsonFieldData::StaticClass());
+
 	fieldData->contextObject = WorldContextObject;
 	return fieldData;
 }
