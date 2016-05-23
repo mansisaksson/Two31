@@ -71,7 +71,11 @@ void AGaussRifle::FireShot(FVector TowardsLocation)
 		collisionQuery.AddIgnoredActor(this);
 		collisionQuery.AddIgnoredActor(GetOwner());
 
-		bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), TowardsLocation, collisionChannel, collisionQuery, collisionResponse);
+		// Om ADS:
+			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), TowardsLocation, collisionChannel, collisionQuery, collisionResponse);
+
+		// else:
+			//bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), BulletSpawnLocation->GetComponentLocation() + (rikting av pipan * 5000.f), collisionChannel, collisionQuery, collisionResponse);
 
 		if (MuzzeFlash != NULL)
 		{

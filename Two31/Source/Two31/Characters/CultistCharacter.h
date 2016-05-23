@@ -23,6 +23,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	virtual FRotator GetFacingDirection() { return CurrentControlRotation; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	class AWeapon* GetCurrentWeapon() { return CurrentWeapon; }
 	
 protected:
 	UFUNCTION()

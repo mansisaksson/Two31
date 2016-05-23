@@ -358,18 +358,20 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 		}
 	}
 
-	if (DecalMat != NULL)
+	if (!Cast<APlayerCharacter>(HitResult.GetActor()))
 	{
-		FVector Normal = (HitResult.Normal * -1);
-		UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, DecalSize, HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
-		DecalComp->SetWorldRotation(Normal.Rotation());
-		DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
-		DecalComp->FadeScreenSize = 0.f;
+		if (DecalMat != NULL)
+		{
+			FVector Normal = (HitResult.Normal * -1);
+			UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, DecalSize, HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
+			DecalComp->SetWorldRotation(Normal.Rotation());
+			DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+			DecalComp->FadeScreenSize = 0.f;
+		}
 	}
 
 	if (ImpactParticle != NULL)
 		UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, HitResult.Normal.Rotation());
-
 }
 void AWeapon::OnBeginFire_Implementation()
 {
