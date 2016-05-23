@@ -208,9 +208,9 @@ void ACultistCharacter::FocusOnPosition(float DeltaTime, FVector Position)
 {
 	FVector Direction = Position - GetActorLocation();
 	FRotator NewControlRotation = Direction.Rotation();
-
 	NewControlRotation.Yaw = FRotator::ClampAxis(NewControlRotation.Yaw);
-	FaceRotation(FMath::Lerp(OldRotation, NewControlRotation, TurnRate * DeltaTime));
+	CurrentControlRotation = FMath::Lerp(OldRotation, NewControlRotation, TurnRate * DeltaTime);
+	FaceRotation(CurrentControlRotation);
 	OldRotation = GetActorRotation();
 }
 void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
@@ -382,14 +382,14 @@ bool ACultistCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 {
 	if (Weapon != NULL)
 	{
-		for (size_t i = 0; i < WeaponSlots.Num(); i++)
+		for (int32 i = 0; i < WeaponSlots.Num(); i++)
 		{
 			if (WeaponSlots[i] == NULL)
 			{
 				const FRotator SpawnRotation = FRotator::ZeroRotator;
 				const FVector SpawnLocation = FVector::ZeroVector;
 				WeaponSlots[i] = GetWorld()->SpawnActor<AWeapon>(Weapon, SpawnLocation, SpawnRotation);
-				WeaponSlots[i]->AttachRootComponentTo(GetMesh(), TEXT("GripPoint"), EAttachLocation::SnapToTargetIncludingScale, true);
+				WeaponSlots[i]->AttachRootComponentTo(GetMesh(), TEXT("R_WristSocket"), EAttachLocation::SnapToTargetIncludingScale, true);
 				WeaponSlots[i]->SetActorHiddenInGame(true);
 
 				if (CurrentWeapon == NULL)
@@ -416,7 +416,7 @@ void ACultistCharacter::SelectWeaponSlot(int index)
 int ACultistCharacter::GetWeaponIndex()
 {
 	int index = -1;
-	for (size_t i = 0; i < WeaponSlots.Num(); i++)
+	for (int32 i = 0; i < WeaponSlots.Num(); i++)
 	{
 		if (CurrentWeapon == WeaponSlots[i])
 			index = i;
@@ -427,7 +427,8 @@ int ACultistCharacter::GetWeaponIndex()
 void ACultistCharacter::Death()
 {
 	AEnemyCharacter::Death();
-	for (size_t i = 0; i < WeaponSlots.Num(); i++)
+
+	for (int32 i = 0; i < WeaponSlots.Num(); i++)
 	{
 		if (WeaponSlots[i] != NULL)
 			WeaponSlots[i]->Destroy();
@@ -444,13 +445,13 @@ float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 		SetCurrentState(EEnemyState::Triggered);
 		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
 	}
-	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
+	//CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 
 	TimeSinceRandMovement += TimeToRandMove * (AvoidDamage / 100.f);
 	if (TimeSinceRandMovement >= TimeToRandMove)
 		bRandMoveAwayFromPlayer = true;
 
-	if (CurrentHealth == 0)
-		bIsAlive = false;
+	//if (CurrentHealth == 0)
+	//	bIsAlive = false;
 	return DamageAmount;
 }

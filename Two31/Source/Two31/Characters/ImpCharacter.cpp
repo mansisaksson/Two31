@@ -470,7 +470,7 @@ bool AImpCharacter::WallInWay(FVector Position)
 	bool hitObject = GetWorld()->LineTraceMultiByChannel(results, GetActorLocation(), Position, collisionChannel, collisionQuery, collisionResponse);
 	if (hitObject)
 	{
-		for (size_t i = 0; i < results.Num(); i++)
+		for (int32 i = 0; i < results.Num(); i++)
 		{
 			if (results[i].GetActor() != NULL)
 			{
@@ -490,7 +490,7 @@ void AImpCharacter::GetPositionOfImps()
 	TArray<AActor*> OverlappingImps;
 	AlertRadius->GetOverlappingActors(OverlappingImps, AImpCharacter::GetClass());
 
-	for (size_t i = 0; i < OverlappingImps.Num(); i++)
+	for (int32 i = 0; i < OverlappingImps.Num(); i++)
 	{
 		if (Cast<AImpCharacter>(OverlappingImps[i]))
 		{

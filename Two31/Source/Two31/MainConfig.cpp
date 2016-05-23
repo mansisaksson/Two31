@@ -22,14 +22,40 @@ void UMainConfig::Save()
 void UMainConfig::Load()
 {
 	LoadConfig();
+	if (!FirstTime) {
+		GraphicsResolution = FString(TEXT("1920x1080"));
+		GraphicsFullscreen = true;
+		GraphicsFOV = 90;
+		GraphicsAntiAliasing = 6;
+		GraphicsPostProcessing = 3;
+		GraphicsShadows = 3;
+		GraphicsTextures = 3;
+		GraphicsEffects = 3;
+		GraphicsRenderDistanceScale = 1.0f;
+		GraphicsVSync = true;
+		AudioMaster = 1.0f;
+		AudioMusic = 1.0f;
+		AudioDialog = 1.0f;
+		AudioEnviroment = 1.0f;
+		GameplaySubtitles = false;
+		GameplayHints = true;
+		GameplayProggMode = false;
+		//MostProcentOfEnemiesKilled = 0;
+		//MostProcentOfSecretsFound = 0;
+		//MostAmountOfBulletsFired = 0;
+		//LeastAmountOfBulletsFired = 0;
+		//MostAmountOfDamageTaken = 0;
+		//LeastAmountOfDamageTaken = 0;
+		//MostAmountOfHealthLost = 0;
+		//LeastAmountOfHealthLost = 0;
+		//MostAmountOfArmorLost = 0;
+		//LeastAmountOfArmorLost = 0;
+		Save();
+	}
 }
 
 void UMainConfig::Apply()
 {
-
-	if(GraphicsResolution.IsEmpty()){
-		GraphicsResolution = FString(TEXT("800x600"));
-	}
 
 	ExecCmd(FString::Printf(TEXT("fov %i"), GraphicsFOV));
 

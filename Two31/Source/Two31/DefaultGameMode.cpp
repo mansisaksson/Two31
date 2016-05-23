@@ -12,7 +12,9 @@ ADefaultGameMode::ADefaultGameMode() : Super()
 void ADefaultGameMode::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	GetConfig()->GameplayProggMode = bEnableProgMod;
+	if (bEnableProgMod) {
+		GetConfig()->GameplayProggMode = true;
+	}
 }
 
 UMainConfig* ADefaultGameMode::GetConfig()

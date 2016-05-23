@@ -81,7 +81,7 @@ void AEnemyCharacter::Tick(float DeltaTime)
 		if (TimeSinceDeath > DespawnTimer)
 			Destroy();
 
-		for (size_t i = 0; i < DelayedImpulses.Num(); i++) {
+		for (int32 i = 0; i < DelayedImpulses.Num(); i++) {
 			//Debug::LogOnScreen(FString::Printf(TEXT("Add Impulse! | Strength: %f"), DelayedImpulses[i].Impulse.Size()));
 			GetMesh()->AddImpulseAtLocation(DelayedImpulses[i].Impulse, DelayedImpulses[i].Location);
 		}
@@ -108,7 +108,7 @@ void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* Clas
 {
 	TArray<AActor*> OverlappingEnemies;
 	Sphere->GetOverlappingActors(OverlappingEnemies, ClassFilter);
-	for (size_t i = 0; i < OverlappingEnemies.Num(); i++)
+	for (int32 i = 0; i < OverlappingEnemies.Num(); i++)
 	{
 		if (Cast<AImpCharacter>(OverlappingEnemies[i]))
 		{
@@ -153,7 +153,6 @@ void AEnemyCharacter::SpawnBloodEffects(FHitResult HitResult, AActor* SourceActo
 float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	OnTakeDamage();
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("DamageTaken"));
 	CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 	if (CurrentHealth <= 0)
@@ -163,6 +162,7 @@ float AEnemyCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 		UStatsPornManager::IncreaseAmountOfEnemiesKilled();
 	}
 
+	OnTakeDamage();
 	return DamageAmount;
 }
 

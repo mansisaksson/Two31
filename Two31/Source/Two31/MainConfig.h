@@ -33,6 +33,9 @@ public:
 	*/
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	bool FirstTime;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
 	FString GraphicsResolution;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
@@ -83,4 +86,33 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
 	bool GameplayProggMode;
 	
+	//Stats
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	int32 MostProcentOfEnemiesKilled;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	int32 MostProcentOfSecretsFound;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	int32 MostAmountOfBulletsFired;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	int32 LeastAmountOfBulletsFired;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	int32 MostAmountOfDamageTaken;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	int32 LeastAmountOfDamageTaken;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	int32 MostAmountOfHealthLost;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	int32 LeastAmountOfHealthLost;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	int32 MostAmountOfArmorLost;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	int32 LeastAmountOfArmorLost;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "BestStats")
+	float FastestLevelCompletion;
 };

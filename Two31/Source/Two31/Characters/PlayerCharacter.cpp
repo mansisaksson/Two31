@@ -6,6 +6,7 @@
 #include "../Pickups/HealthPickup.h"
 #include "../Pickups/ArmorPickup.h"
 #include "../Pickups/AmmoPickup.h"
+#include "../Interactables/Confetti.h"
 #include "../StatsPornManager.h"
 #include "../Characters/EnemyCharacter.h"
 #include "../Weapons/Weapon.h"
@@ -148,12 +149,32 @@ void APlayerCharacter::Tick(float DeltaSeconds)
 			FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), CurrentWeapon->GetADSTransform().GetLocation(), ADSSpeed * DeltaSeconds));
 			FPArmMesh->SetRelativeScale3D(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetScale3D(), CurrentWeapon->GetADSTransform().GetScale3D(), ADSSpeed * DeltaSeconds));
 		}
-		else
+		else if (!CurrentWeapon->GetIsReloading())
 		{
 			FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, DefaultFOV, 10.f * DeltaSeconds);
 			FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), CurrentWeapon->GetHipTransform().Rotator(), ADSSpeed * DeltaSeconds));
 			FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), CurrentWeapon->GetHipTransform().GetLocation(), ADSSpeed * DeltaSeconds));
 			FPArmMesh->SetRelativeScale3D(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetScale3D(), CurrentWeapon->GetHipTransform().GetScale3D(), ADSSpeed * DeltaSeconds));
+		}
+		else
+		{
+			FPCamera->FieldOfView = FMath::Lerp(FPCamera->FieldOfView, DefaultFOV, 10.f * DeltaSeconds);
+
+			FVector Pos = CurrentWeapon->GetHipTransform().GetLocation();
+			if (CurrentWeapon->GetReloadTransform().GetLocation() != FVector::ZeroVector)
+				Pos = CurrentWeapon->GetReloadTransform().GetLocation();
+
+			FRotator Rot = CurrentWeapon->GetHipTransform().Rotator();
+			if (CurrentWeapon->GetReloadTransform().Rotator() != FRotator::ZeroRotator)
+				Rot = CurrentWeapon->GetReloadTransform().Rotator();
+
+			FVector Sca = CurrentWeapon->GetHipTransform().GetScale3D();
+			if (CurrentWeapon->GetReloadTransform().GetScale3D() != FVector(1.f, 1.f, 1.f))
+				Sca = CurrentWeapon->GetReloadTransform().GetScale3D();
+
+			FPArmMesh->SetRelativeRotation(FMath::Lerp(FPArmMesh->GetRelativeTransform().Rotator(), Rot, ADSSpeed * DeltaSeconds));
+			FPArmMesh->SetRelativeLocation(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetLocation(), Pos, ADSSpeed * DeltaSeconds));
+			FPArmMesh->SetRelativeScale3D(FMath::Lerp(FPArmMesh->GetRelativeTransform().GetScale3D(), Sca, ADSSpeed * DeltaSeconds));
 		}
 	}
 	else
@@ -232,6 +253,13 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 			AItemPickup* Item = Cast<AItemPickup>(OtherActor);
 			if (AddItem(Item))
 				Item->Destroy();
+		}
+		else if (Cast<AConfetti>(OtherActor))
+		{
+			AConfetti* confetti = Cast<AConfetti>(OtherActor);
+			TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+			FDamageEvent DamageEvent(ValidDamageTypeClass);
+			confetti->TakeDamage(0.f, DamageEvent, OtherActor->GetInstigatorController(), this);
 		}
 	}
 }
@@ -336,8 +364,9 @@ bool APlayerCharacter::PickupHealthPack(AHealthPickup* Healthpack)
 	}
 	else if (CurrentHealth == MaxHealth && HealthPacks.Num() < MaxAmountOfHealthPacks)
 	{
-		HealthPacks.Add(Healthpack->GetHealth());
-		return true;
+		//HealthPacks.Add(Healthpack->GetHealth());
+		//return true;
+		return false;
 	}
 	return false;
 }
@@ -402,7 +431,7 @@ bool APlayerCharacter::AddItem(AItemPickup* item)
 	if (Inventory.Num() < 4 && Inventory.Num() > 0 )
 	{
 		bool  bShouldAdd = true;
-		for (size_t i = 0; i < Inventory.Num(); i++)
+		for (int32 i = 0; i < Inventory.Num(); i++)
 		{
 			if (Inventory[i].ID == item->GetItemID())
 				bShouldAdd = false;
@@ -437,7 +466,7 @@ int32 APlayerCharacter::GetItem(int32 itemID)
 }
 bool APlayerCharacter::PlayerHasItem(int32 ItemID)
 {
-	for (size_t i = 0; i < Inventory.Num(); i++)
+	for (int32 i = 0; i < Inventory.Num(); i++)
 	{
 		if (Inventory[i].ID == ItemID)
 			return true;
@@ -450,7 +479,7 @@ bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 {
 	if (Weapon != NULL)
 	{
-		for (size_t i = 0; i < WeaponSlots.Num(); i++)
+		for (int32 i = 0; i < WeaponSlots.Num(); i++)
 		{
 			if (WeaponSlots[i] == NULL)
 			{
@@ -590,7 +619,7 @@ void APlayerCharacter::PreviousWeapon()
 int APlayerCharacter::GetWeaponIndex()
 {
 	int index = -1;
-	for (size_t i = 0; i < WeaponSlots.Num(); i++)
+	for (int32 i = 0; i < WeaponSlots.Num(); i++)
 	{
 		if (CurrentWeapon == WeaponSlots[i])
 			index = i;
@@ -631,7 +660,6 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 {
 	if (!((ADefaultGameMode*)GetWorld()->GetAuthGameMode())->GetConfig()->GameplayProggMode)
 	{
-		Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 		UStatsPornManager::IncreaseAmountOfDamageTaken(DamageAmount);
 		ArmorAbsorption = FMath::Clamp(ArmorAbsorption, 0.f, 1.f);
 
@@ -666,6 +694,8 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 		IndicatorLocation = GetDamageCauserLocation(DamageCauser);
 		IndicatorTimer = IndicatorDisplayTime;
+
+		Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 		return DamageAmount;
 	}

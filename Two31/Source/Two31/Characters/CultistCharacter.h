@@ -20,6 +20,9 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	virtual FRotator GetFacingDirection() { return CurrentControlRotation; }
 	
 protected:
 	UFUNCTION()
@@ -146,6 +149,7 @@ private:
 	FVector LastKnownPlayerPos;
 	FVector LastKnownPlayerVelocity;
 	FRotator OldRotation;
+	FRotator CurrentControlRotation;
 
 	class AWeapon* CurrentWeapon;
 	TArray<class AWeapon*> WeaponSlots;

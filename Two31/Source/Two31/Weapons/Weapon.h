@@ -52,7 +52,7 @@ public:
 	virtual void EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* AmmoPool);
 	virtual void HolsterWeapon();
 	virtual void SetPlayerAnimations(USkeletalMeshComponent* PlayerMesh);
-	virtual void SetCultistAnimations(USkeletalMeshComponent* CultistMesh);
+	virtual void SetCultistOwnerMesh(USkeletalMeshComponent* CultistMesh);
 	virtual FString GetWeaponName();
 
 	virtual void StartFire(FVector TowardsLocation);
@@ -95,6 +95,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	FTransform GetADSTransform() { return ADSTransform; }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
+	FTransform GetReloadTransform() { return ReloadTransform; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GetFunction)
 	int32 GetAmmoPool() { if (AmmoPool != NULL) return *AmmoPool; return 0; };
 
 protected:
@@ -116,9 +118,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	FTransform ADSTransform;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	FTransform ReloadTransform;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UAnimBlueprintGeneratedClass* PlayerAnimationBlueprint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UAnimBlueprintGeneratedClass* CultistAnimationBlueprint;
+	FVector CultistLocOffset;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	FRotator CultistRotOffset;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	TArray<FImpactVisual> ImpactVisuals;
 
