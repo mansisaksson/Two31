@@ -40,6 +40,16 @@ void UMainConfig::Load()
 		GameplaySubtitles = false;
 		GameplayHints = true;
 		GameplayProggMode = false;
+		//MostProcentOfEnemiesKilled = 0;
+		//MostProcentOfSecretsFound = 0;
+		//MostAmountOfBulletsFired = 0;
+		//LeastAmountOfBulletsFired = 0;
+		//MostAmountOfDamageTaken = 0;
+		//LeastAmountOfDamageTaken = 0;
+		//MostAmountOfHealthLost = 0;
+		//LeastAmountOfHealthLost = 0;
+		//MostAmountOfArmorLost = 0;
+		//LeastAmountOfArmorLost = 0;
 		Save();
 	}
 }

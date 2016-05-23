@@ -3,6 +3,7 @@
 #include "Engine.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
+//#include "../Interactables/Confetti.h"
 #include "../StatsPornManager.h"
 #include "../BloodParticleBall.h"
 
@@ -270,6 +271,7 @@ AActor* AWeapon::GetOwner()
 
 void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 {
+
 	if (HitResult.GetActor() != NULL)
 	{
 
@@ -327,33 +329,33 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 				}
 			}
 		}
+	}
 
-		if (DecalMat == NULL)
+	if (DecalMat == NULL)
+	{
+		for (int32 i = 0; i < ImpactVisuals.Num(); i++)
 		{
-			for (int32 i = 0; i < ImpactVisuals.Num(); i++)
+			if (ImpactVisuals[i].PhysicsMatName == "Default")
 			{
-				if (ImpactVisuals[i].PhysicsMatName == "Default")
+				if (ImpactVisuals[i].ImpactDecals.Num() > 0)
 				{
-					if (ImpactVisuals[i].ImpactDecals.Num() > 0)
-					{
-						int index = FMath::RandRange(0, ImpactVisuals[i].ImpactDecals.Num() - 1);
-						DecalMat = ImpactVisuals[i].ImpactDecals[index].Decal;
-						DecalSize = ImpactVisuals[i].ImpactDecals[index].Size;
-						RandSize = FMath::RandRange(0.f, ImpactVisuals[i].ImpactDecals[index].AddedRandXYSize);
-					}
-					break;
+					int index = FMath::RandRange(0, ImpactVisuals[i].ImpactDecals.Num() - 1);
+					DecalMat = ImpactVisuals[i].ImpactDecals[index].Decal;
+					DecalSize = ImpactVisuals[i].ImpactDecals[index].Size;
+					RandSize = FMath::RandRange(0.f, ImpactVisuals[i].ImpactDecals[index].AddedRandXYSize);
 				}
+				break;
 			}
 		}
-		if (ImpactParticle == NULL)
+	}
+	if (ImpactParticle == NULL)
+	{
+		for (int32 i = 0; i < ImpactVisuals.Num(); i++)
 		{
-			for (int32 i = 0; i < ImpactVisuals.Num(); i++)
+			if (ImpactVisuals[i].PhysicsMatName == "Default")
 			{
-				if (ImpactVisuals[i].PhysicsMatName == "Default")
-				{
-					ImpactParticle = ImpactVisuals[i].ImpactParticle;
-					break;
-				}
+				ImpactParticle = ImpactVisuals[i].ImpactParticle;
+				break;
 			}
 		}
 	}
@@ -364,10 +366,12 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 		{
 			FVector Normal = (HitResult.Normal * -1);
 			UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(DecalMat, DecalSize, HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
-			DecalComp->SetWorldRotation(Normal.Rotation());
-			DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
-			DecalComp->FadeScreenSize = 0.f;
-		}
+			if (DecalComp != NULL)
+			{
+				DecalComp->SetWorldRotation(Normal.Rotation());
+				DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
+				DecalComp->FadeScreenSize = 0.f;
+			}
 	}
 
 	if (ImpactParticle != NULL)
