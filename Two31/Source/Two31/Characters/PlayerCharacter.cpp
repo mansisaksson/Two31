@@ -6,6 +6,7 @@
 #include "../Pickups/HealthPickup.h"
 #include "../Pickups/ArmorPickup.h"
 #include "../Pickups/AmmoPickup.h"
+//#include "../Interactables/Confetti.h"
 #include "../StatsPornManager.h"
 #include "../Characters/EnemyCharacter.h"
 #include "../Weapons/Weapon.h"
@@ -253,6 +254,13 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 			if (AddItem(Item))
 				Item->Destroy();
 		}
+		//else if (Cast<AConfetti>(OtherActor))
+		//{
+		//	AConfetti* confetti = Cast<AConfetti>(OtherActor);
+		//	TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+		//	FDamageEvent DamageEvent(ValidDamageTypeClass);
+		//	confetti->TakeDamage(0.f, DamageEvent, OtherActor->GetInstigatorController(), this);
+		//}
 	}
 }
 
@@ -652,7 +660,6 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 {
 	if (!((ADefaultGameMode*)GetWorld()->GetAuthGameMode())->GetConfig()->GameplayProggMode)
 	{
-		Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 		UStatsPornManager::IncreaseAmountOfDamageTaken(DamageAmount);
 		ArmorAbsorption = FMath::Clamp(ArmorAbsorption, 0.f, 1.f);
 
@@ -687,6 +694,8 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 		IndicatorLocation = GetDamageCauserLocation(DamageCauser);
 		IndicatorTimer = IndicatorDisplayTime;
+
+		Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 		return DamageAmount;
 	}
