@@ -11,15 +11,28 @@
 	
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 	
+	<link rel="icon" href="logo.png">
+	
 	<style>
+		html, body{
+			margin:0px;
+			padding:0px;
+		}
+		body{
+			background-image:url("banner.png");
+			background-repeat: no-repeat;
+			background-position: center-x;
+			background-color:#000;
+		}
 		table{
 			border-collapse: collapse;
+			color:#FFF;
 		}
 		table td{
-			border:1px solid #000;
+			border:1px solid #FFF;
 			padding:5px;
 		}
 	</style>
@@ -27,68 +40,78 @@
 </head>
 <body>
 	
-	<table>
-		<thead>
-			<td>Level:</td>
-			<td>Username:</td>
-			<td>Enemies killed:</td>
-			<td>Secrets found:</td>
-			<td>Time:</td>
-			<td>Bullets fired:</td>
-			<td>Damage taken:</td>
-			<td>Health lost:</td>
-			<td>Armor lost:</td>
-			<td>Date:</td>
-		</thead>
-		<?php
-			for($i=0; $i<count($highscoreList); $i++){
-				
-				$highscoreList[$i][4] = 71.123456;
-				
-				$secs = floor($highscoreList[$i][4]);
-				$milli = (int) (($highscoreList[$i][4] - $secs) * 1000);
-				$hours = floor($secs / 3600);
-				$minutes = (($secs / 60) % 60);
-				$seconds = $secs % 60;
-				
-				$hours = "".$hours;
-				if(strlen($hours) != 2){
-					$hours = $hours."0";
+	<div style="width:1300px; height:800px; margin:auto; margin-top:100px;">
+		<video width="1280" height="720" controls autoplay>
+			<source src="trailer.mp4" type="video/mp4">
+			Your browser does not support the video tag.
+		</video>
+	<div>	
+	
+	<div style="width:800px; margin:auto; margin-top:650px; margin-bottom:100px; text-align:center;">
+		<h1>Highscore</h1>
+		<table>
+			<thead>
+				<td>Level:</td>
+				<td>Username:</td>
+				<td>Enemies killed:</td>
+				<td>Secrets found:</td>
+				<td>Time:</td>
+				<td>Bullets fired:</td>
+				<td>Damage taken:</td>
+				<td>Health lost:</td>
+				<td>Armor lost:</td>
+				<td>Date:</td>
+			</thead>
+			<?php
+				for($i=0; $i<count($highscoreList); $i++){
+					
+					//$highscoreList[$i][4] = 71.123456;
+					
+					$secs = floor($highscoreList[$i][4]);
+					$milli = (int) (($highscoreList[$i][4] - $secs) * 1000);
+					$hours = floor($secs / 3600);
+					$minutes = (($secs / 60) % 60);
+					$seconds = $secs % 60;
+					
+					$hours = "".$hours;
+					if(strlen($hours) != 2){
+						$hours = $hours."0";
+					}
+					
+					$minutes = "".$minutes;
+					if(strlen($minutes) != 2){
+						$minutes = $minutes."0";
+					}
+					
+					$seconds = "".$seconds;
+					if(strlen($seconds) != 2){
+						$seconds = $seconds."0";
+					}
+					
+					$milli = "".$milli;
+					if(strlen($milli) != 3){
+						$milli = $milli."0";
+					}
+					if(strlen($milli) != 3){
+						$milli = $milli."0";
+					}
+					
+					echo '<tr>';
+					echo '<td>'.$highscoreList[$i][0].'</td>';
+					echo '<td>'.$highscoreList[$i][1].'</td>';
+					echo '<td>'.$highscoreList[$i][2].'%</td>';
+					echo '<td>'.$highscoreList[$i][3].'%</td>';
+					echo '<td>'.$hours.':'.$minutes.':'.$seconds.':'.$milli.'</td>';
+					echo '<td>'.$highscoreList[$i][5].'</td>';
+					echo '<td>'.$highscoreList[$i][6].'</td>';
+					echo '<td>'.$highscoreList[$i][7].'</td>';
+					echo '<td>'.$highscoreList[$i][8].'</td>';
+					echo '<td>'.$highscoreList[$i][9].'</td>';
+					echo '</tr>';
 				}
-				
-				$minutes = "".$minutes;
-				if(strlen($minutes) != 2){
-					$minutes = $minutes."0";
-				}
-				
-				$seconds = "".$seconds;
-				if(strlen($seconds) != 2){
-					$seconds = $seconds."0";
-				}
-				
-				$milli = "".$milli;
-				if(strlen($milli) != 3){
-					$milli = $milli."0";
-				}
-				if(strlen($milli) != 3){
-					$milli = $milli."0";
-				}
-				
-				echo '<tr>';
-				echo '<td>'.$highscoreList[$i][0].'</td>';
-				echo '<td>'.$highscoreList[$i][1].'</td>';
-				echo '<td>'.$highscoreList[$i][2].'%</td>';
-				echo '<td>'.$highscoreList[$i][3].'%</td>';
-				echo '<td>'.$hours.':'.$minutes.':'.$seconds.':'.$milli.'</td>';
-				echo '<td>'.$highscoreList[$i][5].'</td>';
-				echo '<td>'.$highscoreList[$i][6].'</td>';
-				echo '<td>'.$highscoreList[$i][7].'</td>';
-				echo '<td>'.$highscoreList[$i][8].'</td>';
-				echo '<td>'.$highscoreList[$i][9].'</td>';
-				echo '</tr>';
-			}
-		?>
-	</table>
+			?>
+		</table>
+	</div>
 	
 </body>
 </html>
