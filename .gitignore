@@ -77,26 +77,7 @@ SourceArt/**/*.tga
 
 // FMOD Files
 Two31/Plugins/FMODStudio/Binaries/Win64/UE4Editor-FMODStudio.pdb
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/FMODStudioPrivatePCH.h
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/FMODStudioEditorPrivatePCH.h
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/FMODStudioOculusPrivatePCH.h
-//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudio.exp
-//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudioEditor.exp
-//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudioOculus.exp
-//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/PCH.FMODStudioPrivatePCH.h.cpp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/PCH.FMODStudioEditorPrivatePCH.h.cpp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/PCH.FMODStudioOculusPrivatePCH.h.cpp
-
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Inc/FMODStudioOculus/Timestamp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Inc/FMODStudioOculus/Timestamp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Inc/FMODStudioEditor/Timestamp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Inc/FMODStudio/Timestamp
-//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/PCLaunch.rc.res
-//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/PCH.FMODStudioOculusPrivatePCH.h.cpp
-//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/PCLaunch.rc.res
-//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/PCH.FMODStudioEditorPrivatePCH.h.cpp
-//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/PCLaunch.rc.res
-//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/PCH.FMODStudioPrivatePCH.h.cpp
+Two31/Plugins/FMODStudio/Intermediate/*
 
 *TimeStamp
 !Two31/Plugins/FMODStudio/Binaries/Win64/fmod64.dll
@@ -110,4 +91,7 @@ Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Inc/FMODStudio/Times
 !Two31/Plugins/FMODStudio/Binaries/Win64/ovrfmod.dll
 !Two31/Plugins/FMODStudio/Binaries/Win64/ovrfmod.lib
 
+Two31/Plugins/JSONQuery/Binaries/Win64/UE4Editor-JSONQuery.pdb
 Two31/Plugins/JSONQuery/Intermediate/*
+
+!Two31/Plugins/JSONQuery/Binaries/Win64/UE4Editor-JSONQuery.dll
