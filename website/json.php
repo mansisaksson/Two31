@@ -5,21 +5,57 @@
 	if(isset($input)){
 		$decoded = json_decode(stripslashes($input), TRUE);
 		if(!is_null($decoded)){
-			$response['highscore_0'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
-			$response['highscore_1'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
-			$response['highscore_2'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
-			$response['highscore_3'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
-			$response['highscore_4'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
-			$response['highscore_5'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
-			$response['highscore_6'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
-			$response['highscore_7'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
-			$response['highscore_8'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
-			$response['highscore_9'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
-			$response['highscore_10'] = array("you", 0, 0, 0.0, 0, 0, 0, 0);
+			$decoded = $decoded['highscore'];
+			
+			$mysqli = new mysqli("localhost", "two31", "DmquVrtM6ADNWSrq", "two31");
+			if(!$mysqli->connect_errno){
+				$today = getdate();
+				$time = $today['year']."-".$today['mon']."-".$today['mday']." ".$today['hours'].":".$today['minutes'].":".$today['seconds'];
+				
+			
+				
+				if($stmt = $mysqli->prepare("INSERT INTO highscore VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")){
+					if(!$stmt->bind_param("ssssssssss", $decoded[0], $decoded[1], $decoded[2], $decoded[3], $decoded[4], $decoded[5], $decoded[6], $decoded[7], $decoded[8], $time)){
+						$response['status'] = "Bind params failed: (" . $mysqli->errno . ") " . $mysqli->error;
+					}
+					if(!$stmt->execute()){
+						$response['status'] = var_export($decoded, true);
+						//$response['status'] = "[".$decoded[0].", ".$decoded[1]."]execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+					}
+					$stmt->close();
+				
+					if($stmt2 = $mysqli->prepare("SELECT * FROM highscore WHERE level = ? ORDER BY enemies DESC, secrets DESC, time ASC, bullets ASC, damage ASC, health ASC, armor ASC, date DESC LIMIT 10")){
+						$stmt2->bind_param("s", $decoded[0]);
+						$stmt2->execute();
+						$stmt2->bind_result($level, $name, $kills, $secrets, $time, $bullets, $damage, $bla, $bla2, $date);
+						
+						$i = 0;
+						while($stmt2->fetch()){
+							$response['highscore_'.($i+1)] = array($name, $kills, $secrets, $time, $bullets, $damage, 0, 0);
+							$i++;
+						}
+						
+						$response['highscore_0'] = array($decoded[1], $decoded[2], $decoded[3], $decoded[4], $decoded[5], $decoded[6], $decoded[7], $decoded[8]);
+						$stmt2->close();
+						
+					}else{
+						$response['status'] = "error: failed to retrieve top 10 list";
+					}
+					
+				}else{
+					$response['status'] = "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+				}
+				
+			}else{
+				$response['status'] = "error: cant connect mysqli";
+			}
+			
+		}else{
+			$response['status'] = "error: wrong json";
 		}
-		$response['status'] = "fine";
+		
 	}else{
-		$response['status'] = "error";
+		$response['status'] = "error: no json";
 	}
 	
 	$encoded = json_encode($response);
