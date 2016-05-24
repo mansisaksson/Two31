@@ -1,0 +1,2 @@
+java -cp . ImageFixer
+Pause

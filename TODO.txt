@@ -1,0 +1,13 @@
+
+*** TODO ***
+
+Fiender
+- AI (Lära oss hur man gör AI i Unreal)
+- Ska kunna använda vapen (SMG)
+
+Decals
+- Bullet Decals
+- Blood Splater (behöver fiender först)
+
+Weapons
+- Omladnings indikator (loading bar)
