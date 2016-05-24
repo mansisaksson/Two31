@@ -22,6 +22,9 @@ AGaussRifle::AGaussRifle()
 
 	MuzzleSpawnLocation = CreateDefaultSubobject<USceneComponent>("MuzzleSpawnLocation");
 	MuzzleSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
+
+	LaserDirection = CreateDefaultSubobject<UArrowComponent>("LaserDirection");
+	LaserDirection->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
 }
 
 void AGaussRifle::BeginPlay()
@@ -71,16 +74,20 @@ void AGaussRifle::FireShot(FVector TowardsLocation)
 		collisionQuery.AddIgnoredActor(this);
 		collisionQuery.AddIgnoredActor(GetOwner());
 
-		// Om ADS:
-			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), TowardsLocation, collisionChannel, collisionQuery, collisionResponse);
-
-		// else:
-			//bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), BulletSpawnLocation->GetComponentLocation() + (rikting av pipan * 5000.f), collisionChannel, collisionQuery, collisionResponse);
+		bool hitObject = false;
+		if (APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner()))
+		{
+			if (Player->GetADS())
+				hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), TowardsLocation, collisionChannel, collisionQuery, collisionResponse);
+			else
+				hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), BulletSpawnLocation->GetComponentLocation() + (LaserDirection->GetForwardVector() * 5000.f), collisionChannel, collisionQuery, collisionResponse);
+		}
+		else
+			hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), TowardsLocation, collisionChannel, collisionQuery, collisionResponse);
 
 		if (MuzzeFlash != NULL)
 		{
 			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAttached(MuzzeFlash, MuzzleSpawnLocation);
-			//UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzeFlash, BulletSpawnLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
 			particleComp->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 		}
 

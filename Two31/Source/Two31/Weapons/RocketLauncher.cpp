@@ -30,7 +30,9 @@ void ARocketLauncher::FireShot(FVector TowardsLocation)
 			FVector Angle = (TowardsLocation - BulletSpawnLocation->GetComponentLocation());
 			const FRotator SpawnRotation = Angle.Rotation();
 			const FVector SpawnLocation = BulletSpawnLocation->GetComponentLocation();
-			GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+			AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+			Projectile->GetCollisionComp()->IgnoreActorWhenMoving(this, true);
+			Projectile->GetCollisionComp()->IgnoreActorWhenMoving(GetOwner(), true);
 
 			if (MuzzeFlash != NULL)
 			{

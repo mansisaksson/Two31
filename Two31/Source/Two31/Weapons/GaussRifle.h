@@ -10,6 +10,8 @@ class TWO31_API AGaussRifle : public AWeapon
 	
 	UPROPERTY(VisibleDefaultsOnly, Category = Visual, meta = (AllowPrivateAccess = "true"))
 	USceneComponent* MuzzleSpawnLocation;
+	UPROPERTY(VisibleDefaultsOnly, Category = Visual, meta = (AllowPrivateAccess = "true"))
+	UArrowComponent* LaserDirection;
 
 public:
 	AGaussRifle();
