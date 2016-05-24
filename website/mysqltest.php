@@ -9,11 +9,15 @@
 	
 	echo '<br>';
 	
-	$res = $mysqli->query("SELECT * FROM highscore");
-	$res2 = $res->fetch_all();
-	for($i=0; $i<count($res2); $i++){
-		var_dump($res2[$i]);
-		echo '<br>';
-	}
+	
+	
+	
+	
+	
+	
+	
+	
+	$res = $mysqli->query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='two31' AND `TABLE_NAME`='highscore'");
+	var_dump($res->fetch_all());
 	
 ?>
