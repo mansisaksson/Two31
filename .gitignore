@@ -72,7 +72,8 @@ SourceArt/**/*.tga
 *.generated.dep.h
 *.pdb
 *.exp
-*/PCLaunch.rc.res
+*.h.cpp
+*.rc.res
 
 // FMOD Files
 Two31/Plugins/FMODStudio/Binaries/Win64/UE4Editor-FMODStudio.pdb
