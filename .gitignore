@@ -80,10 +80,10 @@ Two31/Plugins/FMODStudio/Binaries/Win64/UE4Editor-FMODStudio.pdb
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/FMODStudioPrivatePCH.h
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/FMODStudioEditorPrivatePCH.h
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/FMODStudioOculusPrivatePCH.h
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudio.exp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudioEditor.exp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudioOculus.exp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/PCH.FMODStudioPrivatePCH.h.cpp
+//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudio.exp
+//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudioEditor.exp
+//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/UE4Editor-FMODStudioOculus.exp
+//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/PCH.FMODStudioPrivatePCH.h.cpp
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/PCH.FMODStudioEditorPrivatePCH.h.cpp
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/PCH.FMODStudioOculusPrivatePCH.h.cpp
 
@@ -91,12 +91,12 @@ Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Inc/FMODStudioOculus
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Inc/FMODStudioOculus/Timestamp
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Inc/FMODStudioEditor/Timestamp
 Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Inc/FMODStudio/Timestamp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/PCLaunch.rc.res
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/PCH.FMODStudioOculusPrivatePCH.h.cpp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/PCLaunch.rc.res
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/PCH.FMODStudioEditorPrivatePCH.h.cpp
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/PCLaunch.rc.res
-Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/PCH.FMODStudioPrivatePCH.h.cpp
+//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/PCLaunch.rc.res
+//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioOculus/PCH.FMODStudioOculusPrivatePCH.h.cpp
+//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/PCLaunch.rc.res
+//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudioEditor/PCH.FMODStudioEditorPrivatePCH.h.cpp
+//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/PCLaunch.rc.res
+//Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStudio/PCH.FMODStudioPrivatePCH.h.cpp
 
 *TimeStamp
 !Two31/Plugins/FMODStudio/Binaries/Win64/fmod64.dll
@@ -110,19 +110,4 @@ Two31/Plugins/FMODStudio/Intermediate/Build/Win64/UE4Editor/Development/FMODStud
 !Two31/Plugins/FMODStudio/Binaries/Win64/ovrfmod.dll
 !Two31/Plugins/FMODStudio/Binaries/Win64/ovrfmod.lib
 
-Two31/Plugins/Substance/Intermediate/Build/Win64/UE4Editor/Development/SubstanceCore/SubstanceCorePrivatePCH.h
-Two31/Plugins/Substance/Intermediate/Build/Win64/UE4Editor/Development/SubstanceEditor/SubstanceCorePrivatePCH.h
-
-!Two31/Plugins/Substance/Source/SubstanceCore/lib/win32-msvc2013/release_md/Substance.lib
-!Two31/Plugins/Substance/Source/SubstanceCore/lib/win32-msvc2013-64/release_md/Substance.lib
-!Two31/Plugins/Substance/Source/SubstanceCore/lib/win32-msvc2015/release_md/Substance.lib
-!Two31/Plugins/Substance/Source/SubstanceCore/lib/win32-msvc2015-64/release_md/Substance.lib
-!Two31/Plugins/Substance/Source/SubstanceCore/lib/win32-msvc2015-64/release_md/Substance.lib
-!Two31/Plugins/Substance/Source/SubstanceCore/lib/mac/release/libSubstance.a
-!Two31/Plugins/Substance/Source/SubstanceCore/lib/linux/release/libSubstance.a
-
-//!Two31/Plugins/Substance/Source/lib/*
-//!Two31/Plugins/Substance/Binaries/Win64/UE4Editor-SubstanceCore.dll
-//!Two31/Plugins/Substance/Binaries/Win64/UE4Editor-SubstanceEditor.dll
-//!Two31/Plugins/Substance/Binaries/Win64/UE4-SubstanceCore.lib
-//!Two31/Plugins/Substance/Binaries/Win64/UE4-SubstanceCore-Win64-Shipping.lib
+Two31/Plugins/JSONQuery/Intermediate/*
