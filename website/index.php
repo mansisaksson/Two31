@@ -15,11 +15,18 @@
 <head>
 	
 	<link rel="icon" href="logo.png">
+	<title>Two31</title>
+	
+	<!-- https://www.google.com/fonts/specimen/Open+Sans -->
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 	
 	<style>
 		html, body{
 			margin:0px;
 			padding:0px;
+			width:100%;
+			height:100%;
+			font-family: 'Open Sans', sans-serif;
 		}
 		body{
 			background-image:url("banner.png");
@@ -29,38 +36,83 @@
 		}
 		table{
 			border-collapse: collapse;
-			color:#FFF;
+			margin:auto;
 		}
 		table td{
-			border:1px solid #FFF;
-			padding:5px;
+			border:1px solid #000;
+			padding:10px;
 		}
 	</style>
 	
 </head>
 <body>
 	
-	<div style="width:1300px; height:800px; margin:auto; margin-top:100px;">
-		<video width="1280" height="720" controls autoplay>
-			<source src="trailer.mp4" type="video/mp4">
-			Your browser does not support the video tag.
-		</video>
-	<div>	
+	<div style="width:50%; margin:auto; margin-top:200px; height:600px; color:#fff; font-size:40px; text-align:center; background-color:rgba(0, 0, 0, 0.3); padding:0px 20px 0px 20px;">
+		<h1>Two31</h1>
+		Two:31 is a fast paced, Doom inspired FPS with a retro feeling to it and a dark Lovecraftian theme.
+		 Earth is but a shell of its former self.
+		 Humanity have emptied almost all resources on earth and tainted all of its water.
+		 To survive, humanity needs to get water elsewhere.
+	</div>
 	
-	<div style="width:800px; margin:auto; margin-top:650px; margin-bottom:100px; text-align:center;">
+	<div style="color:#FFF; font-size:24px; margin-top:800px; width:100%;">
+		
+		<div style="clear:both; width:1300px; margin:auto;">
+			<div style="float:left; width:550px; padding:50px; padding-top:50px;">
+				<iframe width="550" height="310" src="https://www.youtube.com/embed/ZXoAlZvSzG8" frameborder="0" allowfullscreen></iframe>
+				<br><br><br><br><br><br><br><br>
+			</div>
+			<div style="float:left; width:550px; padding-left:100px;">
+				<img src="poster.png" width="50%" height="50%">
+			</div>
+		</div>
+		
+		<div style="width:100%; overflow:hidden; background-color:#FFF; margin-bottom:100px;">
+		<div style="clear:both; width:1300px; margin:auto; padding-top:100px;">
+			<div style="float:left; width:550px; padding-left:100px;">
+				<img src="head.png" width="50%" height="50%" style="float:left;">
+				<img src="imp.png" width="50%" height="50%" style="float:left;">
+			</div>
+			<div style="float:left; width:550px; padding:50px; padding-top:120px; color:#000;">
+				You play as a mercenary, hired by a company that owns a water harvesting base.
+				 A distress signal have been received from said base which is located on one of Neptune’s moons – Triton.
+				 Something has gone terribly wrong, you must go to Triton and make sure that the problem is handled.
+				 The base is needed. Without the water.
+				 Humanity will perish.
+				<br><br><br><br><br><br><br>
+			</div>
+		</div>
+		</div>
+		
+		<div style="clear:both; width:1300px; margin:auto;">
+			<div style="float:left; width:550px; padding:50px; padding-top:120px;">
+				The game is made in Unreal Engine 4 by 17 students at the University of Skövde.
+				 We all feel that the retro FPS genre have been forgotten and we’re trying to bring it back because it’s something that’s missing in today’s market.
+				 “We’re not trying to out doom Doom, but we’ll try to out doom any other title that has been released in the last 10 years”
+				<br><br><br><br><br><br><br>
+			</div>
+			<div style="float:left; width:550px; padding-left:100px;">
+				<img src="logo.png">
+			</div>
+		</div>
+		
+	</div>
+	
+	<div style="color:#000; clear:both; width:100%; margin-top:100px; padding-top:100px; padding-bottom:100px; text-align:center; background-color:#FFF; overflow:hidden;">
 		<h1>Highscore</h1>
 		<table>
-			<thead>
-				<td>Level:</td>
-				<td>Username:</td>
-				<td>Enemies killed:</td>
-				<td>Secrets found:</td>
-				<td>Time:</td>
-				<td>Bullets fired:</td>
-				<td>Damage taken:</td>
-				<td>Health lost:</td>
-				<td>Armor lost:</td>
-				<td>Date:</td>
+			<thead style="font-weight:bold;">
+				<td>Rank</td>
+				<td>Level</td>
+				<td>Username</td>
+				<td>Enemies killed</td>
+				<td>Secrets found</td>
+				<td>Time</td>
+				<td>Bullets fired</td>
+				<td>Damage taken</td>
+				<td>Health lost</td>
+				<td>Armor lost</td>
+				<td>Date</td>
 			</thead>
 			<?php
 				for($i=0; $i<count($highscoreList); $i++){
@@ -96,12 +148,12 @@
 						$milli = $milli."0";
 					}
 					
-					echo '<tr>';
+					echo '<tr><td>'.($i+1).'</td>';
 					echo '<td>'.$highscoreList[$i][0].'</td>';
 					echo '<td>'.$highscoreList[$i][1].'</td>';
 					echo '<td>'.$highscoreList[$i][2].'%</td>';
 					echo '<td>'.$highscoreList[$i][3].'%</td>';
-					echo '<td>'.$hours.':'.$minutes.':'.$seconds.':'.$milli.'</td>';
+					echo '<td>'.$hours.':'.$minutes.':'.$seconds.'</td>';
 					echo '<td>'.$highscoreList[$i][5].'</td>';
 					echo '<td>'.$highscoreList[$i][6].'</td>';
 					echo '<td>'.$highscoreList[$i][7].'</td>';
