@@ -232,15 +232,17 @@ void AWeapon::FireShot(FVector TowardsLocation)
 
 void AWeapon::Reload()
 {
-	if (AmmoInClip < ClipSize)
+	if (AmmoPool != NULL)
 	{
-		if (AmmoInClip == 0)
-			TotalReloadTime = FullReloadTime;
-		else
-			TotalReloadTime = FastReloadTime;
-		bReload = true;
+		if ((AmmoInClip < ClipSize) && (*AmmoPool - AmmoInClip) > 0)
+		{
+			if (AmmoInClip == 0)
+				TotalReloadTime = FullReloadTime;
+			else
+				TotalReloadTime = FastReloadTime;
+			bReload = true;
+		}
 	}
-		
 }
 void AWeapon::SetAmmoPool(int* AmmoPool)
 {
@@ -309,6 +311,7 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 	// Decals/Impact effects
 	UMaterialInterface* DecalMat = NULL;
 	UParticleSystem* ImpactParticle = NULL;
+	FVector ParticleScale;
 
 	float RandSize = 0.f;
 	FVector DecalSize = FVector::ZeroVector;
@@ -320,6 +323,7 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 			if (HitResult.PhysMaterial->GetName() == ImpactVisuals[i].PhysicsMatName)
 			{
 				ImpactParticle = ImpactVisuals[i].ImpactParticle;
+				ParticleScale = ImpactVisuals[i].ParticleScale;
 				if (ImpactVisuals[i].ImpactDecals.Num() > 0)
 				{
 					int index = FMath::RandRange(0, ImpactVisuals[i].ImpactDecals.Num() - 1);
@@ -355,6 +359,7 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 			if (ImpactVisuals[i].PhysicsMatName == "Default")
 			{
 				ImpactParticle = ImpactVisuals[i].ImpactParticle;
+				ParticleScale = ImpactVisuals[i].ParticleScale;
 				break;
 			}
 		}
@@ -375,7 +380,10 @@ void AWeapon::OnWeaponHit_Implementation(FHitResult HitResult)
 		}
 
 		if (ImpactParticle != NULL)
+		{
 			UParticleSystemComponent* ParticleSystemComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticle, HitResult.Location, HitResult.Normal.Rotation());
+			ParticleSystemComp->SetWorldScale3D(ParticleScale);
+		}
 	}
 }
 void AWeapon::OnBeginFire_Implementation()

@@ -6,7 +6,6 @@
 #include "../Pickups/HealthPickup.h"
 #include "../Pickups/ArmorPickup.h"
 #include "../Pickups/AmmoPickup.h"
-//#include "../Interactables/Confetti.h"
 #include "../StatsPornManager.h"
 #include "../Characters/EnemyCharacter.h"
 #include "../Weapons/Weapon.h"

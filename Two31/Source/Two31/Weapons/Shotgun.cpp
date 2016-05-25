@@ -121,10 +121,17 @@ void AShotgun::FireShot(FVector TowardsLocation)
 			LocalUp.Normalize();
 			New = Forward.RotateAngleAxis(Vertical, Left);
 			New.Normalize();
+
+			if (TracerFX != NULL)
+			{
+				UParticleSystemComponent* ParticleComp = UGameplayStatics::SpawnEmitterAtLocation(this, TracerFX, BulletSpawnLocation->GetComponentLocation(), New.Rotation());
+				ParticleComp->IgnoreActorWhenMoving(this, true);
+			}
+
 			FinalDirection = New * Range;
 
 			bool hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), BulletSpawnLocation->GetComponentLocation() + FinalDirection, collisionChannel, collisionQuery, collisionResponse);
-			
+
 			if (hitObject)
 				OnWeaponHit(result);
 		}
