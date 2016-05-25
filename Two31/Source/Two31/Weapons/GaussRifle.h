@@ -25,7 +25,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* MuzzeFlash;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
-	UParticleSystem* BulletTrail;
+	UParticleSystem* TracerFX;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shotgun)
 	float HeatDissipationScale;
