@@ -121,6 +121,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = VoiceActing)
 	void AddVoiceActingID(int32 ID);
 
+	UFUNCTION(BlueprintCallable, Category = DisplayText)
+	FString ChangeDisplayText();
+	UFUNCTION(BlueprintCallable, Category = DisplayText)
+	int32 GetDisplayTextSize();
+	UFUNCTION(BlueprintCallable, Category = DisplayText)
+	void AddDisplayText(FString Text);
+
+	UFUNCTION(BlueprintCallable, Category = DisplayText)
+		FString GetDisplayText() { return TextDisplay; }
+	UFUNCTION(BlueprintCallable, Category = DisplayText)
+		void SetDisplayText(FString Text) { TextDisplay = Text; }
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = DisplayText)
+	FString TextDisplay;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
