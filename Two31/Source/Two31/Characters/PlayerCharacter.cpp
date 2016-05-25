@@ -21,7 +21,6 @@ APlayerCharacter::APlayerCharacter()
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
-	BaseLookUpRate = 45.f;
 	ViewPitchMax = 70.f;
 	ViewPitchMin = -70.f;
 	DefaultFOV = 90.f;
@@ -644,7 +643,7 @@ void APlayerCharacter::TurnAtRate(float Rate)
 }
 void APlayerCharacter::LookUpAtRate(float Rate)
 {
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	AddControllerPitchInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
 void APlayerCharacter::UseHealthPack()
