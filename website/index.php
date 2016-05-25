@@ -117,16 +117,16 @@
 			<?php
 				for($i=0; $i<count($highscoreList); $i++){
 					echo '<tr><td>'.($i+1).'</td>';
-					echo '<td>'.$highscoreList[$i][0].'</td>';
-					echo '<td>'.$highscoreList[$i][1].'</td>';
-					echo '<td>'.$highscoreList[$i][2].'%</td>';
-					echo '<td>'.$highscoreList[$i][3].'%</td>';
-					echo '<td>'.$highscoreList[$i][4].'</td>';
-					echo '<td>'.$highscoreList[$i][5].'</td>';
-					echo '<td>'.$highscoreList[$i][6].'</td>';
-					echo '<td>'.$highscoreList[$i][7].'</td>';
-					echo '<td>'.$highscoreList[$i][8].'</td>';
-					echo '<td>'.$highscoreList[$i][9].'</td>';
+					echo '<td>'.$highscoreList[$i][0+1].'</td>';
+					echo '<td>'.$highscoreList[$i][1+1].'</td>';
+					echo '<td>'.$highscoreList[$i][2+1].'%</td>';
+					echo '<td>'.$highscoreList[$i][3+1].'%</td>';
+					echo '<td>'.$highscoreList[$i][4+1].'</td>';
+					echo '<td>'.$highscoreList[$i][5+1].'</td>';
+					echo '<td>'.$highscoreList[$i][6+1].'</td>';
+					echo '<td>'.$highscoreList[$i][7+1].'</td>';
+					echo '<td>'.$highscoreList[$i][8+1].'</td>';
+					echo '<td>'.$highscoreList[$i][9+1].'</td>';
 					echo '</tr>';
 				}
 			?>

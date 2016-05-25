@@ -14,25 +14,33 @@
 				
 			
 				
-				if($stmt = $mysqli->prepare("INSERT INTO highscore VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")){
+				if($stmt = $mysqli->prepare("INSERT INTO highscore (level, name, enemies, secrets, time, bullets, damage, health, armor, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")){
 					if(!$stmt->bind_param("ssssssssss", $decoded[0], $decoded[1], $decoded[2], $decoded[3], $decoded[4], $decoded[5], $decoded[6], $decoded[7], $decoded[8], $time)){
 						$response['status'] = "Bind params failed: (" . $mysqli->errno . ") " . $mysqli->error;
 					}
 					if(!$stmt->execute()){
-						$response['status'] = var_export($decoded, true);
-						//$response['status'] = "[".$decoded[0].", ".$decoded[1]."]execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
+						$response['status'] = "execute failed: (" . $mysqli->errno . ") " . $mysqli->error;
 					}
 					$stmt->close();
-				
-					if($stmt2 = $mysqli->prepare("SELECT * FROM highscore WHERE level = ? ORDER BY enemies DESC, secrets DESC, time ASC, bullets ASC, damage ASC, health ASC, armor ASC, date DESC LIMIT 10")){
+					
+					$insertID = $mysqli->insert_id;
+					
+					if($stmt2 = $mysqli->prepare("SELECT * FROM highscore WHERE level = ? ORDER BY enemies DESC, secrets DESC, time ASC, bullets ASC, damage ASC, health ASC, armor ASC, date DESC")){
 						$stmt2->bind_param("s", $decoded[0]);
 						$stmt2->execute();
-						$stmt2->bind_result($level, $name, $kills, $secrets, $time2, $bullets, $damage, $bla, $bla2, $date);
+						$stmt2->bind_result($id, $level, $name, $kills, $secrets, $time2, $bullets, $damage, $bla, $bla2, $date);
 						
 						$response['rank'] = -1;
 						
+						$i = 0;
 						while($stmt2->fetch()){
-							$response['highscore_'.($i+1)] = array($name, $kills, $secrets, $time2, $bullets, $damage, 0, 0);
+							if($i < 10){
+								$response['highscore_'.($i+1)] = array($name, $kills, $secrets, $time2, $bullets, $damage, 0, 0);
+							}
+							$i++;
+							if($insertID == $id){
+								$response['rank'] = "".$i;
+							}
 						}
 						
 						$response['highscore_0'] = array($decoded[1], $decoded[2], $decoded[3], $decoded[4], $decoded[5], $decoded[6], $decoded[7], $decoded[8]);
