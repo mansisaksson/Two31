@@ -27,6 +27,8 @@ struct FImpactVisual
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	UParticleSystem* ImpactParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
+	FVector ParticleScale = FVector(1.f, 1.f, 1.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Visual)
 	TArray<FImpactDecals> ImpactDecals;
 };
 

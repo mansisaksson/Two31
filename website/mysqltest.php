@@ -9,14 +9,6 @@
 	
 	echo '<br>';
 	
-	
-	
-	
-	
-	
-	
-	
-	
 	$res = $mysqli->query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='two31' AND `TABLE_NAME`='highscore'");
 	var_dump($res->fetch_all());
 	

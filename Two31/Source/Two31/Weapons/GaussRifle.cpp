@@ -75,15 +75,15 @@ void AGaussRifle::FireShot(FVector TowardsLocation)
 		collisionQuery.AddIgnoredActor(GetOwner());
 
 		bool hitObject = false;
+		FVector TowardsDirection = TowardsLocation - BulletSpawnLocation->GetComponentLocation();
+		TowardsDirection.Normalize();
 		if (APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner()))
 		{
-			if (Player->GetADS())
-				hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), TowardsLocation, collisionChannel, collisionQuery, collisionResponse);
-			else
-				hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), BulletSpawnLocation->GetComponentLocation() + (LaserDirection->GetForwardVector() * 5000.f), collisionChannel, collisionQuery, collisionResponse);
+			if (!Player->GetADS())
+				TowardsDirection = LaserDirection->GetForwardVector();
 		}
-		else
-			hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), TowardsLocation, collisionChannel, collisionQuery, collisionResponse);
+		
+		hitObject = GetWorld()->LineTraceSingleByChannel(result, BulletSpawnLocation->GetComponentLocation(), BulletSpawnLocation->GetComponentLocation() + (TowardsDirection * 5000.f), collisionChannel, collisionQuery, collisionResponse);
 
 		if (MuzzeFlash != NULL)
 		{
@@ -91,15 +91,10 @@ void AGaussRifle::FireShot(FVector TowardsLocation)
 			particleComp->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 		}
 
-		if (BulletTrail != NULL)
+		if (TracerFX != NULL)
 		{
-			FVector BeamEndPoint = TowardsLocation;
-			if (result.GetActor() != NULL)
-				BeamEndPoint = result.Location;
-
-			UParticleSystemComponent* particleComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BulletTrail, MuzzleSpawnLocation->GetComponentLocation(), FRotator::ZeroRotator, true);
-			particleComp->SetBeamTargetPoint(0, BeamEndPoint, 0);
-			particleComp->SetBeamTargetPoint(1, BeamEndPoint, 0);
+			UParticleSystemComponent* ParticleComp = UGameplayStatics::SpawnEmitterAtLocation(this, TracerFX, BulletSpawnLocation->GetComponentLocation(), TowardsDirection.Rotation());
+			ParticleComp->IgnoreActorWhenMoving(this, true);
 		}
 
 		if (hitObject)

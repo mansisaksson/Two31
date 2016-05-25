@@ -3,6 +3,7 @@
 
 #include "EngineMinimal.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetStringLibrary.h"
 #include "Engine.h"
 
 //General Log
