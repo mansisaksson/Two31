@@ -240,6 +240,7 @@ private:
 
 	TArray<class AWeapon*> WeaponSlots;
 	TArray<float> HealthPacks;
+	TArray<FString> DisplayText;
 
 	TArray<int32> Items;
 	TArray<SInventory> Inventory;
