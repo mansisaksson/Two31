@@ -116,44 +116,12 @@
 			</thead>
 			<?php
 				for($i=0; $i<count($highscoreList); $i++){
-					
-					//$highscoreList[$i][4] = 71.123456;
-					
-					$secs = floor($highscoreList[$i][4]);
-					$milli = (int) (($highscoreList[$i][4] - $secs) * 1000);
-					$hours = floor($secs / 3600);
-					$minutes = (($secs / 60) % 60);
-					$seconds = $secs % 60;
-					
-					$hours = "".$hours;
-					if(strlen($hours) != 2){
-						$hours = $hours."0";
-					}
-					
-					$minutes = "".$minutes;
-					if(strlen($minutes) != 2){
-						$minutes = $minutes."0";
-					}
-					
-					$seconds = "".$seconds;
-					if(strlen($seconds) != 2){
-						$seconds = $seconds."0";
-					}
-					
-					$milli = "".$milli;
-					if(strlen($milli) != 3){
-						$milli = $milli."0";
-					}
-					if(strlen($milli) != 3){
-						$milli = $milli."0";
-					}
-					
 					echo '<tr><td>'.($i+1).'</td>';
 					echo '<td>'.$highscoreList[$i][0].'</td>';
 					echo '<td>'.$highscoreList[$i][1].'</td>';
 					echo '<td>'.$highscoreList[$i][2].'%</td>';
 					echo '<td>'.$highscoreList[$i][3].'%</td>';
-					echo '<td>'.$hours.':'.$minutes.':'.$seconds.'</td>';
+					echo '<td>'.$highscoreList[$i][4].'</td>';
 					echo '<td>'.$highscoreList[$i][5].'</td>';
 					echo '<td>'.$highscoreList[$i][6].'</td>';
 					echo '<td>'.$highscoreList[$i][7].'</td>';
