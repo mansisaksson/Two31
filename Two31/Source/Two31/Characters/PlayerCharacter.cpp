@@ -49,6 +49,8 @@ APlayerCharacter::APlayerCharacter()
 	Items.SetNum(0);
 	Inventory.SetNum(0);
 	VoiceActing.SetNum(0);
+	DisplayText.SetNum(0);
+	TextDisplay = "";
 
 	bFireIsPressed = false;
 	bCanJump = false;
@@ -754,4 +756,20 @@ int32 APlayerCharacter::GetVoiceActingSize()
 void APlayerCharacter::AddVoiceActingID(int32 ID)
 {
 	VoiceActing.Add(ID);
+}
+
+FString APlayerCharacter::ChangeDisplayText()
+{
+	FString NewDisplayText;
+	NewDisplayText = DisplayText[0];
+	DisplayText.RemoveAt(0);
+	return NewDisplayText;
+}
+int32 APlayerCharacter::GetDisplayTextSize()
+{
+	return DisplayText.Num();
+}
+void APlayerCharacter::AddDisplayText(FString Text)
+{
+	DisplayText.Add(Text);
 }
