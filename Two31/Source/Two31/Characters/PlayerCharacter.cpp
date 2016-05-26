@@ -95,7 +95,7 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::BeginPlay()
 {
-	Super::BeginPlay();
+	
 
 	FPCamera->FieldOfView = DefaultFOV;
 
@@ -115,7 +115,7 @@ void APlayerCharacter::BeginPlay()
 	CurrentArmor = StartingArmor;
 
 	UStatsPornManager::ClearStats();
-
+	Super::BeginPlay();
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)
