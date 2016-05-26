@@ -121,6 +121,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = VoiceActing)
 	void AddVoiceActingID(int32 ID);
 
+	UFUNCTION(BlueprintCallable, Category = VoiceActing)
+	float ChangeVoiceActingTimer();
+	UFUNCTION(BlueprintCallable, Category = VoiceActing)
+	int32 GetVoiceActingTimerSize();
+	UFUNCTION(BlueprintCallable, Category = VoiceActing)
+	void AddVoiceActingTimer(float Timer);
+
 	UFUNCTION(BlueprintCallable, Category = DisplayText)
 	FString ChangeDisplayText();
 	UFUNCTION(BlueprintCallable, Category = DisplayText)
@@ -129,9 +136,9 @@ public:
 	void AddDisplayText(FString Text);
 
 	UFUNCTION(BlueprintCallable, Category = DisplayText)
-		FString GetDisplayText() { return TextDisplay; }
+	FString GetDisplayText() { return TextDisplay; }
 	UFUNCTION(BlueprintCallable, Category = DisplayText)
-		void SetDisplayText(FString Text) { TextDisplay = Text; }
+	void SetDisplayText(FString Text) { TextDisplay = Text; }
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = DisplayText)
 	FString TextDisplay;
@@ -261,4 +268,5 @@ private:
 	TArray<SInventory> Inventory;
 	TArray<AActor*> MeleedActors;
 	TArray<int32> VoiceActing;
+	TArray<float> VoiceActingTimer;
 };
