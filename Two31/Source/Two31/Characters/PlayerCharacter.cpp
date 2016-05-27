@@ -20,7 +20,6 @@ APlayerCharacter::APlayerCharacter()
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
-	BaseLookUpRate = 45.f;
 	ViewPitchMax = 70.f;
 	ViewPitchMin = -70.f;
 	DefaultFOV = 90.f;
@@ -49,6 +48,7 @@ APlayerCharacter::APlayerCharacter()
 	Items.SetNum(0);
 	Inventory.SetNum(0);
 	VoiceActing.SetNum(0);
+	VoiceActingTimer.SetNum(0);
 	DisplayText.SetNum(0);
 	TextDisplay = "";
 
@@ -95,7 +95,7 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::BeginPlay()
 {
-	Super::BeginPlay();
+	
 
 	FPCamera->FieldOfView = DefaultFOV;
 
@@ -115,7 +115,7 @@ void APlayerCharacter::BeginPlay()
 	CurrentArmor = StartingArmor;
 
 	UStatsPornManager::ClearStats();
-
+	Super::BeginPlay();
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)
@@ -645,7 +645,7 @@ void APlayerCharacter::TurnAtRate(float Rate)
 }
 void APlayerCharacter::LookUpAtRate(float Rate)
 {
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	AddControllerPitchInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
 void APlayerCharacter::UseHealthPack()
@@ -756,6 +756,21 @@ int32 APlayerCharacter::GetVoiceActingSize()
 void APlayerCharacter::AddVoiceActingID(int32 ID)
 {
 	VoiceActing.Add(ID);
+}
+float APlayerCharacter::ChangeVoiceActingTimer()
+{
+	float NewVoiceActingTimer;
+	NewVoiceActingTimer = VoiceActingTimer[0];
+	VoiceActingTimer.RemoveAt(0);
+	return NewVoiceActingTimer;
+}
+int32 APlayerCharacter::GetVoiceActingTimerSize()
+{
+	return VoiceActingTimer.Num();
+}
+void APlayerCharacter::AddVoiceActingTimer(float Timer)
+{
+	VoiceActingTimer.Add(Timer);
 }
 
 FString APlayerCharacter::ChangeDisplayText()
