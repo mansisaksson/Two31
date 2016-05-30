@@ -41,7 +41,7 @@ void UMainConfig::Load()
 		GameplaySubtitles = false;
 		GameplayHints = true;
 		GameplayProggMode = false;
-		MouseSensitivity = 1.0f;
+		MouseSensitivity = 0.07f;
 		//MostProcentOfEnemiesKilled = 0;
 		//MostProcentOfSecretsFound = 0;
 		//MostAmountOfBulletsFired = 0;
