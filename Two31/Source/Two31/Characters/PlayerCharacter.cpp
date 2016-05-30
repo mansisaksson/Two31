@@ -21,7 +21,6 @@ APlayerCharacter::APlayerCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
 	// set our turn rates for input
-	BaseTurnRate = 45.f;
 	ViewPitchMax = 70.f;
 	ViewPitchMin = -70.f;
 	DefaultFOV = 90.f;
@@ -97,13 +96,13 @@ APlayerCharacter::APlayerCharacter()
 
 void APlayerCharacter::BeginPlay()
 {
-	
-
 	FPCamera->FieldOfView = DefaultFOV;
 
 	PlayerController = Cast<APlayerController>(Controller);
 	PlayerController->PlayerCameraManager->ViewPitchMax = ViewPitchMax;
 	PlayerController->PlayerCameraManager->ViewPitchMin = ViewPitchMin;
+
+	PlayerController->PlayerInput->SetMouseSensitivity(Cast<ADefaultGameMode>(GetWorld()->GetAuthGameMode())->GetConfig()->MouseSensitivity);
 
 	DefaultMeleeRadius = MeleeCollider->GetUnscaledSphereRadius();
 	SetMeleeRadius(0.f);
@@ -658,11 +657,11 @@ void APlayerCharacter::MoveSideways(float Value)
 
 void APlayerCharacter::TurnAtRate(float Rate)
 {
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	AddControllerYawInput(Rate * GetWorld()->GetDeltaSeconds());
 }
 void APlayerCharacter::LookUpAtRate(float Rate)
 {
-	AddControllerPitchInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	AddControllerPitchInput(Rate * GetWorld()->GetDeltaSeconds());
 }
 
 void APlayerCharacter::UseHealthPack()

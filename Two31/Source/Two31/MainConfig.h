@@ -33,6 +33,9 @@ public:
 	*/
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
+	float MouseSensitivity;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")
 	bool FirstTime;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "MainConfig")

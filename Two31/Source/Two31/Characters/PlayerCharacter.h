@@ -192,8 +192,6 @@ protected:
 	float ArmorAbsorption;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-	float BaseTurnRate;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float ViewPitchMax;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
 	float ViewPitchMin;
