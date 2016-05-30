@@ -102,6 +102,8 @@ void APlayerCharacter::BeginPlay()
 	PlayerController->PlayerCameraManager->ViewPitchMax = ViewPitchMax;
 	PlayerController->PlayerCameraManager->ViewPitchMin = ViewPitchMin;
 
+	Cast<ADefaultGameMode>(GetWorld()->GetAuthGameMode())->GetConfig()->Load();
+	Cast<ADefaultGameMode>(GetWorld()->GetAuthGameMode())->GetConfig()->Apply();
 	PlayerController->PlayerInput->SetMouseSensitivity(Cast<ADefaultGameMode>(GetWorld()->GetAuthGameMode())->GetConfig()->MouseSensitivity);
 
 	DefaultMeleeRadius = MeleeCollider->GetUnscaledSphereRadius();
