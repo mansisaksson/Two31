@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include "MainConfig.h"
+#include "DefaultGameMode.h"
 
 UMainConfig::UMainConfig()
 {
@@ -78,6 +79,8 @@ void UMainConfig::Apply()
 	}else{
 		ExecCmd(FString(TEXT("r.VSync 0")));
 	}
+
+	//GetWorld()->GetFirstPlayerController()->PlayerInput->SetMouseSensitivity(MouseSensitivity);
 
 }
 
