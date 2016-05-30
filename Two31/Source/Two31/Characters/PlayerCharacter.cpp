@@ -9,6 +9,8 @@
 #include "../StatsPornManager.h"
 #include "../Characters/EnemyCharacter.h"
 #include "../Weapons/Weapon.h"
+#include "../Weapons/Shotgun.h"
+#include "../Weapons/GaussRifle.h"
 #include "GameFramework/InputSettings.h"
 #include "Engine.h"
 #include "../DefaultGameMode.h"
@@ -480,6 +482,21 @@ bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 {
 	if (Weapon != NULL)
 	{
+		for (int32 i = 0; i < WeaponSlots.Num(); i++)
+		{
+			if (WeaponSlots[i] != NULL)
+			{
+				if (Cast<AShotgun>(WeaponSlots[i]) && Weapon->IsChildOf(AShotgun::StaticClass()))
+				{
+					return false;
+				}
+				else if (Cast<AGaussRifle>(WeaponSlots[i]) && Cast<AGaussRifle>(Weapon))
+				{
+					return false;
+				}
+			}
+		}
+
 		for (int32 i = 0; i < WeaponSlots.Num(); i++)
 		{
 			if (WeaponSlots[i] == NULL)
