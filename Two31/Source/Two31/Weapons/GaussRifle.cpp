@@ -41,6 +41,9 @@ void AGaussRifle::Tick(float DeltaTime)
 
 	HeatParam = FMath::Clamp(HeatParam - DeltaTime * HeatDissipationScale, 0.f, 10.f);
 	MatInstance->SetScalarParameterValue(TEXT("HeatParam"), HeatParam);
+
+	if (RootComponent->GetAttachParent() == NULL)
+		Destroy();
 }
 
 void AGaussRifle::FireShot(FVector TowardsLocation)
