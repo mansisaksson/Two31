@@ -804,5 +804,6 @@ int32 APlayerCharacter::GetDisplayTextSize()
 }
 void APlayerCharacter::AddDisplayText(FString Text)
 {
+	DisplayText.Empty();
 	DisplayText.Add(Text);
 }
