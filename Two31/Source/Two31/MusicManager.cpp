@@ -6,13 +6,15 @@ int32 UMusicManager::StateCounter[NumberOfStates];
 
 void UMusicManager::OnEnemyStateSwitch(EEnemyState CurrentState, EEnemyState NewState)
 {
-	StateCounter[static_cast<int32>(CurrentState)]--;
+	//Debug::LogOnScreen("StateSwitch");
+	StateCounter[static_cast<int32>(CurrentState)] = FMath::Clamp(StateCounter[static_cast<int32>(CurrentState)] - 1, 0, 999999999);
 	StateCounter[static_cast<int32>(NewState)]++;
 }
 
 void UMusicManager::RemoveEnemy(EEnemyState CurrentState)
 {
-	StateCounter[static_cast<int32>(CurrentState)]--;
+	//Debug::LogOnScreen("Remove Enemy");
+	StateCounter[static_cast<int32>(CurrentState)] = FMath::Clamp(StateCounter[static_cast<int32>(CurrentState)] - 1, 0, 999999999);
 }
 
 void UMusicManager::AddEnemy(EEnemyState CurrentState)
