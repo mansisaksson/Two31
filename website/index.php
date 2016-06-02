@@ -5,7 +5,7 @@
 		echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
 		exit();
 	}else{
-		$res = $mysqli->query("SELECT * FROM highscore ORDER BY level DESC, enemies DESC, secrets DESC, time ASC, bullets ASC, damage ASC, health ASC, armor ASC, date DESC LIMIT 10");
+		$res = $mysqli->query("SELECT * FROM highscore ORDER BY time ASC, level DESC, enemies DESC, secrets DESC, bullets ASC, damage ASC, health ASC, armor ASC, date DESC LIMIT 10");
 		$highscoreList = $res->fetch_all();
 	}
 	
@@ -59,7 +59,7 @@
 		
 		<div style="clear:both; width:1300px; margin:auto;">
 			<div style="float:left; width:550px; padding:50px; padding-top:50px;">
-				<iframe width="550" height="310" src="https://www.youtube.com/embed/ZXoAlZvSzG8" frameborder="0" allowfullscreen></iframe>
+				<iframe width="550" height="310" src="https://www.youtube.com/embed/E_lL7c6DogI" frameborder="0" allowfullscreen></iframe>
 				<br><br><br><br><br><br><br><br>
 			</div>
 			<div style="float:left; width:550px; padding-left:100px;">
@@ -103,7 +103,7 @@
 		<table>
 			<thead style="font-weight:bold;">
 				<td>Rank</td>
-				<td>Level</td>
+				<!-- <td>Level</td> -->
 				<td>Username</td>
 				<td>Enemies killed</td>
 				<td>Secrets found</td>
@@ -117,7 +117,7 @@
 			<?php
 				for($i=0; $i<count($highscoreList); $i++){
 					echo '<tr><td>'.($i+1).'</td>';
-					echo '<td>'.$highscoreList[$i][0+1].'</td>';
+					//echo '<td>'.$highscoreList[$i][0+1].'</td>';
 					echo '<td>'.$highscoreList[$i][1+1].'</td>';
 					echo '<td>'.$highscoreList[$i][2+1].'%</td>';
 					echo '<td>'.$highscoreList[$i][3+1].'%</td>';

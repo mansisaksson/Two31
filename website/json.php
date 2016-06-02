@@ -25,7 +25,7 @@
 					
 					$insertID = $mysqli->insert_id;
 					
-					if($stmt2 = $mysqli->prepare("SELECT * FROM highscore WHERE level = ? ORDER BY enemies DESC, secrets DESC, time ASC, bullets ASC, damage ASC, health ASC, armor ASC, date DESC")){
+					if($stmt2 = $mysqli->prepare("SELECT * FROM highscore WHERE level = ? ORDER BY time ASC, enemies DESC, secrets DESC, bullets ASC, damage ASC, health ASC, armor ASC, date DESC")){
 						$stmt2->bind_param("s", $decoded[0]);
 						$stmt2->execute();
 						$stmt2->bind_result($id, $level, $name, $kills, $secrets, $time2, $bullets, $damage, $bla, $bla2, $date);
