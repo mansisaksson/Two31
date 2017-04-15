@@ -1,7 +1,8 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
 
 #include "FMODStudioPrivatePCH.h"
 #include "FMODListener.h"
+#include <string.h>
 
 float FFMODListener::Interpolate( const double EndTime )
 {

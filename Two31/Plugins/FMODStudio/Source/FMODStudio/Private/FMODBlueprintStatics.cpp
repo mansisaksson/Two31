@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
 
 #include "FMODStudioPrivatePCH.h"
 #include "FMODBlueprintStatics.h"
@@ -9,9 +9,7 @@
 #include "FMODBank.h"
 #include "FMODEvent.h"
 #include "FMODBus.h"
-#include "FMODVCA.h"
 #include "fmod_studio.hpp"
-#include "fmod_errors.h"
 
 /////////////////////////////////////////////////////
 // UFMODBlueprintStatics
@@ -98,11 +96,7 @@ class UFMODAudioComponent* UFMODBlueprintStatics::PlayEventAttached(class UFMODE
 #endif
 	AudioComponent->RegisterComponentWithWorld(AttachToComponent->GetWorld());
 
-#if ENGINE_MINOR_VERSION >= 12
-	AudioComponent->AttachToComponent(AttachToComponent, FAttachmentTransformRules::KeepRelativeTransform, AttachPointName);
-#else
-	AudioComponent->AttachTo(AttachToComponent, AttachPointName);
-#endif
+	AudioComponent->SetupAttachment(AttachToComponent, AttachPointName);
 	if (LocationType == EAttachLocation::KeepWorldPosition)
 	{
 		AudioComponent->SetWorldLocation(Location);
@@ -140,14 +134,12 @@ void UFMODBlueprintStatics::LoadBank(class UFMODBank* Bank, bool bBlocking, bool
 		FString BankPath = Settings.GetFullBankPath() / (Bank->GetName() + TEXT(".bank"));
 
 		FMOD::Studio::Bank* bank = nullptr;
-		FMOD_STUDIO_LOAD_BANK_FLAGS flags = (bBlocking || bLoadSampleData) ? FMOD_STUDIO_LOAD_BANK_NORMAL : FMOD_STUDIO_LOAD_BANK_NONBLOCKING;
+		FMOD_STUDIO_LOAD_BANK_FLAGS flags = bBlocking ? FMOD_STUDIO_LOAD_BANK_NORMAL : FMOD_STUDIO_LOAD_BANK_NONBLOCKING;
 		FMOD_RESULT result = StudioSystem->loadBankFile(TCHAR_TO_UTF8(*BankPath), flags, &bank);
-		if (result != FMOD_OK)
+		if ( result == FMOD_OK && bank != nullptr && bLoadSampleData )
 		{
-			UE_LOG(LogFMOD, Error, TEXT("Failed to load bank %s: %s"), *Bank->GetName(), UTF8_TO_TCHAR(FMOD_ErrorString(result)));
-		}
-		if (result == FMOD_OK)
-		{
+			// Make sure bank is ready to load sample data from
+			StudioSystem->flushCommands();
 			bank->loadSampleData();
 		}
 	}
@@ -168,26 +160,6 @@ void UFMODBlueprintStatics::UnloadBank(class UFMODBank* Bank)
 			bank->unload();
 		}
 	}
-}
-
-bool UFMODBlueprintStatics::IsBankLoaded(class UFMODBank* Bank)
-{
-	FMOD::Studio::System* StudioSystem = IFMODStudioModule::Get().GetStudioSystem(EFMODSystemContext::Runtime);
-	if (StudioSystem != nullptr && Bank != nullptr)
-	{
-		FMOD::Studio::ID guid = FMODUtils::ConvertGuid(Bank->AssetGuid);
-		FMOD::Studio::Bank* bank = nullptr;
-		FMOD_RESULT result = StudioSystem->getBankByID(&guid, &bank);
-		if (result == FMOD_OK && bank != nullptr)
-		{
-			FMOD_STUDIO_LOADING_STATE loadingState;
-			if (bank->getLoadingState(&loadingState) == FMOD_OK)
-			{
-				return (loadingState == FMOD_STUDIO_LOADING_STATE_LOADED);
-			}
-		}
-	}
-	return false;
 }
 
 void UFMODBlueprintStatics::LoadBankSampleData(class UFMODBank* Bank)
@@ -259,7 +231,7 @@ TArray<FFMODEventInstance> UFMODBlueprintStatics::FindEventInstances(UObject* Wo
 	return Instances;
 }
 
-void UFMODBlueprintStatics::BusSetVolume(class UFMODBus* Bus, float Volume)
+void UFMODBlueprintStatics::BusSetFaderLevel(class UFMODBus* Bus, float Level)
 {
 	FMOD::Studio::System* StudioSystem = IFMODStudioModule::Get().GetStudioSystem(EFMODSystemContext::Runtime);
 	if (StudioSystem != nullptr && Bus != nullptr)
@@ -269,7 +241,7 @@ void UFMODBlueprintStatics::BusSetVolume(class UFMODBus* Bus, float Volume)
 		FMOD_RESULT result = StudioSystem->getBusByID(&guid, &bus);
 		if (result == FMOD_OK && bus != nullptr)
 		{
-			bus->setVolume(Volume);
+			bus->setFaderLevel(Level);
 		}
 	}
 }
@@ -300,21 +272,6 @@ void UFMODBlueprintStatics::BusSetMute(class UFMODBus* Bus, bool bMute)
 		if (result == FMOD_OK && bus != nullptr)
 		{
 			bus->setMute(bMute);
-		}
-	}
-}
-
-void UFMODBlueprintStatics::VCASetVolume(class UFMODVCA* Vca, float Volume)
-{
-	FMOD::Studio::System* StudioSystem = IFMODStudioModule::Get().GetStudioSystem(EFMODSystemContext::Runtime);
-	if (StudioSystem != nullptr && Vca != nullptr)
-	{
-		FMOD::Studio::ID guid = FMODUtils::ConvertGuid(Vca->AssetGuid);
-		FMOD::Studio::VCA* vca = nullptr;
-		FMOD_RESULT result = StudioSystem->getVCAByID(&guid, &vca);
-		if (result == FMOD_OK && vca != nullptr)
-		{
-			vca->setVolume(Volume);
 		}
 	}
 }
@@ -395,19 +352,6 @@ float UFMODBlueprintStatics::EventInstanceGetParameter(FFMODEventInstance EventI
 	return Value;
 }
 
-void UFMODBlueprintStatics::EventInstanceSetProperty(FFMODEventInstance EventInstance, EFMODEventProperty::Type Property, float Value)
-{
-	if (EventInstance.Instance)
-	{
-		FMOD_RESULT Result = EventInstance.Instance->setProperty((FMOD_STUDIO_EVENT_PROPERTY)Property, Value);
-
-		if (Result != FMOD_OK)
-		{
-			UE_LOG(LogFMOD, Warning, TEXT("Failed to set event instance property type %d to value %f (%s)"), (int)Property, Value, FMOD_ErrorString(Result));
-		}
-	}
-}
-
 void UFMODBlueprintStatics::EventInstancePlay(FFMODEventInstance EventInstance)
 {
 	if (EventInstance.Instance)
@@ -464,115 +408,6 @@ void UFMODBlueprintStatics::EventInstanceSetTransform(FFMODEventInstance EventIn
 			UE_LOG(LogFMOD, Warning, TEXT("Failed to set transform on event instance"));
 		}
 	}
+
+
 }
-
-TArray<FString> UFMODBlueprintStatics::GetOutputDrivers()
-{
-	TArray<FString> AllNames;
-
-	FMOD::Studio::System* StudioSystem = IFMODStudioModule::Get().GetStudioSystem(EFMODSystemContext::Runtime);
-	if (StudioSystem != nullptr)
-	{
-		FMOD::System* LowLevelSystem = nullptr;
-		verifyfmod(StudioSystem->getLowLevelSystem(&LowLevelSystem));
-
-		int DriverCount = 0;
-		verifyfmod(LowLevelSystem->getNumDrivers(&DriverCount));
-
-		for (int id=0; id<DriverCount; ++id)
-		{
-			char DriverNameUTF8[256] = {};
-			verifyfmod(LowLevelSystem->getDriverInfo(id, DriverNameUTF8, sizeof(DriverNameUTF8), 0, 0, 0, 0));
-			FString DriverName(UTF8_TO_TCHAR(DriverNameUTF8));
-			AllNames.Add(DriverName);
-		}
-	}
-
-	return AllNames;
-}
-
-void UFMODBlueprintStatics::SetOutputDriverByName(FString NewDriverName)
-{
-	FMOD::Studio::System* StudioSystem = IFMODStudioModule::Get().GetStudioSystem(EFMODSystemContext::Runtime);
-	if (StudioSystem != nullptr)
-	{
-		FMOD::System* LowLevelSystem = nullptr;
-		verifyfmod(StudioSystem->getLowLevelSystem(&LowLevelSystem));
-
-		int DriverIndex = -1;
-		int DriverCount = 0;
-		verifyfmod(LowLevelSystem->getNumDrivers(&DriverCount));
-
-		for (int id=0; id<DriverCount; ++id)
-		{
-			char DriverNameUTF8[256] = {};
-			verifyfmod(LowLevelSystem->getDriverInfo(id, DriverNameUTF8, sizeof(DriverNameUTF8), 0, 0, 0, 0));
-			FString DriverName(UTF8_TO_TCHAR(DriverNameUTF8));
-			UE_LOG(LogFMOD, Log, TEXT("Driver %d: %s"), id, *DriverName);
-			if (DriverName.Contains(NewDriverName))
-			{
-				DriverIndex = id;
-			}
-		}
-
-		if (DriverIndex >= 0)
-		{
-			UE_LOG(LogFMOD, Log, TEXT("Selected driver %d"), DriverIndex);
-			verifyfmod(LowLevelSystem->setDriver(DriverIndex));
-		}
-		else
-		{
-			UE_LOG(LogFMOD, Warning, TEXT("Did not find driver of name '%s'"), *NewDriverName);
-		}
-	}
-}
-
-void UFMODBlueprintStatics::SetOutputDriverByIndex(int NewDriverIndex)
-{
-	FMOD::Studio::System* StudioSystem = IFMODStudioModule::Get().GetStudioSystem(EFMODSystemContext::Runtime);
-	if (StudioSystem != nullptr)
-	{
-		FMOD::System* LowLevelSystem = nullptr;
-		verifyfmod(StudioSystem->getLowLevelSystem(&LowLevelSystem));
-
-		int DriverCount = 0;
-		verifyfmod(LowLevelSystem->getNumDrivers(&DriverCount));
-		
-		if (NewDriverIndex >= 0 && NewDriverIndex < DriverCount)
-		{
-			UE_LOG(LogFMOD, Log, TEXT("Selected driver %d"), NewDriverIndex);
-			verifyfmod(LowLevelSystem->setDriver(NewDriverIndex));
-		}
-		else
-		{
-			UE_LOG(LogFMOD, Warning, TEXT("Driver %d out of range"), NewDriverIndex);
-		}
-	}
-}
-
-void UFMODBlueprintStatics::MixerSuspend()
-{
-	UE_LOG(LogFMOD, Log, TEXT("MixerSuspend called"));
-	FMOD::Studio::System* StudioSystem = IFMODStudioModule::Get().GetStudioSystem(EFMODSystemContext::Runtime);
-	if (StudioSystem != nullptr)
-	{
-		FMOD::System* LowLevelSystem = nullptr;
-		verifyfmod(StudioSystem->getLowLevelSystem(&LowLevelSystem));
-
-		verifyfmod(LowLevelSystem->mixerSuspend());
-	}
-}
-
-void UFMODBlueprintStatics::MixerResume()
-{
-	UE_LOG(LogFMOD, Log, TEXT("MixerResume called"));
-	FMOD::Studio::System* StudioSystem = IFMODStudioModule::Get().GetStudioSystem(EFMODSystemContext::Runtime);
-	if (StudioSystem != nullptr)
-	{
-		FMOD::System* LowLevelSystem = nullptr;
-		verifyfmod(StudioSystem->getLowLevelSystem(&LowLevelSystem));
-
-		verifyfmod(LowLevelSystem->mixerResume());
-	}
-}
-

@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
 
 #include "FMODStudioEditorPrivatePCH.h"
 #include "FMODEventEditor.h"
@@ -17,25 +17,25 @@ DEFINE_LOG_CATEGORY_STATIC(LogFMODEventEditor, Log, All);
 const FName FFMODEventEditor::EventEditorTabId(TEXT("FFMODEventEditor_EventView"));
 const FName FFMODEventEditor::FMODEventEditorAppIdentifier(TEXT("FMODEventEditorApp"));
 
-void FFMODEventEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& NewTabManager)
+void FFMODEventEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& TabManager)
 {
-	WorkspaceMenuCategory = NewTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_FMODEventEditor", "FMOD Event Editor"));
+	WorkspaceMenuCategory = TabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_FMODEventEditor", "FMOD Event Editor"));
 	auto WorkspaceMenuCategoryRef = WorkspaceMenuCategory.ToSharedRef();
 
-	FAssetEditorToolkit::RegisterTabSpawners(NewTabManager);
+	FAssetEditorToolkit::RegisterTabSpawners(TabManager);
 
-	NewTabManager->RegisterTabSpawner(
+	TabManager->RegisterTabSpawner(
 		EventEditorTabId,
 		FOnSpawnTab::CreateSP(this, &FFMODEventEditor::SpawnTab_EventEditor))
 		.SetDisplayName(LOCTEXT("EventTab", "FMOD Event"))
 		.SetGroup(WorkspaceMenuCategoryRef);
 }
 
-void FFMODEventEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& NewTabManager)
+void FFMODEventEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& TabManager)
 {
-	FAssetEditorToolkit::UnregisterTabSpawners(NewTabManager);
+	FAssetEditorToolkit::UnregisterTabSpawners(TabManager);
 
-	NewTabManager->UnregisterTabSpawner(EventEditorTabId);
+	TabManager->UnregisterTabSpawner(EventEditorTabId);
 }
 
 FFMODEventEditor::FFMODEventEditor()

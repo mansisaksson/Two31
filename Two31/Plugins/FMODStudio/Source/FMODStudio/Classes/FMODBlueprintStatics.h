@@ -1,9 +1,8 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
 
 #pragma once
 
 #include "UnrealString.h"
-#include "FMODAudioComponent.h"
 #include "FMODBlueprintStatics.generated.h"
 
 class UFMODAudioComponent;
@@ -21,13 +20,14 @@ class UFMODAsset;
 class UFMODEvent;
 class USceneComponent;
 
-USTRUCT(BlueprintType)
+USTRUCT()
 struct FFMODEventInstance
 {
 	GENERATED_USTRUCT_BODY()
 
 	FMOD::Studio::EventInstance* Instance;
 };
+
 
 UCLASS()
 class FMODSTUDIO_API UFMODBlueprintStatics : public UBlueprintFunctionLibrary
@@ -87,12 +87,6 @@ class FMODSTUDIO_API UFMODBlueprintStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "Audio|FMOD", meta = (UnsafeDuringActorConstruction = "true"))
 	static void UnloadBank(class UFMODBank* Bank);
 
-	/** Returns true if a bank is loaded.
-	* @param Bank - bank to query
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Audio|FMOD", meta = (UnsafeDuringActorConstruction = "true"))
-	static bool IsBankLoaded(class UFMODBank* Bank);
-
 	/** Load bank sample data.
 	 * @param Bank - bank to load sample data from
 	 */
@@ -124,12 +118,12 @@ class FMODSTUDIO_API UFMODBlueprintStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category="Audio|FMOD", meta=(HidePin="WorldContextObject", DefaultToSelf="WorldContextObject", UnsafeDuringActorConstruction = "true"))
 	static TArray<FFMODEventInstance> FindEventInstances(UObject* WorldContextObject, UFMODEvent* Event);
 
-	/** Set volume on a bus
+	/** Set fader level on a bus
 	 * @param Bus - bus to use
-	 * @param Volume - volume
+	 * @param Level - fader level
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Audio|FMOD|Bus", meta = (UnsafeDuringActorConstruction = "true"))
-	static void BusSetVolume(class UFMODBus* Bus, float Volume);
+	static void BusSetFaderLevel(class UFMODBus* Bus, float Level);
 
 	/** Pause/Unpause all events going through this bus
 	 * @param Bus - bus to use
@@ -144,13 +138,6 @@ class FMODSTUDIO_API UFMODBlueprintStatics : public UBlueprintFunctionLibrary
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Audio|FMOD|Bus", meta = (UnsafeDuringActorConstruction = "true"))
 	static void BusSetMute(class UFMODBus* Bus, bool bMute);
-
-	/** Set volume on a VCA
-	 * @param Vca - VCA to use
-	 * @param Volume - volume
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Audio|FMOD|VCA", meta = (UnsafeDuringActorConstruction = "true"))
-	static void VCASetVolume(class UFMODVCA* Vca, float Volume);
 
 	/** Returns whether this FMOD Event Instance is valid.  The instance will be invalidated when the sound stops.
 	 * @param EventInstance - Event instance
@@ -194,14 +181,6 @@ class FMODSTUDIO_API UFMODBlueprintStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category="Audio|FMOD|EventInstance", meta = (UnsafeDuringActorConstruction = "true"))
 	static float EventInstanceGetParameter(FFMODEventInstance EventInstance, FName Name);
 
-	/** Set an FMOD event property on an FMOD Event Instance.
-	* @param EventInstance - Event instance
-	* @param Property - Property to set
-	* @param Value - Value to set
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Audio|FMOD|EventInstance", meta = (UnsafeDuringActorConstruction = "true"))
-	static void EventInstanceSetProperty(FFMODEventInstance EventInstance, EFMODEventProperty::Type Property, float Value);
-	
 	/** Plays a FMOD Event Instance.
 	 * @param EventInstance - Event instance
 	 */
@@ -226,30 +205,4 @@ class FMODSTUDIO_API UFMODBlueprintStatics : public UBlueprintFunctionLibrary
 	 */
 	UFUNCTION(BlueprintCallable, Category="Audio|FMOD|EventInstance", meta = (UnsafeDuringActorConstruction = "true"))
 	static void EventInstanceSetTransform(FFMODEventInstance EventInstance, const FTransform& Location);
-
-	/** List all output device names.
-	 */
-	UFUNCTION(BlueprintCallable, Category="Audio|FMOD")
-	static TArray<FString> GetOutputDrivers();
-
-	/** Set current output device by name or part of the name.
-	 */
-	UFUNCTION(BlueprintCallable, Category="Audio|FMOD")
-	static void SetOutputDriverByName(FString NewDriverName);
-
-	/** Set current output device by its index from GetOutputDrivers.
-	 */
-	UFUNCTION(BlueprintCallable, Category="Audio|FMOD")
-	static void SetOutputDriverByIndex(int NewDriverIndex);
-
-	/** Suspend the FMOD mixer.  Used when suspending the application.
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Audio|FMOD")
-	static void MixerSuspend();
-
-	/** Resume the FMOD mixer.  Used when resuming the application.
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Audio|FMOD")
-	static void MixerResume();
-
 };

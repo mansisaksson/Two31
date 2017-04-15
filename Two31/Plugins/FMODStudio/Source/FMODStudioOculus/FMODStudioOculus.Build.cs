@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
 
 namespace UnrealBuildTool.Rules
 {
@@ -36,28 +36,14 @@ namespace UnrealBuildTool.Rules
 			switch (Target.Platform)
 			{
 				case UnrealTargetPlatform.Win32:
-					if (System.IO.File.Exists(System.IO.Path.Combine(BasePath, "ovrfmod.lib")))
-					{
-						PublicAdditionalLibraries.Add(System.IO.Path.Combine(BasePath, "ovrfmod.lib"));
-						PublicDelayLoadDLLs.Add("ovrfmod.dll");
-						Definitions.Add("FMOD_OSP_SUPPORTED=1");
-					}
+					PublicAdditionalLibraries.Add(System.IO.Path.Combine(BasePath, "ovrfmod.lib"));
+					PublicDelayLoadDLLs.Add("ovrfmod.dll");
+					Definitions.Add("FMOD_OSP_SUPPORTED=1");
 					break;
 				case UnrealTargetPlatform.Win64:
-					if (System.IO.File.Exists(System.IO.Path.Combine(BasePath, "ovrfmod.lib")))
-					{
-						PublicAdditionalLibraries.Add(System.IO.Path.Combine(BasePath, "ovrfmod.lib"));
-						PublicDelayLoadDLLs.Add("ovrfmod.dll");
-						Definitions.Add("FMOD_OSP_SUPPORTED=1");
-					}
-					break;
-				case UnrealTargetPlatform.Android:
-					if (System.IO.File.Exists(System.IO.Path.Combine(BasePath, "armeabi-v7a/libovrfmod.so")))
-					{
-						PublicAdditionalLibraries.Add(System.IO.Path.Combine(BasePath, "armeabi-v7a/libovrfmod.so"));
-						PublicDelayLoadDLLs.Add("libovrfmod.so");
-						Definitions.Add("FMOD_OSP_SUPPORTED=1");
-					}
+					PublicAdditionalLibraries.Add(System.IO.Path.Combine(BasePath, "ovrfmod.lib"));
+					PublicDelayLoadDLLs.Add("ovrfmod.dll");
+					Definitions.Add("FMOD_OSP_SUPPORTED=1");
 					break;
 				default:
 					break;

@@ -1,11 +1,11 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
 
 #include "FMODStudioOculusPrivatePCH.h"
 #include "FMODStudioOculusModule.h"
 #include "FMODOculusBlueprintStatics.h"
 #include "FMODUtils.h"
 
-#ifdef FMOD_OSP_SUPPORTED
+#if FMOD_OSP_SUPPORTED
 	#include "OculusFMODSpatializerSettings.h"
 #endif
 
@@ -19,7 +19,7 @@ UFMODOculusBlueprintStatics::UFMODOculusBlueprintStatics(const FObjectInitialize
 
 void UFMODOculusBlueprintStatics::SetEarlyReflectionsEnabled(bool bEnable)
 {
-#ifdef FMOD_OSP_SUPPORTED
+#if FMOD_OSP_SUPPORTED
 	if (IFMODStudioOculusModule::Get().IsRunning())
 	{
 		OSP_FMOD_SetEarlyReflectionsEnabled(bEnable);
@@ -29,7 +29,7 @@ void UFMODOculusBlueprintStatics::SetEarlyReflectionsEnabled(bool bEnable)
 
 void UFMODOculusBlueprintStatics::SetLateReverberationEnabled(bool bEnable)
 {
-#ifdef FMOD_OSP_SUPPORTED
+#if FMOD_OSP_SUPPORTED
 	if (IFMODStudioOculusModule::Get().IsRunning())
 	{
 		OSP_FMOD_SetLateReverberationEnabled(bEnable);
@@ -39,7 +39,7 @@ void UFMODOculusBlueprintStatics::SetLateReverberationEnabled(bool bEnable)
 
 void UFMODOculusBlueprintStatics::SetRoomParameters(const FFMODOculusRoomParameters& Params)
 {
-#ifdef FMOD_OSP_SUPPORTED
+#if FMOD_OSP_SUPPORTED
 	if (IFMODStudioOculusModule::Get().IsRunning())
 	{
 		// If we have a set of empty parameters, don't set it into oculus

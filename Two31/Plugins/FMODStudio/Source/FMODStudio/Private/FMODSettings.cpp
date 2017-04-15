@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
 
 #include "FMODStudioPrivatePCH.h"
 #include "FMODSettings.h"
@@ -25,7 +25,6 @@ UFMODSettings::UFMODSettings(const FObjectInitializer& ObjectInitializer)
 	StudioUpdatePeriod = 0;
 	LiveUpdatePort = 0;
 	bMatchHardwareSampleRate = true;
-	bLockAllBuses = false;
 }
 
 FString UFMODSettings::GetFullBankPath() const
@@ -46,7 +45,7 @@ FString UFMODSettings::GetFullBankPath() const
 	}
 	else
 	{
-#if PLATFORM_IOS || PLATFORM_ANDROID || (ENGINE_MINOR_VERSION > 14 && PLATFORM_SWITCH)
+#if PLATFORM_IOS || PLATFORM_ANDROID
 		FString PlatformName = "Mobile";
 #elif PLATFORM_PS4
 		FString PlatformName = "PS4";

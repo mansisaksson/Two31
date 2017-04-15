@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
 
 #include "FMODStudioEditorPrivatePCH.h"
 #include "SFMODEventEditorPanel.h"
@@ -323,16 +323,16 @@ TSharedRef<SExpandableArea> SFMODEventEditorPanel::ConstructUserProperties(FMOD:
 			switch (UserProperty.type)
 			{
 			case FMOD_STUDIO_USER_PROPERTY_TYPE_INTEGER:
-				PropertyText = FText::AsNumber(UserProperty.intvalue);
+				PropertyText = FText::AsNumber(UserProperty.intValue);
 				break;
 			case FMOD_STUDIO_USER_PROPERTY_TYPE_BOOLEAN:
-				PropertyText = UserProperty.boolvalue ? LOCTEXT("True", "True") : LOCTEXT("False", "False");
+				PropertyText = UserProperty.boolValue ? LOCTEXT("True", "True") : LOCTEXT("False", "False");
 				break;
 			case FMOD_STUDIO_USER_PROPERTY_TYPE_FLOAT:
-				PropertyText = FText::AsNumber(UserProperty.floatvalue);
+				PropertyText = FText::AsNumber(UserProperty.floatValue);
 				break;
 			case FMOD_STUDIO_USER_PROPERTY_TYPE_STRING:
-				PropertyText = FText::FromString(UTF8_TO_TCHAR(UserProperty.stringvalue));
+				PropertyText = FText::FromString(UTF8_TO_TCHAR(UserProperty.stringValue));
 				break;
 			}
 

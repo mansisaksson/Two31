@@ -27,7 +27,7 @@ AShotgun::AShotgun()
 	MaxHeatAccumulation = 10.f;
 
 	MuzzleFlashLocation = CreateDefaultSubobject<USceneComponent>("MuzzleFlash");
-	MuzzleFlashLocation->AttachTo(WeaponMesh, TEXT("MuzzleFlash"));
+	MuzzleFlashLocation->SetupAttachment(WeaponMesh, TEXT("MuzzleFlash"));
 }
 
 void AShotgun::BeginPlay()

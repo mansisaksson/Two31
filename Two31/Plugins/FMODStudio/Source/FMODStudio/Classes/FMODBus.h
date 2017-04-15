@@ -1,9 +1,15 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
 
 #pragma once
 
 #include "FMODAsset.h"
 #include "FMODBus.generated.h"
+
+/* Purely for doxygen generation */
+#ifdef GENERATE_DOX
+	#define UCLASS(...)
+	#define UPROPERTY(...) public:
+#endif
 
 /**
  * FMOD Bus Asset.

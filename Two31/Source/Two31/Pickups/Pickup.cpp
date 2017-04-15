@@ -22,7 +22,7 @@ APickup::APickup()
 	TriggerSphere->CanCharacterStepUpOn = ECB_No;
 
 	TriggerSphere->bGenerateOverlapEvents = true;
-	TriggerSphere->AttachTo(ItemMesh);
+	TriggerSphere->SetupAttachment(ItemMesh);
 
 	BobHeight = 1.f;
 	BobSpeed = 3.f;
