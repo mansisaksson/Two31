@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
 
 #pragma once
 
@@ -110,6 +110,18 @@ public:
 	int32 StudioUpdatePeriod;
 
 	/**
+	 * Output device to choose at system start up, or empty for default.
+	 */
+	UPROPERTY(config, EditAnywhere, Category = InitSettings)
+	FString InitialOutputDriverName;
+
+	/**
+	 * Lock all mixer buses at startup, making sure they are created up front.
+	 */
+	UPROPERTY(config, EditAnywhere, Category = InitSettings)
+	bool bLockAllBuses;
+
+	/**
 	 * Live update port to use, or 0 for default.
 	 */
 	UPROPERTY(config, EditAnywhere, Category = Advanced)
@@ -146,6 +158,12 @@ public:
 	 */
 	UPROPERTY(config, EditAnywhere, Category = Advanced)
 	FString SkipLoadBankName;
+
+	/**
+	* Force wav writer output, for debugging only.  Setting this will prevent normal sound output!
+	*/
+	UPROPERTY(config, EditAnywhere, Category = Advanced)
+	FString WavWriterPath;
 
 	/** Is the bank path set up . */
 	bool IsBankPathSet() const { return !BankOutputDirectory.Path.IsEmpty(); }

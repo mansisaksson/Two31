@@ -63,11 +63,11 @@ AImpCharacter::AImpCharacter()
 	bAttackOnCooldown = false;
 
 	L_ClawRadius = CreateDefaultSubobject<USphereComponent>(TEXT("L_ClawRadius"));
-	L_ClawRadius->AttachTo(GetMesh(), TEXT("L_Claw"));
+	L_ClawRadius->SetupAttachment(GetMesh(), TEXT("L_Claw"));
 	L_ClawRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	R_ClawRadius = CreateDefaultSubobject<USphereComponent>(TEXT("R_ClawRadius"));
-	R_ClawRadius->AttachTo(GetMesh(), TEXT("R_Claw"));
+	R_ClawRadius->SetupAttachment(GetMesh(), TEXT("R_Claw"));
 	R_ClawRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
@@ -95,7 +95,7 @@ void AImpCharacter::BeginPlay()
 			//ROT:(Pitch=-83.495476,Yaw=74.854538,Roll=-89.920227)
 			//SCALE:(X=0.700000,Y=0.700000,Z=0.700000)
 			AJetpack* pack = GetWorld()->SpawnActor<AJetpack>(Jetpack, FVector(21.795549f, 30.619284, 5.023289f), FRotator(-83.495476f, 74.854538f, -89.920227f));
-			pack->AttachRootComponentTo(GetMesh(), TEXT("JetPack"));
+			pack->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("JetPack"));
 			pack->SetActorScale3D(FVector(0.7f, 0.7f, 0.7f));
 		}
 	}
@@ -552,7 +552,7 @@ void AImpCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassF
 	AEnemyCharacter::GetOverlappingActors(Sphere, ClassFilter);
 	GetPositionOfImps();
 }
-void AImpCharacter::OnAttackBeginOverlap(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+void AImpCharacter::OnAttackBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{

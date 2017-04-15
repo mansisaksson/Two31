@@ -60,21 +60,21 @@ APlayerCharacter::APlayerCharacter()
 
 	// Create a CameraComponent	
 	FPCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FPCamera->AttachParent = GetCapsuleComponent();
+	FPCamera->SetupAttachment(GetCapsuleComponent());
 	FPCamera->RelativeLocation = FVector(0, 0, 64.f); // Position the camera
 	FPCamera->bUsePawnControlRotation = true;
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	FPArmMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
 	FPArmMesh->SetOnlyOwnerSee(false);
-	FPArmMesh->AttachParent = FPCamera;
+	FPArmMesh->SetupAttachment(FPCamera);
 	FPArmMesh->bCastDynamicShadow = false;
 	FPArmMesh->CastShadow = false;
 
 	NoiseEmitter = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("Noise Emitter"));
 
 	MeleeCollider = CreateDefaultSubobject<USphereComponent>(TEXT("MeleeCollider"));
-	MeleeCollider->AttachTo(FPArmMesh, TEXT("L_Wrist"));
+	MeleeCollider->SetupAttachment(FPArmMesh, TEXT("L_Wrist"));
 	MeleeCollider->SetCollisionResponseToAllChannels(ECR_Overlap);
 	MeleeCollider->SetSphereRadius(30.f);
 	MeleeCollider->IgnoreActorWhenMoving(this, true);
@@ -82,15 +82,15 @@ APlayerCharacter::APlayerCharacter()
 	MeleeCollider->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnMeleeBeginOverlap);
 
 	LineOfSight_Chest = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Chest"));
-	LineOfSight_Chest->AttachTo(GetCapsuleComponent());
+	LineOfSight_Chest->SetupAttachment(GetCapsuleComponent());
 	LineOfSight_Chest->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
 
 	LineOfSight_Shoulder_Right = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Right"));
-	LineOfSight_Shoulder_Right->AttachTo(GetCapsuleComponent());
+	LineOfSight_Shoulder_Right->SetupAttachment(GetCapsuleComponent());
 	LineOfSight_Shoulder_Right->SetRelativeLocation(FVector(0.f, 40.f, 60.f));
 
 	LineOfSight_Shoulder_Left = CreateDefaultSubobject<USceneComponent>(TEXT("LineOfSight_Shoulder_Left"));
-	LineOfSight_Shoulder_Left->AttachTo(GetCapsuleComponent());
+	LineOfSight_Shoulder_Left->SetupAttachment(GetCapsuleComponent());
 	LineOfSight_Shoulder_Left->SetRelativeLocation(FVector(0.f, -40.f, 60.f));
 }
 
@@ -268,7 +268,7 @@ void APlayerCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 	}
 }
 
-void APlayerCharacter::OnMeleeBeginOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
+void APlayerCharacter::OnMeleeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!MeleedActors.Contains(OtherActor))
 	{
@@ -288,40 +288,40 @@ void APlayerCharacter::OnMeleeBeginOverlap(AActor* OtherActor, UPrimitiveCompone
 	MeleedActors.Add(OtherActor);
 }
 
-void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
+void APlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
-	check(InputComponent);
+	check(PlayerInputComponent);
 
 	/*to remove*/
 	if (bCanJump)
 	{
-		InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-		InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+		PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+		PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	}
 
-	InputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::OnFire);
-	InputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::OnReleaseFire);
-	InputComponent->BindAction("Reload", IE_Released, this, &APlayerCharacter::OnReload);
-	InputComponent->BindAction("ADS", IE_Pressed, this, &APlayerCharacter::OnADS);
-	InputComponent->BindAction("MeleeAttack", IE_Pressed, this, &APlayerCharacter::OnMeleeAttack);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &APlayerCharacter::OnFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::OnReleaseFire);
+	PlayerInputComponent->BindAction("Reload", IE_Released, this, &APlayerCharacter::OnReload);
+	PlayerInputComponent->BindAction("ADS", IE_Pressed, this, &APlayerCharacter::OnADS);
+	PlayerInputComponent->BindAction("MeleeAttack", IE_Pressed, this, &APlayerCharacter::OnMeleeAttack);
 
-	InputComponent->BindAction("WeaponSlot1", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot1);
-	InputComponent->BindAction("WeaponSlot2", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot2);
-	InputComponent->BindAction("WeaponSlot3", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot3);
-	InputComponent->BindAction("WeaponSlot4", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot4);
+	PlayerInputComponent->BindAction("WeaponSlot1", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot1);
+	PlayerInputComponent->BindAction("WeaponSlot2", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot2);
+	PlayerInputComponent->BindAction("WeaponSlot3", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot3);
+	PlayerInputComponent->BindAction("WeaponSlot4", IE_Pressed, this, &APlayerCharacter::SelectWeaponSlot4);
 
-	InputComponent->BindAction("NextWeapon", IE_Pressed, this, &APlayerCharacter::NextWeapon);
-	InputComponent->BindAction("PreviousWeapon", IE_Pressed, this, &APlayerCharacter::PreviousWeapon);
+	PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, this, &APlayerCharacter::NextWeapon);
+	PlayerInputComponent->BindAction("PreviousWeapon", IE_Pressed, this, &APlayerCharacter::PreviousWeapon);
 
-	InputComponent->BindAction("UseHealthPack", IE_Pressed, this, &APlayerCharacter::UseHealthPack);
+	PlayerInputComponent->BindAction("UseHealthPack", IE_Pressed, this, &APlayerCharacter::UseHealthPack);
 
-	InputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
-	InputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveSideways);
+	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveSideways);
 
-	InputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	InputComponent->BindAxis("TurnRate", this, &APlayerCharacter::TurnAtRate);
-	InputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	InputComponent->BindAxis("LookUpRate", this, &APlayerCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("TurnRate", this, &APlayerCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("LookUpRate", this, &APlayerCharacter::LookUpAtRate);
 }
 
 void APlayerCharacter::OnFire()
@@ -505,7 +505,7 @@ bool APlayerCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 				const FRotator SpawnRotation = FRotator::ZeroRotator;
 				const FVector SpawnLocation = FVector::ZeroVector;
 				WeaponSlots[i] = GetWorld()->SpawnActor<AWeapon>(Weapon, SpawnLocation, SpawnRotation);
-				WeaponSlots[i]->AttachRootComponentTo(FPArmMesh);
+				WeaponSlots[i]->AttachToComponent(FPArmMesh, FAttachmentTransformRules::SnapToTargetIncludingScale);
 				WeaponSlots[i]->SetAmmoPool(&GetAmmoOfType((EAmmoType)WeaponSlots[i]->GetAmmoType())->AmmoPool);
 				WeaponSlots[i]->HolsterWeapon();
 

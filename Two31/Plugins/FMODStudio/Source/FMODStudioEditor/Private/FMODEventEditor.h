@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
 
 #pragma once
 
@@ -17,8 +17,8 @@ namespace FMOD
 class FFMODEventEditor : public FAssetEditorToolkit
 {
 public:
-	virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& TabManager) override;
-	virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& TabManager) override;
+	virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& NewTabManager) override;
+	virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& NewTabManager) override;
 
 	/**
 	* Edits the specified event

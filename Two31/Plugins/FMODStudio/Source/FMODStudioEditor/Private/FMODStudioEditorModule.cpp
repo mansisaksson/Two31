@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
 
 #include "FMODStudioEditorPrivatePCH.h"
 
@@ -13,8 +13,11 @@
 #include "FMODEventEditor.h"
 #include "FMODAudioComponentVisualizer.h"
 #include "FMODAmbientSoundDetails.h"
+#include "Sequencer/FMODEventControlTrackEditor.h"
+#include "Sequencer/FMODEventParameterTrackEditor.h"
 
 #include "SlateBasics.h"
+#include "AssetSelection.h"
 #include "AssetTypeActions_FMODEvent.h"
 #include "NotificationManager.h"
 #include "SNotificationList.h"
@@ -26,6 +29,8 @@
 #include "SocketSubsystem.h"
 #include "Sockets.h"
 #include "IPAddress.h"
+#include "FileHelpers.h"
+#include "ISequencerModule.h"
 
 #include "fmod_studio.hpp"
 
@@ -153,7 +158,10 @@ public:
 	FFMODStudioEditorModule() :
 		bSimulating(false),
 		bIsInPIE(false),
-		bRegisteredComponentVisualizers(false)
+		bRegisteredComponentVisualizers(false),
+		bRunningTest(false),
+		TestDelay(0.0f),
+		TestStep(0)
 	{
 	}
 
@@ -196,6 +204,8 @@ public:
 	/** Reload banks */
 	void ReloadBanks();
 
+	void TickTest(float DeltaTime);
+
 	TArray<FName> RegisteredComponentClassNames;
 	void RegisterComponentVisualizer(FName ComponentClassName, TSharedPtr<FComponentVisualizer> Visualizer);
 
@@ -209,6 +219,8 @@ public:
 	FDelegateHandle PausePIEDelegateHandle;
 	FDelegateHandle ResumePIEDelegateHandle;
 	FDelegateHandle HandleBanksReloadedDelegateHandle;
+    FDelegateHandle FMODControlTrackEditorCreateTrackEditorHandle;
+    FDelegateHandle FMODParamTrackEditorCreateTrackEditorHandle;
 
 	/** Hook for drawing viewport */
 	FDebugDrawDelegate ViewportDrawingDelegate;
@@ -222,9 +234,14 @@ public:
 	/** Asset type actions for events (edit, play, stop) */
 	TSharedPtr<FAssetTypeActions_FMODEvent> FMODEventAssetTypeActions;
 
+	ISettingsSectionPtr SettingsSection;
+
 	bool bSimulating;
 	bool bIsInPIE;
 	bool bRegisteredComponentVisualizers;
+	bool bRunningTest;
+	float TestDelay;
+	int TestStep;
 };
 
 IMPLEMENT_MODULE( FFMODStudioEditorModule, FMODStudioEditor )
@@ -238,7 +255,7 @@ void FFMODStudioEditorModule::StartupModule()
 
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
-		ISettingsSectionPtr SettingsSection = SettingsModule->RegisterSettings("Project", "Plugins", "FMODStudio",
+		SettingsSection = SettingsModule->RegisterSettings("Project", "Plugins", "FMODStudio",
 			LOCTEXT("FMODStudioSettingsName", "FMOD Studio"),
 			LOCTEXT("FMODStudioDescription", "Configure the FMOD Studio plugin"),
 			GetMutableDefault<UFMODSettings>()
@@ -249,6 +266,11 @@ void FFMODStudioEditorModule::StartupModule()
 			SettingsSection->OnModified().BindRaw(this, &FFMODStudioEditorModule::HandleSettingsSaved);
 		}
 	}
+
+    // Register with the sequencer module that we provide auto-key handlers.
+    ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>("Sequencer");
+    FMODControlTrackEditorCreateTrackEditorHandle = SequencerModule.RegisterTrackEditor_Handle(FOnCreateTrackEditor::CreateStatic(&FFMODEventControlTrackEditor::CreateTrackEditor));
+    FMODParamTrackEditorCreateTrackEditorHandle = SequencerModule.RegisterTrackEditor_Handle(FOnCreateTrackEditor::CreateStatic(&FFMODEventParameterTrackEditor::CreateTrackEditor));
 
 	// Register the details customizations
 	{
@@ -295,6 +317,10 @@ void FFMODStudioEditorModule::StartupModule()
 	// This module is loaded after FMODStudioModule
 	HandleBanksReloadedDelegateHandle = IFMODStudioModule::Get().BanksReloadedEvent().AddRaw(this, &FFMODStudioEditorModule::HandleBanksReloaded);
 
+	if (FParse::Param(FCommandLine::Get(), TEXT("fmodtest")))
+	{
+		bRunningTest = true;
+	}
 }
 
 void FFMODStudioEditorModule::AddHelpMenuExtension(FMenuBuilder& MenuBuilder)
@@ -376,7 +402,7 @@ void FFMODStudioEditorModule::ShowVersion()
 	unsigned int DLLVersion = GetDLLVersion();
 
 	FText VersionMessage = FText::Format(
-		LOCTEXT("FMODStudio_About", "FMOD Studio\n\nBuilt Version: {0}\nDLL Version: {1}\n\nCopyright Firelight Technologies Pty Ltd"),
+		LOCTEXT("FMODStudio_About", "FMOD Studio\n\nBuilt Version: {0}\nDLL Version: {1}\n\nCopyright \u00A9 Firelight Technologies Pty Ltd.\n\nSee LICENSE.TXT for additional license information."),
 			FText::FromString(VersionToString(HeaderVersion)),
 			FText::FromString(VersionToString(DLLVersion)));
 	FMessageDialog::Open(EAppMsgType::Ok, VersionMessage);
@@ -561,8 +587,8 @@ void FFMODStudioEditorModule::ValidateFMOD()
 			}
 		}
 	}
-	bool AnyBankFiles = false;
-
+	bool bAnyBankFiles = false;
+	// Check bank path
 	if (!FPaths::DirectoryExists(FullBankPath) || !FPaths::DirectoryExists(PlatformBankPath))
 	{
 		FText DirMessage = FText::Format(
@@ -578,7 +604,7 @@ void FFMODStudioEditorModule::ValidateFMOD()
 		Settings.GetAllBankPaths(BankFiles, true);
 		if (BankFiles.Num() != 0)
 		{
-			AnyBankFiles = true;
+			bAnyBankFiles = true;
 		}
 		else
 		{
@@ -590,7 +616,8 @@ void FFMODStudioEditorModule::ValidateFMOD()
 			ProblemsFound++;
 		}
 	}
-	if (AnyBankFiles)
+	// Look for banks that may have failed to load
+	if (bAnyBankFiles)
 	{
 		FMOD::Studio::System* StudioSystem = IFMODStudioModule::Get().GetStudioSystem(EFMODSystemContext::Auditioning);
 		int BankCount = 0;
@@ -643,6 +670,7 @@ void FFMODStudioEditorModule::ValidateFMOD()
 			}
 		}
 	}
+	// Look for required plugins that have not been registered
 	TArray<FString> RequiredPlugins = IFMODStudioModule::Get().GetRequiredPlugins();
 	if (RequiredPlugins.Num() != 0 && Settings.PluginFiles.Num() == 0)
 	{
@@ -658,10 +686,31 @@ void FFMODStudioEditorModule::ValidateFMOD()
 		FMessageDialog::Open(EAppMsgType::Ok, PluginMessage);
 		ProblemsFound++;
 	}
-
+	// Look for FMOD in packaging settings
+	UProjectPackagingSettings* PackagingSettings = Cast<UProjectPackagingSettings>(UProjectPackagingSettings::StaticClass()->GetDefaultObject());
+	bool bPackagingFound = false;
+	for (int i=0; i<PackagingSettings->DirectoriesToAlwaysStageAsUFS.Num(); ++i)
+	{
+		// We allow subdirectory references, such as "FMOD/Mobile"
+		if (PackagingSettings->DirectoriesToAlwaysStageAsUFS[i].Path.StartsWith(Settings.BankOutputDirectory.Path))
+		{
+			bPackagingFound = true;
+			break;
+		}
+	}
+	if (!bPackagingFound)
+	{
+		ProblemsFound++;
+		if (EAppReturnType::Yes == FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("PackagingFMOD_Ask", "FMOD has not been added to the \"Additional Non-Asset Directories to Package\" list.\n\nDo you want add it now?")))
+		{
+			PackagingSettings->DirectoriesToAlwaysStageAsUFS.Add(Settings.BankOutputDirectory);
+			PackagingSettings->UpdateDefaultConfigFile();
+		}
+	}
+	// Summary
 	if (ProblemsFound)
 	{
-		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("SetStudioBuildStudio_FinishedBad", "Finished validation.  Problems were detected.\n"));
+		FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("SetStudioBuildStudio_FinishedBad", "Finished validation.\n"));
 	}
 	else
 	{
@@ -685,7 +734,92 @@ bool FFMODStudioEditorModule::Tick( float DeltaTime )
 		bRegisteredComponentVisualizers = true;
 	}
 
+	if (bRunningTest)
+	{
+		TickTest(DeltaTime);
+	}
+
 	return true;
+}
+
+void FFMODStudioEditorModule::TickTest( float DeltaTime )
+{
+	TestDelay -= DeltaTime;
+	if (TestDelay > 0.0f)
+	{
+		return; // Still waiting
+	}
+
+	// Default time to next step
+	TestDelay = 1.0f;
+	TestStep++;
+
+	UE_LOG(LogFMOD, Log, TEXT("Test step %d"), TestStep);
+
+	switch (TestStep)
+	{
+		case 1:
+		{
+			// Spawn event in level
+			FString EventPath;
+			if (FParse::Value(FCommandLine::Get(), TEXT("spawnevent="), EventPath))
+			{
+				UFMODEvent* FoundEvent = IFMODStudioModule::Get().FindEventByName(EventPath);
+				if (FoundEvent)
+				{
+					UActorFactory* ActorFactory = FActorFactoryAssetProxy::GetFactoryForAssetObject(FoundEvent);
+					if (ActorFactory)
+					{
+						AActor* NewActor = ActorFactory->CreateActor(FoundEvent, GWorld->GetCurrentLevel(), FTransform());
+						UE_LOG(LogFMOD, Log, TEXT("Placing '%s' in world: New actor %p"), *EventPath, NewActor);
+					}
+					else
+					{
+						UE_LOG(LogFMOD, Error, TEXT("Failed to find factory for event: '%s'"), *EventPath);
+					}
+				}
+				else
+				{
+					UE_LOG(LogFMOD, Error, TEXT("Failed to find event: '%s'"), *EventPath);
+				}
+			}
+			break;
+		}
+		case 2:
+		{
+			// Save FMOD directory to package
+			UProjectPackagingSettings* PackagingSettings = Cast<UProjectPackagingSettings>(UProjectPackagingSettings::StaticClass()->GetDefaultObject());
+			const UFMODSettings& Settings = *GetDefault<UFMODSettings>();
+			PackagingSettings->DirectoriesToAlwaysStageAsUFS.Add(Settings.BankOutputDirectory);
+			PackagingSettings->UpdateDefaultConfigFile();
+			break;
+		}
+		case 3:
+		{
+			// Save map
+			FEditorFileUtils::SaveDirtyPackages(false, true, false, true, false, false);
+			break;
+		}
+		case 4:
+		{
+			// Begin PIE
+			UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
+			GEditor->PlayInEditor(EditorWorld, false);
+			break;
+		}
+		case 5:
+		{
+			// Extra delay
+			TestDelay = 10.0f;
+			break;
+		}
+		case 6:
+		{
+			// Finish test
+			GIsRequestingExit = true;
+			break;
+		}
+	}
 }
 
 void FFMODStudioEditorModule::BeginPIE(bool simulating)
@@ -737,7 +871,11 @@ void FFMODStudioEditorModule::ViewportDraw(UCanvas* Canvas, APlayerController*)
 		UWorld* World = GCurrentLevelEditingViewportClient->GetWorld();
 		const FVector& ViewLocation = GCurrentLevelEditingViewportClient->GetViewLocation();
 
+#if ENGINE_MINOR_VERSION >= 14
+		FMatrix CameraToWorld = View->ViewMatrices.GetViewMatrix().InverseFast();
+#else
 		FMatrix CameraToWorld = View->ViewMatrices.ViewMatrix.InverseFast();
+#endif
 		FVector ProjUp = CameraToWorld.TransformVector(FVector(0, 1000, 0));
 		FVector ProjRight = CameraToWorld.TransformVector(FVector(1000, 0, 0));
 
@@ -804,7 +942,15 @@ void FFMODStudioEditorModule::ShutdownModule()
 		}
 	}
 
-	IFMODStudioModule::Get().BanksReloadedEvent().Remove(HandleBanksReloadedDelegateHandle);
+    // Unregister sequencer track creation delegates
+    ISequencerModule* SequencerModule = FModuleManager::GetModulePtr<ISequencerModule>("Sequencer");
+    if (SequencerModule != nullptr)
+    {
+        SequencerModule->UnRegisterTrackEditor_Handle(FMODControlTrackEditorCreateTrackEditorHandle);
+        SequencerModule->UnRegisterTrackEditor_Handle(FMODParamTrackEditorCreateTrackEditorHandle);
+    }
+    
+    IFMODStudioModule::Get().BanksReloadedEvent().Remove(HandleBanksReloadedDelegateHandle);
 }
 
 bool FFMODStudioEditorModule::HandleSettingsSaved()

@@ -389,7 +389,7 @@ bool ACultistCharacter::EquipWeapon(TSubclassOf<AWeapon> Weapon)
 				const FRotator SpawnRotation = FRotator::ZeroRotator;
 				const FVector SpawnLocation = FVector::ZeroVector;
 				WeaponSlots[i] = GetWorld()->SpawnActor<AWeapon>(Weapon, SpawnLocation, SpawnRotation);
-				WeaponSlots[i]->AttachRootComponentTo(GetMesh(), TEXT("R_WristSocket"), EAttachLocation::SnapToTargetIncludingScale, true);
+				WeaponSlots[i]->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("R_WristSocket"));
 				WeaponSlots[i]->SetActorHiddenInGame(true);
 
 				if (CurrentWeapon == NULL)

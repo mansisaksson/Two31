@@ -54,7 +54,7 @@ void ABloodParticleBall::Tick( float DeltaTime )
 	}
 }
 
-void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& HitResult)
+void ABloodParticleBall::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if ((OtherActor != NULL))
 	{
@@ -73,8 +73,8 @@ void ABloodParticleBall::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherCom
 			{
 				float DecalScale = (MaxDecalSize - MinDecalSize) * FMath::FRand() + MinDecalSize;
 				FVector DecalSize = FVector(DecalScale, DecalScale, 1.f);
-				FVector Normal = (HitResult.Normal * -1);
-				UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(Decal, DecalSize, HitResult.GetComponent(), HitResult.BoneName, HitResult.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
+				FVector Normal = (Hit.Normal * -1);
+				UDecalComponent* DecalComp = UGameplayStatics::SpawnDecalAttached(Decal, DecalSize, Hit.GetComponent(), Hit.BoneName, Hit.Location, FRotator::ZeroRotator, EAttachLocation::KeepWorldPosition);
 				DecalComp->SetWorldRotation(Normal.Rotation());
 				DecalComp->AddRelativeRotation(FRotator(0.f, 0.f, FMath::FRand() * 360.f));
 			}

@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
 
 #include "FMODStudioPrivatePCH.h"
 
@@ -30,6 +30,14 @@
 #define LOCTEXT_NAMESPACE "FMODStudio"
 
 DEFINE_LOG_CATEGORY(LogFMOD);
+
+DECLARE_STATS_GROUP(TEXT("FMOD"), STATGROUP_FMOD, STATCAT_Advanced);
+DECLARE_FLOAT_COUNTER_STAT(TEXT("FMOD CPU - Mixer"), STAT_FMOD_CPUMixer, STATGROUP_FMOD);
+DECLARE_FLOAT_COUNTER_STAT(TEXT("FMOD CPU - Studio"), STAT_FMOD_CPUStudio, STATGROUP_FMOD);
+DECLARE_MEMORY_STAT(TEXT("FMOD Memory - Current"), STAT_FMOD_Current_Memory, STATGROUP_FMOD);
+DECLARE_MEMORY_STAT(TEXT("FMOD Memory - Max"), STAT_FMOD_Max_Memory, STATGROUP_FMOD);
+DECLARE_DWORD_COUNTER_STAT(TEXT("FMOD Channels - Total"), STAT_FMOD_Total_Channels, STATGROUP_FMOD);
+DECLARE_DWORD_COUNTER_STAT(TEXT("FMOD Channels - Real"), STAT_FMOD_Real_Channels, STATGROUP_FMOD);
 
 const TCHAR* FMODSystemContextNames[EFMODSystemContext::Max] =
 {
@@ -120,7 +128,7 @@ public:
 	virtual void PostLoadCallback() override;
 	virtual void ShutdownModule() override;
 
-	FString GetDllPath(const TCHAR* ShortName);
+	FString GetDllPath(const TCHAR* ShortName, bool bExplicitPath, bool bUseLibPrefix);
 	void* LoadDll(const TCHAR* ShortName);
 
 	bool LoadLibraries();
@@ -276,19 +284,24 @@ bool FFMODStudioModule::LoadPlugin(const TCHAR* ShortName)
 	verifyfmod(StudioSystem[EFMODSystemContext::Runtime]->getLowLevelSystem(&LowLevelSystem));
 
 	FMOD_RESULT PluginLoadResult;
-	for (int attempt=0; attempt<2; ++attempt)
+
+	for (int useLib = 0; useLib<2; ++useLib)
 	{
-		FString AttemptName = FString(ShortName) + AttemptPrefixes[attempt];
-		FString PluginPath = GetDllPath(*AttemptName);
-
-		UE_LOG(LogFMOD, Log, TEXT("Trying to load plugin file at location: %s"), *PluginPath);
-
-		unsigned int Handle = 0;
-		PluginLoadResult = LowLevelSystem->loadPlugin(TCHAR_TO_UTF8(*PluginPath), &Handle, 0);
-		if (PluginLoadResult == FMOD_OK)
+		for (int attempt = 0; attempt<2; ++attempt)
 		{
-			UE_LOG(LogFMOD, Log, TEXT("Loaded plugin %s"), ShortName);
-			return true;
+			// Try to load combinations of 64/32 suffix and lib prefix for relevant platforms
+			FString AttemptName = FString(ShortName) + AttemptPrefixes[attempt];
+			FString PluginPath = GetDllPath(*AttemptName, true, useLib != 0);
+
+			UE_LOG(LogFMOD, Log, TEXT("Trying to load plugin file at location: %s"), *PluginPath);
+
+			unsigned int Handle = 0;
+			PluginLoadResult = LowLevelSystem->loadPlugin(TCHAR_TO_UTF8(*PluginPath), &Handle, 0);
+			if (PluginLoadResult == FMOD_OK)
+			{
+				UE_LOG(LogFMOD, Log, TEXT("Loaded plugin %s"), ShortName);
+				return true;
+			}
 		}
 	}
 	UE_LOG(LogFMOD, Error, TEXT("Failed to load plugin '%s', sounds may not play"), ShortName);
@@ -297,14 +310,14 @@ bool FFMODStudioModule::LoadPlugin(const TCHAR* ShortName)
 
 void* FFMODStudioModule::LoadDll(const TCHAR* ShortName)
 {
-	FString LibPath = GetDllPath(ShortName);
+	FString LibPath = GetDllPath(ShortName, false, true);
 
 	void* Handle = nullptr;
 	UE_LOG(LogFMOD, Log, TEXT("FFMODStudioModule::LoadDll: Loading %s"), *LibPath);
 	// Unfortunately Unreal's platform loading code hasn't been implemented on all platforms so we wrap it
 	Handle = FMODPlatformLoadDll(*LibPath);
 #if WITH_EDITOR
-	if (!Handle)
+	if (!Handle && !FApp::IsUnattended())
 	{
 		FString Message = TEXT("Couldn't load FMOD DLL ") + LibPath;
 		FPlatformMisc::MessageBoxExt(EAppMsgType::Ok, *Message, TEXT("Error"));
@@ -317,23 +330,20 @@ void* FFMODStudioModule::LoadDll(const TCHAR* ShortName)
 	return Handle;
 }
 
-FString FFMODStudioModule::GetDllPath(const TCHAR* ShortName)
+FString FFMODStudioModule::GetDllPath(const TCHAR* ShortName, bool bExplicitPath, bool bUseLibPrefix)
 {
+	const TCHAR* LibPrefixName = (bUseLibPrefix ? TEXT("lib") : TEXT(""));
 #if PLATFORM_MAC
-	return FString::Printf(TEXT("%s/Mac/lib%s.dylib"), *BaseLibPath, ShortName);
+	return FString::Printf(TEXT("%s/Mac/%s%s.dylib"), *BaseLibPath, LibPrefixName, ShortName);
 #elif PLATFORM_PS4
-	FString ShortLibPath = BaseLibPath.ToLower();
-	while (ShortLibPath.StartsWith(TEXT("../")))
-	{
-		ShortLibPath = ShortLibPath.RightChop(3);
-	}
-	return FString::Printf(TEXT("/app0/%s/ps4/lib%s.prx"), *ShortLibPath, ShortName);
+	const TCHAR* DirPrefix = (bExplicitPath ? TEXT("/app0/prx/") : TEXT(""));
+	return FString::Printf(TEXT("%s%s%s.prx"), DirPrefix, LibPrefixName, ShortName);
 #elif PLATFORM_XBOXONE
 	return FString::Printf(TEXT("%s.dll"), ShortName);
 #elif PLATFORM_ANDROID
-	return FString::Printf(TEXT("lib%s.so"), ShortName);
+	return FString::Printf(TEXT("%s%s.so"), LibPrefixName, ShortName);
 #elif PLATFORM_LINUX
-	return FString::Printf(TEXT("lib%s.so"), ShortName);
+	return FString::Printf(TEXT("%s%s.so"), LibPrefixName, ShortName);
 #elif PLATFORM_WINDOWS
 	#if PLATFORM_64BITS
 		return FString::Printf(TEXT("%s/Win64/%s.dll"), *BaseLibPath, ShortName);
@@ -348,7 +358,13 @@ FString FFMODStudioModule::GetDllPath(const TCHAR* ShortName)
 
 bool FFMODStudioModule::LoadLibraries()
 {
-#if PLATFORM_IOS || PLATFORM_ANDROID || PLATFORM_LINUX
+#if ENGINE_MINOR_VERSION > 14
+	#if PLATFORM_SWITCH
+		return true; // Nothing to do
+	#endif
+#endif
+
+#if PLATFORM_IOS || PLATFORM_ANDROID || PLATFORM_LINUX || PLATFORM_MAC
 	return true; // Nothing to do on those platforms
 #elif PLATFORM_HTML5
 	UE_LOG(LogFMOD, Error, TEXT("FMOD Studio not supported on HTML5"));
@@ -396,7 +412,9 @@ void FFMODStudioModule::StartupModule()
 
 	if (LoadLibraries())
 	{
+		verifyfmod(FMOD::Debug_Initialize(FMOD_DEBUG_LEVEL_WARNING, FMOD_DEBUG_MODE_CALLBACK, FMODLogCallback));
 		verifyfmod(FMOD::Memory_Initialize(0, 0, FMODMemoryAlloc, FMODMemoryRealloc, FMODMemoryFree));
+		verifyfmod(FMODPlatformSystemSetup());
 
 		// Create sandbox system just for asset loading
 		AssetTable.Create();
@@ -408,6 +426,8 @@ void FFMODStudioModule::StartupModule()
 		}
 		else
 		{
+			AssetTable.Destroy(); // Don't need this copy around since we don't hot reload
+
 			SetInPIE(true, false);
 		}
 	}
@@ -464,24 +484,53 @@ void FFMODStudioModule::CreateStudioSystem(EFMODSystemContext::Type Type)
 #endif
 	}
 	
-	FMOD::Debug_Initialize(FMOD_DEBUG_LEVEL_WARNING, FMOD_DEBUG_MODE_CALLBACK, FMODLogCallback);
-
 	verifyfmod(FMOD::Studio::System::create(&StudioSystem[Type]));
 	FMOD::System* lowLevelSystem = nullptr;
 	verifyfmod(StudioSystem[Type]->getLowLevelSystem(&lowLevelSystem));
+
+	int DriverIndex = 0;
+	if (!Settings.InitialOutputDriverName.IsEmpty())
+	{
+		int DriverCount = 0;
+		verifyfmod(lowLevelSystem->getNumDrivers(&DriverCount));
+		for (int id=0; id<DriverCount; ++id)
+		{
+			char DriverNameUTF8[256] = {};
+			verifyfmod(lowLevelSystem->getDriverInfo(id, DriverNameUTF8, sizeof(DriverNameUTF8), 0, 0, 0, 0));
+			FString DriverName(UTF8_TO_TCHAR(DriverNameUTF8));
+			UE_LOG(LogFMOD, Log, TEXT("Driver %d: %s"), id, *DriverName);
+			if (DriverName.Contains(Settings.InitialOutputDriverName))
+			{
+				UE_LOG(LogFMOD, Log, TEXT("Selected driver %d"), id);
+				DriverIndex = id;
+			}
+		}
+		verifyfmod(lowLevelSystem->setDriver(DriverIndex));
+	}
+
+	FTCHARToUTF8 WavWriterDestUTF8(*Settings.WavWriterPath);
+	void* InitData = nullptr;
+	if (Type == EFMODSystemContext::Runtime && Settings.WavWriterPath.Len() > 0)
+	{
+		UE_LOG(LogFMOD, Log, TEXT("Running with Wav Writer: %s"), *Settings.WavWriterPath);
+		verifyfmod(lowLevelSystem->setOutput(FMOD_OUTPUTTYPE_WAVWRITER));
+		InitData = (void*)WavWriterDestUTF8.Get();
+	}
+
 	int SampleRate = Settings.SampleRate;
 	if (Settings.bMatchHardwareSampleRate)
 	{
+		int DefaultSampleRate = 0;
+		verifyfmod(lowLevelSystem->getSoftwareFormat(&DefaultSampleRate, 0, 0));
 		int SystemSampleRate = 0;
-		verifyfmod(lowLevelSystem->getDriverInfo(0, nullptr, 0, nullptr, &SystemSampleRate, nullptr, nullptr));
-		if (SystemSampleRate >= 44100 && SystemSampleRate <= 48000)
+		verifyfmod(lowLevelSystem->getDriverInfo(DriverIndex, nullptr, 0, nullptr, &SystemSampleRate, nullptr, nullptr));
+		UE_LOG(LogFMOD, Log, TEXT("Default sample rate = %d"), DefaultSampleRate);
+		UE_LOG(LogFMOD, Log, TEXT("System sample rate = %d"), SystemSampleRate);
+		if (DefaultSampleRate >= 44100 && DefaultSampleRate <= 48000 &&
+			SystemSampleRate >= 44100 && SystemSampleRate <= 48000)
 		{
-			UE_LOG(LogFMOD, Log, TEXT("Setting system sample rate %d"), SystemSampleRate);
+			UE_LOG(LogFMOD, Log, TEXT("Matching system sample rate %d"), SystemSampleRate);
 			SampleRate = SystemSampleRate;
-		}
-		else
-		{
-			UE_LOG(LogFMOD, Warning, TEXT("Ignoring system sample rate %d"), SystemSampleRate);
 		}
 	}
 
@@ -494,8 +543,6 @@ void FFMODStudioModule::CreateStudioSystem(EFMODSystemContext::Type Type)
 		verifyfmod(lowLevelSystem->setDSPBufferSize(Settings.DSPBufferLength, Settings.DSPBufferCount));
 	}
 
-	verifyfmod(FMODPlatformSystemSetup());
-
 	FMOD_ADVANCEDSETTINGS advSettings = {0};
 	advSettings.cbSize = sizeof(advSettings);
 	if (Settings.bVol0Virtual)
@@ -504,11 +551,15 @@ void FFMODStudioModule::CreateStudioSystem(EFMODSystemContext::Type Type)
 		InitFlags |= FMOD_INIT_VOL0_BECOMES_VIRTUAL;
 	}
 #if PLATFORM_IOS || PLATFORM_ANDROID
-	advSettings.maxADPCMCodecs = Settings.RealChannelCount;
+	advSettings.maxFADPCMCodecs = Settings.RealChannelCount;
 #elif PLATFORM_PS4
 	advSettings.maxAT9Codecs = Settings.RealChannelCount;
 #elif PLATFORM_XBOXONE
 	advSettings.maxXMACodecs = Settings.RealChannelCount;
+#elif ENGINE_MINOR_VERSION > 14
+	#if PLATFORM_SWITCH
+		advSettings.maxFADPCMCodecs = Settings.RealChannelCount;
+	#endif
 #else
 	advSettings.maxVorbisCodecs = Settings.RealChannelCount;
 #endif
@@ -517,18 +568,19 @@ void FFMODStudioModule::CreateStudioSystem(EFMODSystemContext::Type Type)
 	verifyfmod(lowLevelSystem->setAdvancedSettings(&advSettings));
 
 	FMOD_STUDIO_ADVANCEDSETTINGS advStudioSettings = {0};
-	advStudioSettings.cbSize = sizeof(advStudioSettings);
-	advStudioSettings.studioUpdatePeriod = Settings.StudioUpdatePeriod;
+	advStudioSettings.cbsize = sizeof(advStudioSettings);
+	advStudioSettings.studioupdateperiod = Settings.StudioUpdatePeriod;
 	verifyfmod(StudioSystem[Type]->setAdvancedSettings(&advStudioSettings));
 
-	verifyfmod(StudioSystem[Type]->initialize(Settings.TotalChannelCount, StudioInitFlags, InitFlags, 0));
+	verifyfmod(StudioSystem[Type]->initialize(Settings.TotalChannelCount, StudioInitFlags, InitFlags, InitData));
 
 	// Don't bother loading plugins during editor, only during PIE or in game
 	if (Type == EFMODSystemContext::Runtime)
 	{
 		for (FString PluginName : Settings.PluginFiles)
 		{
-			LoadPlugin(*PluginName);
+			if (!PluginName.IsEmpty())
+				LoadPlugin(*PluginName);
 		}
 	}
 }
@@ -559,6 +611,23 @@ bool FFMODStudioModule::Tick( float DeltaTime )
 	}
 	if (StudioSystem[EFMODSystemContext::Runtime])
 	{
+		FMOD_STUDIO_CPU_USAGE Usage = {};
+		StudioSystem[EFMODSystemContext::Runtime]->getCPUUsage(&Usage);
+		SET_FLOAT_STAT(STAT_FMOD_CPUMixer, Usage.dspusage);
+		SET_FLOAT_STAT(STAT_FMOD_CPUStudio, Usage.studiousage);
+
+		int currentAlloc, maxAlloc;
+		FMOD::Memory_GetStats(&currentAlloc, &maxAlloc, false);
+		SET_MEMORY_STAT(STAT_FMOD_Current_Memory, currentAlloc);
+		SET_MEMORY_STAT(STAT_FMOD_Max_Memory, maxAlloc);
+
+		int channels, realChannels;
+		FMOD::System* lowlevel;
+		StudioSystem[EFMODSystemContext::Runtime]->getLowLevelSystem(&lowlevel);
+		lowlevel->getChannelsPlaying(&channels, &realChannels);
+		SET_DWORD_STAT(STAT_FMOD_Real_Channels, realChannels);
+		SET_DWORD_STAT(STAT_FMOD_Total_Channels, channels);
+
 		UpdateViewportPosition();
 
 		verifyfmod(StudioSystem[EFMODSystemContext::Runtime]->update());
@@ -584,10 +653,18 @@ void FFMODStudioModule::UpdateViewportPosition()
 	{
 		for( FConstPlayerControllerIterator Iterator = ViewportWorld->GetPlayerControllerIterator(); Iterator; ++Iterator )
 		{
+#if ENGINE_MINOR_VERSION > 14
+			APlayerController* PlayerController = Iterator->Get();
+#else
 			APlayerController* PlayerController = *Iterator;
+#endif
 			if( PlayerController )
 			{
+#if ENGINE_MINOR_VERSION > 14
+				ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
+#else
 				ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(PlayerController->Player);
+#endif
 				if (LocalPlayer)
 				{
 					FVector Location;
@@ -715,15 +792,27 @@ void FFMODStudioModule::FinishSetListenerPosition(int NumListeners, float DeltaS
 	for (int i = 0; i < ListenerCount; ++i)
 	{
 		AAudioVolume* CandidateVolume = Listeners[i].Volume;
+#if ENGINE_MINOR_VERSION >= 13
+		if (BestVolume == nullptr || (CandidateVolume != nullptr && CandidateVolume->GetPriority() > BestVolume->GetPriority()))
+#else
 		if (BestVolume == nullptr || (CandidateVolume != nullptr && CandidateVolume->Priority > BestVolume->Priority))
+#endif
 		{
 			BestVolume = CandidateVolume;
 		}
 	}
 	UFMODSnapshotReverb* NewSnapshot = nullptr;
+#if ENGINE_MINOR_VERSION >= 13
+	if (BestVolume && BestVolume->GetReverbSettings().bApplyReverb)
+#else
 	if (BestVolume && BestVolume->Settings.bApplyReverb)
+#endif
 	{
+#if ENGINE_MINOR_VERSION >= 13
+		NewSnapshot = Cast<UFMODSnapshotReverb>(BestVolume->GetReverbSettings().ReverbEffect);
+#else
 		NewSnapshot = Cast<UFMODSnapshotReverb>(BestVolume->Settings.ReverbEffect);
+#endif
 	}
 
 	if (NewSnapshot != nullptr)
@@ -768,7 +857,11 @@ void FFMODStudioModule::FinishSetListenerPosition(int NumListeners, float DeltaS
 		// Fade up
 		if (ReverbSnapshots[SnapshotEntryIndex].FadeIntensityEnd == 0.0f)
 		{
+#if ENGINE_MINOR_VERSION >= 13
+			ReverbSnapshots[SnapshotEntryIndex].FadeTo(BestVolume->GetReverbSettings().Volume, BestVolume->GetReverbSettings().FadeTime);
+#else
 			ReverbSnapshots[SnapshotEntryIndex].FadeTo(BestVolume->Settings.Volume, BestVolume->Settings.FadeTime);
+#endif
 		}
 	}
 	// Fade out all other entries
@@ -945,7 +1038,8 @@ void FFMODStudioModule::LoadBanks(EFMODSystemContext::Type Type)
 		*/
 		bool bLoadAllBanks = ((Type == EFMODSystemContext::Auditioning) || Settings.bLoadAllBanks);
 		bool bLoadSampleData = ((Type == EFMODSystemContext::Runtime) && Settings.bLoadAllSampleData);
-		FMOD_STUDIO_LOAD_BANK_FLAGS BankFlags = (bLoadSampleData ? FMOD_STUDIO_LOAD_BANK_NORMAL : FMOD_STUDIO_LOAD_BANK_NONBLOCKING);
+		bool bLockAllBuses = ((Type == EFMODSystemContext::Runtime) && Settings.bLockAllBuses);
+		FMOD_STUDIO_LOAD_BANK_FLAGS BankFlags = ((bLoadSampleData || bLockAllBuses) ? FMOD_STUDIO_LOAD_BANK_NORMAL : FMOD_STUDIO_LOAD_BANK_NONBLOCKING);
 
 		// Always load the master bank at startup
 		FString MasterBankPath = Settings.GetMasterBankPath();
@@ -1001,7 +1095,27 @@ void FFMODStudioModule::LoadBanks(EFMODSystemContext::Type Type)
 					}
 				}
 			}
+
+			// Optionally lock all buses to make sure they are created
+			if (Settings.bLockAllBuses)
+			{
+				UE_LOG(LogFMOD, Verbose, TEXT("Locking all buses"));
+				int BusCount = 0;
+				verifyfmod(MasterBank->getBusCount(&BusCount));
+				if (BusCount != 0)
+				{
+					TArray<FMOD::Studio::Bus*> BusList;
+					BusList.AddZeroed(BusCount);
+					verifyfmod(MasterBank->getBusList(BusList.GetData(), BusCount, &BusCount));
+					BusList.SetNum(BusCount);
+					for (int BusIdx=0; BusIdx<BusCount; ++BusIdx)
+					{
+						verifyfmod(BusList[BusIdx]->lockChannelGroup());
+					}
+				}
+			}
 		}
+
 		// Wait for all banks to load.
 		StudioSystem[Type]->flushCommands();
 

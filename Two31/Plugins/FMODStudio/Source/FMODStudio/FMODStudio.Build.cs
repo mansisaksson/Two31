@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
 
 namespace UnrealBuildTool.Rules
 {
@@ -34,7 +34,9 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				new string[]
 				{
-				}
+                    "MovieScene",
+                    "MovieSceneTracks"
+                }
 				);
 
 			if (UEBuildConfiguration.bBuildEditor == true)
@@ -71,58 +73,84 @@ namespace UnrealBuildTool.Rules
 
 			// ModuleDirectory points to FMODStudio\source\FMODStudio, need to get back to binaries directory for our libs
 			string BasePath = System.IO.Path.Combine(ModuleDirectory, "../../Binaries", platformName);
+            // Collapse the directory path, otherwise OSX is having issues with plugin paths.
+            Utils.CollapseRelativeDirectories(ref BasePath);
 
-			string copyThirdPartyPath = "";
-			bool bDynamicLibraries = true;
+            string copyThirdPartyPath = "";
+			bool bAddRuntimeDependencies = true;
+			bool bAddDelayLoad = false;
+			bool bShortLinkNames = false;
+			bool bLinkFromBinaries = true;
 
-			switch (Target.Platform)
-			{
-				case UnrealTargetPlatform.Win32:
-					linkExtension = "_vc.lib";
-					dllExtension = ".dll";
-					break;
-				case UnrealTargetPlatform.Win64:
-					platformMidName = "64";
-					linkExtension = "_vc.lib";
-					dllExtension = ".dll";
-					break;
-				case UnrealTargetPlatform.Mac:
-					linkExtension = dllExtension = ".dylib";
-					libPrefix = "lib";
-					break;
-				case UnrealTargetPlatform.XboxOne:
-					linkExtension = "_vc.lib";
-					dllExtension = ".dll";
-					copyThirdPartyPath = "../XBoxOne"; // XBoxOne still doesn't seem to support plugins with .dlls
-					break;
-				case UnrealTargetPlatform.PS4:
-					linkExtension = "_stub.a";
-					dllExtension = ".prx";
-					libPrefix = "lib";
-					break;
-				case UnrealTargetPlatform.Android:
-					linkExtension = dllExtension = ".so";
-					libPrefix = "lib";
-					WriteAndroidDeploy(System.IO.Path.Combine(BasePath, "deploy.txt"), configName);
-					break;
-				case UnrealTargetPlatform.IOS:
-					linkExtension = "_iphoneos.a";
-					libPrefix = "lib";
-					bDynamicLibraries = false;
-					break;
-				case UnrealTargetPlatform.Linux:
-					BasePath = System.IO.Path.Combine(BasePath, "x86_64");
-					linkExtension = ".so";
-					dllExtension = ".so";
-					libPrefix = "lib";
-					break;
-				case UnrealTargetPlatform.WinRT:
-				case UnrealTargetPlatform.WinRT_ARM:
-				case UnrealTargetPlatform.HTML5:
-					//extName = ".a";
-					throw new System.Exception(System.String.Format("Unsupported platform {0}", Target.Platform.ToString()));
-					//break;
-			}
+            // Minimum UE version for Switch 4.15
+            System.Console.WriteLine("Target Platform -- " + Target.Platform.ToString());
+            if (Target.Platform.ToString() == "Switch")
+            {
+                linkExtension = ".a";
+                dllExtension = ".a";
+                libPrefix = "lib";
+                bAddRuntimeDependencies = false;
+            }
+            else
+            {
+                switch (Target.Platform)
+                {
+                    case UnrealTargetPlatform.Win32:
+                        linkExtension = "_vc.lib";
+                        dllExtension = ".dll";
+                        bAddDelayLoad = true;
+                        break;
+                    case UnrealTargetPlatform.Win64:
+                        platformMidName = "64";
+                        linkExtension = "_vc.lib";
+                        dllExtension = ".dll";
+                        bAddDelayLoad = true;
+                        break;
+                    case UnrealTargetPlatform.Mac:
+                        linkExtension = dllExtension = ".dylib";
+                        libPrefix = "lib";
+                        bLinkFromBinaries = false;
+
+                        break;
+                    case UnrealTargetPlatform.XboxOne:
+                        linkExtension = "_vc.lib";
+                        dllExtension = ".dll";
+                        copyThirdPartyPath = "../XBoxOne"; // XBoxOne still doesn't seem to support plugins with .dlls
+                        bAddDelayLoad = false;
+                        break;
+                    case UnrealTargetPlatform.PS4:
+                        linkExtension = "_stub.a";
+                        dllExtension = ".prx";
+                        libPrefix = "lib";
+                        bAddDelayLoad = true;
+                        break;
+                    case UnrealTargetPlatform.Android:
+                        // Don't use an explicit path with the .so, let the architecture dirs be filtered by UBT
+                        PublicLibraryPaths.Add(System.IO.Path.Combine(BasePath, "armeabi-v7a"));
+                        PublicLibraryPaths.Add(System.IO.Path.Combine(BasePath, "arm64-v8a"));
+                        PublicLibraryPaths.Add(System.IO.Path.Combine(BasePath, "x86"));
+                        bAddRuntimeDependencies = false; // Don't use this system
+                        bShortLinkNames = true; // strip off lib and .so
+                        linkExtension = dllExtension = ".so";
+                        libPrefix = "lib";
+                        break;
+                    case UnrealTargetPlatform.IOS:
+                        linkExtension = "_iphoneos.a";
+                        libPrefix = "lib";
+                        bAddRuntimeDependencies = false;
+                        break;
+                    case UnrealTargetPlatform.Linux:
+                        BasePath = System.IO.Path.Combine(BasePath, "x86_64");
+                        linkExtension = ".so";
+                        dllExtension = ".so";
+                        libPrefix = "lib";
+                        break;
+                    default:
+                        //extName = ".a";
+                        throw new System.Exception(System.String.Format("Unsupported platform {0}", Target.Platform.ToString()));
+                        //break;
+                }
+            }
 			
 			//System.Console.WriteLine("FMOD Current path: " + System.IO.Path.GetFullPath("."));
 			//System.Console.WriteLine("FMOD Base path: " + BasePath);
@@ -143,9 +171,26 @@ namespace UnrealBuildTool.Rules
 
 			System.Collections.Generic.List<string> plugins = GetPlugins(BasePath);
 
-			PublicAdditionalLibraries.Add(fmodLibPath);
-			PublicAdditionalLibraries.Add(fmodStudioLibPath);
-			if (bDynamicLibraries)
+			if (bShortLinkNames)
+			{
+				// For android we have provided the paths to all architectures above
+				// Just provide the name without "lib" and without extension
+				PublicAdditionalLibraries.Add(System.String.Format("fmod{0}{1}", configName, platformMidName));
+				PublicAdditionalLibraries.Add(System.String.Format("fmodstudio{0}{1}", configName, platformMidName));
+			}
+			else if (bLinkFromBinaries)
+			{
+				PublicAdditionalLibraries.Add(fmodLibPath);
+				PublicAdditionalLibraries.Add(fmodStudioLibPath);
+			}
+			else
+			{
+				string LibPath = System.IO.Path.Combine(ModuleDirectory, "../../Libs/Mac/");
+				PublicAdditionalLibraries.Add(System.String.Format("{0}libfmod{1}.dylib", LibPath, configName));			
+				PublicAdditionalLibraries.Add(System.String.Format("{0}libfmodStudio{1}.dylib", LibPath, configName));		
+			}
+
+			if (bAddRuntimeDependencies)
 			{
 				RuntimeDependencies.Add(new RuntimeDependency(fmodDllPath));
 				RuntimeDependencies.Add(new RuntimeDependency(fmodStudioDllPath));
@@ -169,8 +214,7 @@ namespace UnrealBuildTool.Rules
 				CopyFile(fmodStudioDllPath, fmodStudioDllDest);
 			}
 
-
-			if (Target.Platform == UnrealTargetPlatform.Win32 || Target.Platform == UnrealTargetPlatform.Win64 || Target.Platform == UnrealTargetPlatform.XboxOne)
+			if (bAddDelayLoad)
 			{
 				PublicDelayLoadDLLs.AddRange(
 						new string[] {
@@ -178,6 +222,23 @@ namespace UnrealBuildTool.Rules
 							fmodStudioDllName
 							}
 						);
+			}
+
+			if (Target.Platform == UnrealTargetPlatform.Android)
+			{
+				string APLName = System.String.Format("FMODStudio{0}_APL.xml", configName);
+				string RelAPLPath = Utils.MakePathRelativeTo(System.IO.Path.Combine(ModuleDirectory, APLName), BuildConfiguration.RelativeEnginePath);
+				System.Console.WriteLine("Adding {0}", RelAPLPath);
+				AdditionalPropertiesForReceipt.Add(new ReceiptProperty("AndroidPlugin", RelAPLPath));
+				foreach (string PluginName in System.IO.Directory.GetFiles(BasePath))
+				{
+					if (PluginName.EndsWith("_APL.xml", System.StringComparison.OrdinalIgnoreCase))
+					{
+						string RelPluginPath = Utils.MakePathRelativeTo(PluginName, BuildConfiguration.RelativeEnginePath);
+						System.Console.WriteLine("Adding {0}", RelPluginPath);
+						AdditionalPropertiesForReceipt.Add(new ReceiptProperty("AndroidPlugin", RelPluginPath));
+					}
+				}
 			}
 		}
 
@@ -196,17 +257,6 @@ namespace UnrealBuildTool.Rules
 			{
 				System.Console.WriteLine("Failed to copy file: {0}", ex.Message);
 			}
-		}
-
-		private void WriteAndroidDeploy(string fileName, string configLetter)
-		{
-			string[] contents = new string[]
-			{
-				"fmod.jar",
-				System.String.Format("libfmod{0}.so", configLetter),
-				System.String.Format("libfmodstudio{0}.so", configLetter)
-			};
-			System.IO.File.WriteAllLines(fileName, contents);
 		}
 
 		private System.Collections.Generic.List<string> GetPlugins(string BasePath)

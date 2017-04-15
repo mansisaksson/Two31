@@ -1,4 +1,4 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
 
 #include "FMODStudioPrivatePCH.h"
 #include "FMODAudioComponent.h"
@@ -10,16 +10,24 @@
 
 UFMODAudioComponent::UFMODAudioComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
+	, CurrentOcclusionFilterFrequency(MAX_FILTER_FREQUENCY)
+	, CurrentOcclusionVolumeAttenuation(1.0f)
 {
 	bAutoDestroy = false;
 	bAutoActivate = true;
 	bEnableTimelineCallbacks = false; // Default OFF for efficiency
 	bStopWhenOwnerDestroyed = true;
 	bNeverNeedsRenderUpdate = true;
+#if ENGINE_MINOR_VERSION >= 11
+	bWantsOnUpdateTransform = true;
+#endif
 #if WITH_EDITORONLY_DATA
 	bVisualizeComponent = true;
 #endif
 	bApplyAmbientVolumes = false;
+	bApplyOcclusionDirect = false;
+	bApplyOcclusionParameter = false;
+	bHasCheckedOcclusion = false;
 
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.TickGroup = TG_PrePhysics;
@@ -32,6 +40,15 @@ UFMODAudioComponent::UFMODAudioComponent(const FObjectInitializer& ObjectInitial
 	SourceInteriorLPF = 0.0f;
 	CurrentInteriorVolume = 0.0f;
 	CurrentInteriorLPF = 0.0f;
+	AmbientVolumeMultiplier = 1.0f;
+	AmbientLPF = MAX_FILTER_FREQUENCY;
+	LastLPF = MAX_FILTER_FREQUENCY;
+	LastVolume = 1.0f;
+
+	for (int i=0; i<EFMODEventProperty::Count; ++i)
+	{
+		StoredProperties[i] = -1.0f;
+	}
 }
 
 FString UFMODAudioComponent::GetDetailedInfoInternal(void) const
@@ -91,13 +108,21 @@ void UFMODAudioComponent::PostEditChangeProperty(FPropertyChangedEvent& Property
 }
 #endif // WITH_EDITOR
 
-#if ENGINE_MINOR_VERSION >= 9
+#if ENGINE_MINOR_VERSION >= 12
+void UFMODAudioComponent::OnUpdateTransform(EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
+#elif ENGINE_MINOR_VERSION >= 9
 void UFMODAudioComponent::OnUpdateTransform(bool bSkipPhysicsMove, ETeleportType Teleport)
 #else
 void UFMODAudioComponent::OnUpdateTransform(bool bSkipPhysicsMove)
 #endif
 {
+#if ENGINE_MINOR_VERSION >= 12
+	Super::OnUpdateTransform(UpdateTransformFlags, Teleport);
+#elif ENGINE_MINOR_VERSION >= 9
+	Super::OnUpdateTransform(bSkipPhysicsMove, Teleport);
+#else
 	Super::OnUpdateTransform(bSkipPhysicsMove);
+#endif
 	if (StudioInstance)
 	{
 		FMOD_3D_ATTRIBUTES attr = {{0}};
@@ -107,19 +132,22 @@ void UFMODAudioComponent::OnUpdateTransform(bool bSkipPhysicsMove)
 
 		StudioInstance->set3DAttributes(&attr);
 
-		if (bApplyAmbientVolumes)
-		{
-			UpdateInteriorVolumes();
-		}
+		UpdateInteriorVolumes();
+		UpdateAttenuation();
+		ApplyVolumeLPF();
 	}
 }
 
 // Taken mostly from ActiveSound.cpp
 void UFMODAudioComponent::UpdateInteriorVolumes()
 {
+	if (!GetOwner()) return; // May not have owner when previewing animations
+
+	if (!bApplyAmbientVolumes) return;
+
 	// Result of the ambient calculations to apply to the instance
-	float AmbientVolumeMultiplier = 1.0f;
-	float AmbientHighFrequencyGain = 1.0f;
+	float NewAmbientVolumeMultiplier = 1.0f;
+	float NewAmbientHighFrequencyGain = 1.0f;
 
 	FInteriorSettings Ambient;
 	const FVector& Location = GetOwner()->GetTransform().GetTranslation();
@@ -133,16 +161,15 @@ void UFMODAudioComponent::UpdateInteriorVolumes()
 		InteriorLastUpdateTime = FApp::GetCurrentTime();
 	}
 
-
 	bool bAllowSpatialization = true;
 	if( Listener.Volume == AudioVolume || !bAllowSpatialization )
 	{
 		// Ambient and listener in same ambient zone
 		CurrentInteriorVolume = ( SourceInteriorVolume * ( 1.0f - Listener.InteriorVolumeInterp ) ) + Listener.InteriorVolumeInterp;
-		AmbientVolumeMultiplier *= CurrentInteriorVolume;
+		NewAmbientVolumeMultiplier *= CurrentInteriorVolume;
 
 		CurrentInteriorLPF = ( SourceInteriorLPF * ( 1.0f - Listener.InteriorLPFInterp ) ) + Listener.InteriorLPFInterp;
-		AmbientHighFrequencyGain *= CurrentInteriorLPF;
+		NewAmbientHighFrequencyGain *= CurrentInteriorLPF;
 
 		//UE_LOG(LogFMOD, Verbose, TEXT( "Ambient in same volume. Volume *= %g LPF *= %g" ), CurrentInteriorVolume, CurrentInteriorLPF);
 	}
@@ -153,10 +180,10 @@ void UFMODAudioComponent::UpdateInteriorVolumes()
 		{
 			// The ambient sound is 'outside' - use the listener's exterior volume
 			CurrentInteriorVolume = ( SourceInteriorVolume * ( 1.0f - Listener.ExteriorVolumeInterp ) ) + ( Listener.InteriorSettings.ExteriorVolume * Listener.ExteriorVolumeInterp );
-			AmbientVolumeMultiplier *= CurrentInteriorVolume;
+			NewAmbientVolumeMultiplier *= CurrentInteriorVolume;
 
 			CurrentInteriorLPF = ( SourceInteriorLPF * ( 1.0f - Listener.ExteriorLPFInterp ) ) + ( Listener.InteriorSettings.ExteriorLPF * Listener.ExteriorLPFInterp );
-			AmbientHighFrequencyGain *= CurrentInteriorLPF;
+			NewAmbientHighFrequencyGain *= CurrentInteriorLPF;
 
 			//UE_LOG(LogFMOD, Verbose, TEXT( "Ambient in diff volume, ambient outside. Volume *= %g LPF *= %g" ), CurrentInteriorVolume, CurrentInteriorLPF);
 		}
@@ -165,38 +192,131 @@ void UFMODAudioComponent::UpdateInteriorVolumes()
 			// The ambient sound is 'inside' - use the ambient sound's interior volume multiplied with the listeners exterior volume
 			CurrentInteriorVolume = (( SourceInteriorVolume * ( 1.0f - Listener.InteriorVolumeInterp ) ) + ( Ambient.InteriorVolume * Listener.InteriorVolumeInterp ))
 										* (( SourceInteriorVolume * ( 1.0f - Listener.ExteriorVolumeInterp ) ) + ( Listener.InteriorSettings.ExteriorVolume * Listener.ExteriorVolumeInterp ));
-			AmbientVolumeMultiplier *= CurrentInteriorVolume;
+			NewAmbientVolumeMultiplier *= CurrentInteriorVolume;
 
 			CurrentInteriorLPF = (( SourceInteriorLPF * ( 1.0f - Listener.InteriorLPFInterp ) ) + ( Ambient.InteriorLPF * Listener.InteriorLPFInterp ))
 										* (( SourceInteriorLPF * ( 1.0f - Listener.ExteriorLPFInterp ) ) + ( Listener.InteriorSettings.ExteriorLPF * Listener.ExteriorLPFInterp ));
-			AmbientHighFrequencyGain *= CurrentInteriorLPF;
+			NewAmbientHighFrequencyGain *= CurrentInteriorLPF;
 
 			//UE_LOG(LogFMOD, Verbose, TEXT( "Ambient in diff volume, ambient inside. Volume *= %g LPF *= %g" ), CurrentInteriorVolume, CurrentInteriorLPF);
 		}
 	}
 
-	StudioInstance->setVolume(AmbientVolumeMultiplier);
+	// This seemed to match the inbuilt Unreal behaviour, although it is much lower than MAX_FILTER_FREQUENCY
+	static float MAX_FREQUENCY = 8000.0f;
 
-	FMOD::ChannelGroup* ChanGroup = nullptr;
-	StudioInstance->getChannelGroup(&ChanGroup);
-	if (ChanGroup)
+	AmbientVolumeMultiplier = NewAmbientVolumeMultiplier;
+	AmbientLPF = MAX_FREQUENCY * NewAmbientHighFrequencyGain;
+}
+
+void UFMODAudioComponent::UpdateAttenuation()
+{
+	if (!GetOwner()) return; // May not have owner when previewing animations
+
+#if ENGINE_MINOR_VERSION > 14
+	const FSoundAttenuationSettings* AttenuationSettingsPtr = nullptr;
+#else
+	const FAttenuationSettings* AttenuationSettingsPtr = nullptr;
+#endif
+
+	if (bOverrideAttenuation)
 	{
-		int NumDSP = 0;
-		ChanGroup->getNumDSPs(&NumDSP);
-		for (int Index=0; Index<NumDSP; ++Index)
+		AttenuationSettingsPtr = &AttenuationOverrides;
+	}
+	else if (AttenuationSettings)
+	{
+		AttenuationSettingsPtr = &AttenuationSettings->Attenuation;
+	}
+	if (!AttenuationSettingsPtr)
+	{
+		return;
+	}
+
+	// Use occlusion part of settings
+	if (AttenuationSettingsPtr->bEnableOcclusion && (bApplyOcclusionDirect || bApplyOcclusionParameter))
+	{
+		static FName NAME_SoundOcclusion = FName(TEXT("SoundOcclusion"));
+		FCollisionQueryParams Params(NAME_SoundOcclusion, AttenuationSettingsPtr->bUseComplexCollisionForOcclusion, GetOwner());
+
+		const FVector& Location = GetOwner()->GetTransform().GetTranslation();
+		const FFMODListener& Listener = IFMODStudioModule::Get().GetNearestListener(Location);
+
+		bool bIsOccluded = GWorld->LineTraceTestByChannel(Location, Listener.Transform.GetLocation(), ECC_Visibility, Params);
+
+		// Apply directly as gain and LPF
+		if (bApplyOcclusionDirect)
 		{
-			FMOD::DSP* ChanDSP = nullptr;
-			ChanGroup->getDSP(Index, &ChanDSP);
-			if (ChanDSP)
+			float InterpolationTime = bHasCheckedOcclusion ? AttenuationSettingsPtr->OcclusionInterpolationTime : 0.0f;
+			if (bIsOccluded)
 			{
-				FMOD_DSP_TYPE DSPType = FMOD_DSP_TYPE_UNKNOWN;
-				ChanDSP->getType(&DSPType);
-				if (DSPType == FMOD_DSP_TYPE_LOWPASS || DSPType == FMOD_DSP_TYPE_LOWPASS_SIMPLE)
+				if (CurrentOcclusionFilterFrequency.GetTargetValue() > AttenuationSettingsPtr->OcclusionLowPassFilterFrequency)
 				{
-					static float MAX_FREQUENCY = 8000.0f;
-					float Frequency = MAX_FREQUENCY * AmbientHighFrequencyGain;
-					ChanDSP->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, MAX_FREQUENCY * AmbientHighFrequencyGain);
-					break;
+					CurrentOcclusionFilterFrequency.Set(AttenuationSettingsPtr->OcclusionLowPassFilterFrequency, InterpolationTime);
+				}
+
+				if (CurrentOcclusionVolumeAttenuation.GetTargetValue() > AttenuationSettingsPtr->OcclusionVolumeAttenuation)
+				{
+					CurrentOcclusionVolumeAttenuation.Set(AttenuationSettingsPtr->OcclusionVolumeAttenuation, InterpolationTime);
+				}
+			}
+			else
+			{
+				CurrentOcclusionFilterFrequency.Set(MAX_FILTER_FREQUENCY, InterpolationTime);
+				CurrentOcclusionVolumeAttenuation.Set(1.0f, InterpolationTime);
+			}
+
+			CurrentOcclusionFilterFrequency.Update(GWorld->DeltaTimeSeconds);
+			CurrentOcclusionVolumeAttenuation.Update(GWorld->DeltaTimeSeconds);
+		}
+
+		// Apply as a studio parameter
+		if (bApplyOcclusionParameter)
+		{
+			StudioInstance->setParameterValue("Occlusion", bIsOccluded ? 1.0f : 0.0f);
+		}
+
+		bHasCheckedOcclusion = true;
+	}
+}
+
+void UFMODAudioComponent::ApplyVolumeLPF()
+{
+	float CurVolume = AmbientVolumeMultiplier * CurrentOcclusionVolumeAttenuation.GetValue();
+	if (CurVolume != LastVolume)
+	{
+		StudioInstance->setVolume(CurVolume);
+		LastVolume = CurVolume;
+	}
+
+	float CurLPF = FMath::Min(AmbientLPF, CurrentOcclusionFilterFrequency.GetValue());
+	if (CurLPF != LastLPF)
+	{
+		FMOD::ChannelGroup* ChanGroup = nullptr;
+		StudioInstance->getChannelGroup(&ChanGroup);
+		if (ChanGroup)
+		{
+			int NumDSP = 0;
+			ChanGroup->getNumDSPs(&NumDSP);
+			for (int Index=0; Index<NumDSP; ++Index)
+			{
+				FMOD::DSP* ChanDSP = nullptr;
+				ChanGroup->getDSP(Index, &ChanDSP);
+				if (ChanDSP)
+				{
+					FMOD_DSP_TYPE DSPType = FMOD_DSP_TYPE_UNKNOWN;
+					ChanDSP->getType(&DSPType);
+					if (DSPType == FMOD_DSP_TYPE_LOWPASS || DSPType == FMOD_DSP_TYPE_LOWPASS_SIMPLE)
+					{
+						ChanDSP->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, CurLPF);
+						LastLPF = CurLPF; // Actually set it!
+						break;
+					}					
+					else if (DSPType == FMOD_DSP_TYPE_THREE_EQ)
+					{
+						ChanDSP->setParameterFloat(FMOD_DSP_THREE_EQ_LOWCROSSOVER, CurLPF);
+						LastLPF = CurLPF; // Actually set it!
+						break;
+					}
 				}
 			}
 		}
@@ -231,9 +351,11 @@ void UFMODAudioComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 	
 	if (bIsActive)
 	{
-		if (bApplyAmbientVolumes && IFMODStudioModule::Get().HasListenerMoved())
+		if (IFMODStudioModule::Get().HasListenerMoved())
 		{
 			UpdateInteriorVolumes();
+			UpdateAttenuation();
+			ApplyVolumeLPF();
 		}
 
 		TArray<FTimelineMarkerProperties> LocalMarkerQueue;
@@ -339,8 +461,8 @@ void UFMODAudioComponent::EventCallbackAddBeat(FMOD_STUDIO_TIMELINE_BEAT_PROPERT
 	info.Beat = props->beat;
 	info.Position = props->position;
 	info.Tempo = props->tempo;
-	info.TimeSignatureUpper = props->timeSignatureUpper;
-	info.TimeSignatureLower = props->timeSignatureLower;
+	info.TimeSignatureUpper = props->timesignatureupper;
+	info.TimeSignatureLower = props->timesignaturelower;
 	CallbackBeatQueue.Push(info);
 }
 
@@ -400,7 +522,7 @@ void UFMODAudioComponent::EventCallbackCreateProgrammerSound(FMOD_STUDIO_PROGRAM
 					UE_LOG(LogFMOD, Verbose, TEXT("Creating programmer sound using audio entry '%s'"), *SoundName);
 
 					props->sound = (FMOD_SOUND*)Sound;
-					props->subsoundIndex = SoundInfo.subsoundIndex;
+					props->subsoundIndex = SoundInfo.subsoundindex;
 				}
 				else
 				{
@@ -441,6 +563,8 @@ void UFMODAudioComponent::Play()
 {
 	Stop();
 
+	bHasCheckedOcclusion = false;
+
 	if (!FMODUtils::IsWorldAudible(GetWorld()))
 	{
 		return;
@@ -451,19 +575,38 @@ void UFMODAudioComponent::Play()
 	// Only play events in PIE/game, not when placing them in the editor
 	FMOD::Studio::EventDescription* EventDesc = IFMODStudioModule::Get().GetEventDescription(Event.Get());
 	if (EventDesc != nullptr)
-	{
+	{		
+		EventDesc->getLength(&EventLength);
 		FMOD_RESULT result = EventDesc->createInstance(&StudioInstance);
 		if (StudioInstance != nullptr)
 		{
+			// Query the event for some extra info
 			FMOD_STUDIO_USER_PROPERTY UserProp = {0};
 			if (EventDesc->getUserProperty("Ambient", &UserProp) == FMOD_OK)
 			{
 				if (UserProp.type == FMOD_STUDIO_USER_PROPERTY_TYPE_FLOAT) // All numbers are stored as float
 				{
-					bApplyAmbientVolumes = (UserProp.floatValue != 0.0f);
+					bApplyAmbientVolumes = (UserProp.floatvalue != 0.0f);
 				}
 			}
+			if (EventDesc->getUserProperty("Occlusion", &UserProp) == FMOD_OK)
+			{
+				if (UserProp.type == FMOD_STUDIO_USER_PROPERTY_TYPE_FLOAT) // All numbers are stored as float
+				{
+					bApplyOcclusionDirect = (UserProp.floatvalue != 0.0f);
+				}
+			}
+			FMOD_STUDIO_PARAMETER_DESCRIPTION paramDesc = {};
+			if (EventDesc->getParameter("Occlusion", &paramDesc) == FMOD_OK)
+			{
+				bApplyOcclusionParameter = true;
+			}
+
+#if ENGINE_MINOR_VERSION >= 12
+			OnUpdateTransform(EUpdateTransformFlags::SkipPhysicsUpdate);
+#else
 			OnUpdateTransform(true);
+#endif
 			// Set initial parameters
 			for (auto Kvp : StoredParameters)
 			{
@@ -471,6 +614,17 @@ void UFMODAudioComponent::Play()
 				if (Result != FMOD_OK)
 				{
 					UE_LOG(LogFMOD, Warning, TEXT("Failed to set initial parameter %s"), *Kvp.Key.ToString());
+				}
+			}
+			for (int i = 0; i<EFMODEventProperty::Count; ++i)
+			{
+				if (StoredProperties[i] != -1.0f)
+				{
+					FMOD_RESULT Result = StudioInstance->setProperty((FMOD_STUDIO_EVENT_PROPERTY)i, StoredProperties[i]);
+					if (Result != FMOD_OK)
+					{
+						UE_LOG(LogFMOD, Warning, TEXT("Failed to set initial property %d"), i);
+					}
 				}
 			}
 
@@ -523,14 +677,15 @@ void UFMODAudioComponent::OnPlaybackCompleted()
 	bIsActive = false;
 	SetComponentTickEnabled(false);
 
-	OnEventStopped.Broadcast();
-
 	if (StudioInstance)
 	{
 		StudioInstance->setCallback(nullptr);
 		StudioInstance->release();
 		StudioInstance = nullptr;
 	}
+
+	// Fire callback after we have cleaned up our instance
+	OnEventStopped.Broadcast();
 
 	// Auto destruction is handled via marking object for deletion.
 	if (bAutoDestroy)
@@ -592,6 +747,25 @@ void UFMODAudioComponent::SetParameter(FName Name, float Value)
 		}
 	}
 	StoredParameters.FindOrAdd(Name) = Value;
+}
+
+void UFMODAudioComponent::SetProperty(EFMODEventProperty::Type Property, float Value)
+{
+	verify(Property < EFMODEventProperty::Count);
+	if (StudioInstance)
+	{
+		FMOD_RESULT Result = StudioInstance->setProperty((FMOD_STUDIO_EVENT_PROPERTY)Property, Value);
+		if (Result != FMOD_OK)
+		{
+			UE_LOG(LogFMOD, Warning, TEXT("Failed to set property %d"), (int)Property);
+		}
+	}
+	StoredProperties[Property] = Value;
+}
+
+int32 UFMODAudioComponent::GetLength() const
+{
+	return EventLength;
 }
 
 void UFMODAudioComponent::SetTimelinePosition(int32 Time)

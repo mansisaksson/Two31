@@ -34,7 +34,7 @@ AEnemyCharacter::AEnemyCharacter()
 	PawnSensor = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensor"));
 
 	AlertRadius = CreateDefaultSubobject<USphereComponent>(TEXT("AlertRadius"));
-	AlertRadius->AttachTo(GetCapsuleComponent());
+	AlertRadius->SetupAttachment(GetCapsuleComponent());
 	AlertRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	AlertRadius->IgnoreActorWhenMoving(this, true);
 }

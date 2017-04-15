@@ -56,7 +56,7 @@ AWeapon::AWeapon()
 	RootComponent = WeaponMesh;
 
 	BulletSpawnLocation = CreateDefaultSubobject<USceneComponent>("BulletSpawnLocation");
-	BulletSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
+	BulletSpawnLocation->SetupAttachment(WeaponMesh, TEXT("BulletSpawn"));
 }
 
 void AWeapon::BeginPlay()
@@ -128,7 +128,7 @@ FString AWeapon::GetWeaponName()
 	return WeaponName;
 }
 
-void AWeapon::EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* AmmoPool)
+void AWeapon::EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* ammoPool)
 {
 	if (Cast<APlayerCharacter>(SkeletalMesh->GetAttachmentRootActor()))
 	{
@@ -145,7 +145,7 @@ void AWeapon::EquipWeapon(USkeletalMeshComponent* SkeletalMesh, int* AmmoPool)
 		//WeaponMesh->SetRelativeLocation(FVector(-9.f, 5.f, -2.f));
 	}
 
-	SetAmmoPool(AmmoPool);
+	SetAmmoPool(ammoPool);
 
 	if (bFirstTimeEquiped)
 		FillClip();
@@ -244,11 +244,11 @@ void AWeapon::Reload()
 		}
 	}
 }
-void AWeapon::SetAmmoPool(int* AmmoPool)
+void AWeapon::SetAmmoPool(int* ammoPool)
 {
-	this->AmmoPool = AmmoPool;
+	AmmoPool = ammoPool;
 
-	if (bFirstTimeEquiped && AmmoPool != NULL)
+	if (bFirstTimeEquiped && ammoPool != NULL)
 		FillClip();
 }
 void AWeapon::FillClip()

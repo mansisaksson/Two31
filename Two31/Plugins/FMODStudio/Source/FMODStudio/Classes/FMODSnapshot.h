@@ -1,15 +1,9 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
 
 #pragma once
 
 #include "FMODEvent.h"
 #include "FMODSnapshot.generated.h"
-
-/* Purely for doxygen generation */
-#ifdef GENERATE_DOX
-	#define UCLASS(...)
-	#define UPROPERTY(...) public:
-#endif
 
 /**
  * FMOD Snapshot Asset.

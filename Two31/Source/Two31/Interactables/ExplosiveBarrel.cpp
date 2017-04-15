@@ -15,7 +15,7 @@ AExplosiveBarrel::AExplosiveBarrel()
 
 	ExplosiveRadius = CreateDefaultSubobject<USphereComponent>(TEXT("ExplosiveRadius"));
 	ExplosiveRadius->SetSphereRadius(100.f);
-	ExplosiveRadius->AttachTo(BarrelMesh);
+	ExplosiveRadius->SetupAttachment(BarrelMesh);
 	ExplosiveRadius->SetCollisionResponseToAllChannels(ECR_Overlap);
 	ExplosiveRadius->bGenerateOverlapEvents = true;
 	ExplosiveRadius->OnComponentBeginOverlap.AddDynamic(this, &AExplosiveBarrel::OnExplosionBeginOverlap);
@@ -48,7 +48,7 @@ void AExplosiveBarrel::Tick(float DeltaTime)
 	bOldExplode = bExplode;
 }
 
-void AExplosiveBarrel::OnExplosionBeginOverlap(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
+void AExplosiveBarrel::OnExplosionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	FVector Distance = OtherActor->GetActorLocation() - GetActorLocation();
 	TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());

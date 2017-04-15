@@ -21,10 +21,10 @@ AGaussRifle::AGaussRifle()
 	MaxHeatAccumulation = 10.f;
 
 	MuzzleSpawnLocation = CreateDefaultSubobject<USceneComponent>("MuzzleSpawnLocation");
-	MuzzleSpawnLocation->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
+	MuzzleSpawnLocation->SetupAttachment(WeaponMesh, TEXT("BulletSpawn"));
 
 	LaserDirection = CreateDefaultSubobject<UArrowComponent>("LaserDirection");
-	LaserDirection->AttachTo(WeaponMesh, TEXT("BulletSpawn"));
+	LaserDirection->SetupAttachment(WeaponMesh, TEXT("BulletSpawn"));
 }
 
 void AGaussRifle::BeginPlay()

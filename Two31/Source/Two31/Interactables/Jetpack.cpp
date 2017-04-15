@@ -9,7 +9,7 @@ AJetpack::AJetpack()
 	SetRootComponent(JetMesh);
 
 	UpArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("UpArrow"));
-	UpArrow->AttachTo(JetMesh);
+	UpArrow->SetupAttachment(UpArrow);
 	bIsActive = false;
 }
 
