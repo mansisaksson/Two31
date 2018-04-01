@@ -1,5 +1,5 @@
-#include "Two31.h"
 #include "ExplosiveBarrel.h"
+#include "Two31.h"
 #include "../Characters/EnemyCharacter.h"
 
 AExplosiveBarrel::AExplosiveBarrel()

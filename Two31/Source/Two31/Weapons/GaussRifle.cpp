@@ -1,5 +1,5 @@
-#include "Two31.h"
 #include "GaussRifle.h"
+#include "Two31.h"
 #include "../StatsPornManager.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"

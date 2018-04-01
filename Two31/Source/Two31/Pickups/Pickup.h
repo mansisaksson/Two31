@@ -9,10 +9,10 @@ class TWO31_API APickup : public AActor
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* ItemMesh;
+		class UStaticMeshComponent* ItemMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	USphereComponent* TriggerSphere;
+		class USphereComponent* TriggerSphere;
 
 public:	
 	APickup();

@@ -1,5 +1,6 @@
-#include "Two31.h"
+ï»¿
 #include "ImpCharacter.h"
+#include "Two31.h"
 #include "../StatsPornManager.h"
 #include "Engine.h"
 #include "PlayerCharacter.h"
@@ -110,7 +111,7 @@ void AImpCharacter::Tick(float DeltaTime)
 		TimeSinceLand += DeltaTime;
 		if (GetCharacterMovement()->IsFalling())
 			TimeSinceLand = 0.f;
-		
+
 		if (TimeSinceLand >= LandCooldown)
 		{
 			if (bForceMovement)
@@ -295,7 +296,7 @@ bool AImpCharacter::CanSeePlayer()
 float AImpCharacter::GetDistanceToPlayer()
 {
 	FVector distance = PlayerReferense->GetActorLocation() - GetActorLocation();
-	return FMath::Abs(distance.Size()); 
+	return FMath::Abs(distance.Size());
 }
 bool AImpCharacter::AtLastKnownPosition()
 {
@@ -353,7 +354,7 @@ void AImpCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, floa
 	{
 		//Debug::LogOnScreen("Aggro true - hear pawn");
 		SetCurrentState(EEnemyState::Search);
-		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
+		GetOverlappingActorsOfClass(AlertRadius, AEnemyCharacter::GetClass());
 	}
 }
 void AImpCharacter::OnSeePawn(APawn *OtherPawn)
@@ -362,7 +363,7 @@ void AImpCharacter::OnSeePawn(APawn *OtherPawn)
 	{
 		//Debug::LogOnScreen("Aggro true - see pawn");
 		SetCurrentState(EEnemyState::Search);
-		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
+		GetOverlappingActorsOfClass(AlertRadius, AEnemyCharacter::GetClass());
 	}
 }
 
@@ -374,7 +375,7 @@ float AImpCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	{
 		//Debug::LogOnScreen("Aggro true - take DAMAGE");
 		SetCurrentState(EEnemyState::Search);
-		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
+		GetOverlappingActorsOfClass(AlertRadius, AEnemyCharacter::GetClass());
 	}
 	GetPositionOfImps();
 
@@ -389,7 +390,7 @@ void AImpCharacter::MoveAroundPlayer()
 	{
 		FVector movePosition;
 		FVector temp;
-		float Dist = GetDistanceToPlayer() - FMath::FRandRange(0, (GetDistanceToPlayer()/2));
+		float Dist = GetDistanceToPlayer() - FMath::FRandRange(0, (GetDistanceToPlayer() / 2));
 		AllowedDistanceFromPlayer = GetDistanceToPlayer() + AllowedDistanceFromPlayerOffset;
 		//float Dist = GetDistanceToPlayer() + 5000.f;
 
@@ -521,7 +522,7 @@ void AImpCharacter::GetPositionOfImps()
 				imp->SetRunAroundDegree(-MaxFlankDegree, -MinFlankDegree);
 
 			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Degrees is %f"), degree));
-		}	
+		}
 	}
 }
 void AImpCharacter::SetRunAroundDegree(float Min, float Max)
@@ -547,9 +548,9 @@ void AImpCharacter::Attack()
 
 }
 
-void AImpCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter)
+void AImpCharacter::GetOverlappingActorsOfClass(UShapeComponent* Sphere, UClass* ClassFilter)
 {
-	AEnemyCharacter::GetOverlappingActors(Sphere, ClassFilter);
+	AEnemyCharacter::GetOverlappingActorsOfClass(Sphere, ClassFilter);
 	GetPositionOfImps();
 }
 void AImpCharacter::OnAttackBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -570,9 +571,9 @@ void AImpCharacter::Death()
 	SetClawRadius(0.f, 0.f);
 }
 
-// Denna funktion körs via animations-blueprinten för att synka upp den med attak-animationerna
+// Denna funktion kÃ¶rs via animations-blueprinten fÃ¶r att synka upp den med attak-animationerna
 void AImpCharacter::SetClawRadius(float LeftRadius, float RightRadius)
-{ 
+{
 	if (LeftRadius == 0.f)
 		L_ClawRadius->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	else
@@ -584,5 +585,5 @@ void AImpCharacter::SetClawRadius(float LeftRadius, float RightRadius)
 		R_ClawRadius->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	L_ClawRadius->SetSphereRadius(LeftRadius);
-	R_ClawRadius->SetSphereRadius(RightRadius); 
+	R_ClawRadius->SetSphereRadius(RightRadius);
 }

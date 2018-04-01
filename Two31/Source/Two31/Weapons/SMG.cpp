@@ -1,5 +1,5 @@
-#include "Two31.h"
 #include "SMG.h"
+#include "Two31.h"
 #include "../StatsPornManager.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"

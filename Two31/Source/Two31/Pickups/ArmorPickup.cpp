@@ -1,5 +1,5 @@
-#include "Two31.h"
 #include "ArmorPickup.h"
+#include "Two31.h"
 
 AArmorPickup::AArmorPickup()
 	: APickup()

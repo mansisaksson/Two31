@@ -5,21 +5,10 @@ using System.Collections.Generic;
 
 public class Two31Target : TargetRules
 {
-	public Two31Target(TargetInfo Target)
+	public Two31Target(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
+		
+		ExtraModuleNames.AddRange( new string[] { "Two31" } );
 	}
-
-	//
-	// TargetRules interface.
-	//
-
-	public override void SetupBinaries(
-		TargetInfo Target,
-		ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
-		ref List<string> OutExtraModuleNames
-		)
-	{
-		OutExtraModuleNames.Add("Two31");
-    }
 }

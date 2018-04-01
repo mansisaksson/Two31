@@ -1,8 +1,7 @@
-
+#include "MainConfig.h"
 #include "Two31.h"
 #include <sstream>
 #include <iostream>
-#include "MainConfig.h"
 #include "DefaultGameMode.h"
 
 UMainConfig::UMainConfig()

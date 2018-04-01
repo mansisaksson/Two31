@@ -4,7 +4,7 @@ namespace UnrealBuildTool.Rules
 {
 	public class FMODStudioOculus : ModuleRules
 	{
-		public FMODStudioOculus(TargetInfo Target)
+		public FMODStudioOculus(ReadOnlyTargetRules Target) : base(Target)
 		{
 			// For some reason this flag blows out the size of the compiled lib from under 50MB to over 100MB!
 			//bFasterWithoutUnity = true;
@@ -38,18 +38,18 @@ namespace UnrealBuildTool.Rules
 				case UnrealTargetPlatform.Win32:
 					PublicAdditionalLibraries.Add(System.IO.Path.Combine(BasePath, "ovrfmod.lib"));
 					PublicDelayLoadDLLs.Add("ovrfmod.dll");
-					Definitions.Add("FMOD_OSP_SUPPORTED=1");
+					PublicDefinitions.Add("FMOD_OSP_SUPPORTED=1");
 					break;
 				case UnrealTargetPlatform.Win64:
 					PublicAdditionalLibraries.Add(System.IO.Path.Combine(BasePath, "ovrfmod.lib"));
 					PublicDelayLoadDLLs.Add("ovrfmod.dll");
-					Definitions.Add("FMOD_OSP_SUPPORTED=1");
+					PublicDefinitions.Add("FMOD_OSP_SUPPORTED=1");
 					break;
 				default:
 					break;
 			}
 
-			if (UEBuildConfiguration.bBuildEditor == true)
+			if (Target.Type == TargetType.Editor)
 			{
 				PublicDependencyModuleNames.AddRange(
 					new string[]

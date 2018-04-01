@@ -1,11 +1,12 @@
-#include "Two31.h"
 #include "Weapon.h"
+#include "Two31.h"
 #include "Engine.h"
 #include "../Characters/PlayerCharacter.h"
 #include "../Characters/CultistCharacter.h"
 //#include "../Interactables/Confetti.h"
 #include "../StatsPornManager.h"
 #include "../BloodParticleBall.h"
+#include "DestructibleComponent.h"
 
 AWeapon::AWeapon()
 {

@@ -1,5 +1,5 @@
-#include "Two31.h"
 #include "EnemyCharacter.h"
+#include "Two31.h"
 #include "Perception/PawnSensingComponent.h"
 #include "../MusicManager.h"
 #include "../Characters/PlayerCharacter.h"
@@ -104,7 +104,7 @@ void AEnemyCharacter::OnSeePawn(APawn *OtherPawn)
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, message);
 }
 
-void AEnemyCharacter::GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter)
+void AEnemyCharacter::GetOverlappingActorsOfClass(UShapeComponent* Sphere, UClass* ClassFilter)
 {
 	TArray<AActor*> OverlappingEnemies;
 	Sphere->GetOverlappingActors(OverlappingEnemies, ClassFilter);

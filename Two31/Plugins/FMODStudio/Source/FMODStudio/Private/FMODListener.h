@@ -1,6 +1,27 @@
-// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2016.
+// Copyright (c), Firelight Technologies Pty, Ltd. 2012-2017.
 
 #pragma once
+
+/** Struct encapsulating settings for interior areas. */
+struct FFMODInteriorSettings
+{
+	uint32 bIsWorldSettings : 1;
+	float ExteriorVolume;
+	float ExteriorTime;
+	float ExteriorLPF;
+	float ExteriorLPFTime;
+	float InteriorVolume;
+	float InteriorTime;
+	float InteriorLPF;
+	float InteriorLPFTime;
+
+	FFMODInteriorSettings();
+
+	bool operator==(const FInteriorSettings& Other) const;
+	bool operator!=(const FInteriorSettings& Other) const;
+	FFMODInteriorSettings& operator =(FInteriorSettings Other);
+};
+
 
 /** A direct copy of FListener (which doesn't have external linkage, unfortunately) **/
 struct FFMODListener
@@ -8,7 +29,7 @@ struct FFMODListener
 	FTransform Transform;
 	FVector Velocity;
 
-	struct FInteriorSettings InteriorSettings;
+	struct FFMODInteriorSettings InteriorSettings;
 
 	/** The volume the listener resides in */
 	class AAudioVolume* Volume;
@@ -24,24 +45,24 @@ struct FFMODListener
 	float ExteriorVolumeInterp;
 	float ExteriorLPFInterp;
 
-	FVector GetUp() const		{ return Transform.GetUnitAxis(EAxis::Z); }
-	FVector GetFront() const	{ return Transform.GetUnitAxis(EAxis::Y); }
-	FVector GetRight() const	{ return Transform.GetUnitAxis(EAxis::X); }
+	FVector GetUp() const { return Transform.GetUnitAxis(EAxis::Z); }
+	FVector GetFront() const { return Transform.GetUnitAxis(EAxis::Y); }
+	FVector GetRight() const { return Transform.GetUnitAxis(EAxis::X); }
 
 	/**
-	 * Works out the interp value between source and end
-	 */
-	float Interpolate( const double EndTime );
+	* Works out the interp value between source and end
+	*/
+	float Interpolate(const double EndTime);
 
 	/**
-	 * Gets the current state of the interior settings for the listener
-	 */
+	* Gets the current state of the interior settings for the listener
+	*/
 	void UpdateCurrentInteriorSettings();
 
-	/** 
-	 * Apply the interior settings to ambient sounds
-	 */
-	void ApplyInteriorSettings( class AAudioVolume* Volume, const FInteriorSettings& Settings );
+	/**
+	* Apply the interior settings to ambient sounds
+	*/
+	void ApplyInteriorSettings(class AAudioVolume* Volume, const FInteriorSettings& Settings);
 
 	FFMODListener()
 		: Transform(FTransform::Identity)

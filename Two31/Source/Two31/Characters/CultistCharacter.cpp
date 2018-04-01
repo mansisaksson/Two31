@@ -1,12 +1,13 @@
-#include "Two31.h"
+ï»¿
 #include "CultistCharacter.h"
+#include "Two31.h"
 #include "../Weapons/Weapon.h"
 #include "PlayerCharacter.h"
 
 ACultistCharacter::ACultistCharacter()
 	: AEnemyCharacter()
 {
-	AmmoPool = 2147483647; // Sätter ammo till max så att den inte tar slut
+	AmmoPool = 2147483647; // SÃ¤tter ammo till max sÃ¥ att den inte tar slut
 
 	TurnRate = 10.f;
 	TimeToIdle = 20.f;
@@ -215,8 +216,8 @@ void ACultistCharacter::FocusOnPosition(float DeltaTime, FVector Position)
 }
 void ACultistCharacter::ReactToPlayerMovement(float DeltaTime)
 {
-	// Notes för framtiden:
-	// Kolla om fienden är åvanför spelaren och agera anorlunda utifrån detta
+	// Notes fÃ¶r framtiden:
+	// Kolla om fienden Ã¤r Ã¥vanfÃ¶r spelaren och agera anorlunda utifrÃ¥n detta
 	float distanceToPlayer = FVector::Dist(GetActorLocation(), PlayerReferense->GetActorLocation());
 	if (distanceToPlayer < RetreatDistance)
 		AvoidPlayer(DeltaTime);
@@ -321,7 +322,7 @@ void ACultistCharacter::GoToLastKnownPosition(float DeltaTime)
 		TimeSinceStartSearch = 0.f;
 		LastFloorValue = -1.f;
 	}
-	else if (TimeSinceRanToLastKnownPosition == 0.f || (TimeSinceRanToLastKnownPosition > 1.5f && !bHasMovedToPlayer)) // Kommer gå till en uppdaterad position av spelaren i ett visst antal sekunder
+	else if (TimeSinceRanToLastKnownPosition == 0.f || (TimeSinceRanToLastKnownPosition > 1.5f && !bHasMovedToPlayer)) // Kommer gÃ¥ till en uppdaterad position av spelaren i ett visst antal sekunder
 	{
 		//Debug::LogOnScreen("Moving to player position");
 		if (TimeSinceRanToLastKnownPosition > 1.5f)
@@ -366,7 +367,7 @@ void ACultistCharacter::OnHearNoise(APawn *OtherActor, const FVector &Location, 
 	if (GetCurrentState() != EEnemyState::Triggered)
 	{
 		SetCurrentState(EEnemyState::Triggered);
-		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
+		GetOverlappingActorsOfClass(AlertRadius, AEnemyCharacter::GetClass());
 	}
 }
 void ACultistCharacter::OnSeePawn(APawn *OtherPawn)
@@ -374,7 +375,7 @@ void ACultistCharacter::OnSeePawn(APawn *OtherPawn)
 	if (GetCurrentState() != EEnemyState::Triggered && Cast<APlayerCharacter>(OtherPawn))
 	{
 		SetCurrentState(EEnemyState::Triggered);
-		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
+		GetOverlappingActorsOfClass(AlertRadius, AEnemyCharacter::GetClass());
 	}
 }
 
@@ -443,7 +444,7 @@ float ACultistCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	if (GetCurrentState() != EEnemyState::Triggered)
 	{
 		SetCurrentState(EEnemyState::Triggered);
-		GetOverlappingActors(AlertRadius, AEnemyCharacter::GetClass());
+		GetOverlappingActorsOfClass(AlertRadius, AEnemyCharacter::GetClass());
 	}
 	//CurrentHealth = FMath::Clamp(CurrentHealth - DamageAmount, 0.f, MaxHealth);
 

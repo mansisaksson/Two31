@@ -1,5 +1,5 @@
-#include "Two31.h"
 #include "Shotgun.h"
+#include "Two31.h"
 #include <iostream>
 #include <sstream>
 #include "../Characters/EnemyCharacter.h"

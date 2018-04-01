@@ -5,21 +5,10 @@ using System.Collections.Generic;
 
 public class Two31EditorTarget : TargetRules
 {
-	public Two31EditorTarget(TargetInfo Target)
+	public Two31EditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
+		
+		ExtraModuleNames.AddRange( new string[] { "Two31" } );
 	}
-
-	//
-	// TargetRules interface.
-	//
-
-	public override void SetupBinaries(
-		TargetInfo Target,
-		ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
-		ref List<string> OutExtraModuleNames
-		)
-	{
-		OutExtraModuleNames.Add("Two31");
-    }
 }

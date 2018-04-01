@@ -57,7 +57,7 @@ protected:
 	UFUNCTION()
 	virtual void OnSeePawn(APawn *OtherPawn);
 	UFUNCTION()
-	void GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter);
+	void GetOverlappingActorsOfClass(UShapeComponent* Sphere, UClass* ClassFilter);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnTakeDamage();
@@ -77,7 +77,7 @@ protected:
 	class TSubclassOf<class AJetpack> Jetpack;
 
 	class ADefaultGameMode* DefaultGameMode;
-	UNavigationSystem* NavSystem;
+	class UNavigationSystem* NavSystem;
 	class AAIController* AIController;
 	class APlayerCharacter* PlayerReferense;
 

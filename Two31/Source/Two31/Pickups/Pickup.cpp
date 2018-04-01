@@ -1,6 +1,7 @@
-#include "Two31.h"
 #include "Pickup.h"
+#include "Two31.h"
 #include "../DefaultGameMode.h"
+#include "Components/SphereComponent.h"
 
 APickup::APickup()
 {

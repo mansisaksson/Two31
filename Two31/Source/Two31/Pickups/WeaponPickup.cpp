@@ -1,6 +1,6 @@
+#include "WeaponPickup.h"
 #include "Two31.h"
 #include "../Weapons/Weapon.h"
-#include "WeaponPickup.h"
 
 AWeaponPickup::AWeaponPickup()
 	: APickup()

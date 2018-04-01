@@ -17,7 +17,11 @@ TSharedRef<IDetailCustomization> FFMODAmbientSoundDetails::MakeInstance()
 
 void FFMODAmbientSoundDetails::CustomizeDetails( IDetailLayoutBuilder& DetailBuilder )
 {
-	const TArray< TWeakObjectPtr<UObject> >& SelectedObjects = DetailBuilder.GetDetailsView().GetSelectedObjects();
+	auto* DetailsView = DetailBuilder.GetDetailsView();
+	if (DetailsView)
+		return;
+
+	const TArray< TWeakObjectPtr<UObject> >& SelectedObjects = DetailsView->GetSelectedObjects();
 
 	for( int32 ObjectIndex = 0; !AmbientSound.IsValid() && ObjectIndex < SelectedObjects.Num(); ++ObjectIndex )
 	{

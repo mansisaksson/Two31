@@ -46,7 +46,7 @@ UJsonFieldData* UJsonFieldData::GetRequest(UObject* WorldContextObject, const FS
 */
 UJsonFieldData* UJsonFieldData::Create(UObject* WorldContextObject) {
 	// Get the world object from the context
-	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject);
+	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 
 	// Construct the object and return it
 	

@@ -1,6 +1,6 @@
-#include "Two31.h"
 #include "TriggerManager.h"
-
+#include "Two31.h"
+#include "Components/BoxComponent.h"
 
 ATriggerManager::ATriggerManager()
 {

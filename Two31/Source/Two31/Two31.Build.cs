@@ -4,8 +4,12 @@ using UnrealBuildTool;
 
 public class Two31 : ModuleRules
 {
-	public Two31(TargetInfo Target)
+	public Two31(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule" });
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "InputCore", "AIModule", "ApexDestruction" });
+		
+		PrivateDependencyModuleNames.AddRange(new string[] { "Engine" });
 	}
 }

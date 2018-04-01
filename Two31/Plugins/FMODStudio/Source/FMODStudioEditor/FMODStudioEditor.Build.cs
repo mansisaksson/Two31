@@ -4,7 +4,7 @@ namespace UnrealBuildTool.Rules
 {
 	public class FMODStudioEditor : ModuleRules
 	{
-		public FMODStudioEditor(TargetInfo Target)
+		public FMODStudioEditor(ReadOnlyTargetRules Target) : base(Target)
 		{
 			bFasterWithoutUnity = true;
 

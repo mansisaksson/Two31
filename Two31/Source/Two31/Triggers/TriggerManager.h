@@ -12,5 +12,5 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UBoxComponent* TriggerBox;
+	class UBoxComponent* TriggerBox;
 };

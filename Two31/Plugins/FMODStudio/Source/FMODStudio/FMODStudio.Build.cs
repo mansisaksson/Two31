@@ -4,7 +4,7 @@ namespace UnrealBuildTool.Rules
 {
 	public class FMODStudio : ModuleRules
 	{
-		public FMODStudio(TargetInfo Target)
+		public FMODStudio(ReadOnlyTargetRules Target) : base(Target)
 		{
 			bFasterWithoutUnity = true;
 
@@ -37,7 +37,7 @@ namespace UnrealBuildTool.Rules
 				}
 				);
 
-			if (UEBuildConfiguration.bBuildEditor == true)
+			if (Target.Type == TargetType.Editor)
 			{
 				PrivateDependencyModuleNames.Add("AssetRegistry");
 				PrivateDependencyModuleNames.Add("UnrealEd");
@@ -54,12 +54,12 @@ namespace UnrealBuildTool.Rules
 			if (Target.Configuration != UnrealTargetConfiguration.Shipping)
 			{
 				configName = "L";
-				Definitions.Add("FMODSTUDIO_LINK_LOGGING=1");
+				PublicDefinitions.Add("FMODSTUDIO_LINK_LOGGING=1");
 			}
 			else
 			{
 				configName = "";
-				Definitions.Add("FMODSTUDIO_LINK_RELEASE=1");
+				PublicDefinitions.Add("FMODSTUDIO_LINK_RELEASE=1");
 			}
 
 			string platformName = Target.Platform.ToString();
@@ -148,19 +148,19 @@ namespace UnrealBuildTool.Rules
 			PublicAdditionalLibraries.Add(fmodStudioLibPath);
 			if (bDynamicLibraries)
 			{
-				RuntimeDependencies.Add(new RuntimeDependency(fmodDllPath));
-				RuntimeDependencies.Add(new RuntimeDependency(fmodStudioDllPath));
+				RuntimeDependencies.Add(fmodDllPath);
+				RuntimeDependencies.Add(fmodStudioDllPath);
 				foreach (string plugin in plugins)
 				{
 					string pluginPath = System.IO.Path.Combine(BasePath, plugin + dllExtension);
 					System.Console.WriteLine("Adding reference to FMOD plugin: " + pluginPath);
-					RuntimeDependencies.Add(new RuntimeDependency(pluginPath));
+					RuntimeDependencies.Add(pluginPath);
 				}
 			}
 
 			if (copyThirdPartyPath.Length != 0)
 			{
-				string destPath = System.IO.Path.Combine(UEBuildConfiguration.UEThirdPartyBinariesDirectory, copyThirdPartyPath);
+				string destPath = System.IO.Path.Combine(Target.UEThirdPartyBinariesDirectory, copyThirdPartyPath);
 				System.IO.Directory.CreateDirectory(destPath);
 
 				string fmodDllDest = System.IO.Path.Combine(destPath, fmodDllName);

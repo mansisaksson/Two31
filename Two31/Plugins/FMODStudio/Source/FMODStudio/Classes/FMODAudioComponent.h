@@ -4,6 +4,8 @@
 
 #include "Map.h"
 #include "Runtime/Launch/Resources/Version.h"
+#include "RunTime/Engine/Public/AudioDevice.h"
+#include "AudioDevice.h"
 #include "FMODAudioComponent.generated.h"
 
 /** Used to store callback info from FMOD thread to our event */
@@ -45,6 +47,7 @@ namespace FMOD
 struct FMOD_STUDIO_TIMELINE_MARKER_PROPERTIES;
 struct FMOD_STUDIO_TIMELINE_BEAT_PROPERTIES;
 
+struct FInteriorSettings;
 
 /* Purely for doxygen generation */
 #ifdef GENERATE_DOX

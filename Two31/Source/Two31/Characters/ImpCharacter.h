@@ -50,7 +50,7 @@ protected:
 	UFUNCTION()
 	virtual void OnSeePawn(APawn *OtherPawn);
 	UFUNCTION()
-	virtual void GetOverlappingActors(UShapeComponent* Sphere, UClass* ClassFilter);
+	virtual void GetOverlappingActorsOfClass(UShapeComponent* Sphere, UClass* ClassFilter);
 	UFUNCTION()
 	virtual void OnAttackBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 

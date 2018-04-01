@@ -97,9 +97,9 @@ void UFMODAudioComponent::OnUpdateTransform(EUpdateTransformFlags UpdateTransfor
 	if (StudioInstance)
 	{
 		FMOD_3D_ATTRIBUTES attr = {{0}};
-		attr.position = FMODUtils::ConvertWorldVector(ComponentToWorld.GetLocation());
-		attr.up = FMODUtils::ConvertUnitVector(ComponentToWorld.GetUnitAxis(EAxis::Z));
-		attr.forward = FMODUtils::ConvertUnitVector(ComponentToWorld.GetUnitAxis(EAxis::X));
+		attr.position = FMODUtils::ConvertWorldVector(GetComponentToWorld().GetLocation());
+		attr.up = FMODUtils::ConvertUnitVector(GetComponentToWorld().GetUnitAxis(EAxis::Z));
+		attr.forward = FMODUtils::ConvertUnitVector(GetComponentToWorld().GetUnitAxis(EAxis::X));
 
 		StudioInstance->set3DAttributes(&attr);
 
@@ -117,9 +117,9 @@ void UFMODAudioComponent::UpdateInteriorVolumes()
 	float AmbientVolumeMultiplier = 1.0f;
 	float AmbientHighFrequencyGain = 1.0f;
 
-	FInteriorSettings Ambient;
+	FInteriorSettings* Ambient = (FInteriorSettings*)alloca(sizeof(FInteriorSettings)); // FinteriorSetting::FInteriorSettings() isn't exposed (possible UE4 bug???)
 	const FVector& Location = GetOwner()->GetTransform().GetTranslation();
-	AAudioVolume* AudioVolume = GetWorld()->GetAudioSettings(Location, NULL, &Ambient);
+	AAudioVolume* AudioVolume = GetWorld()->GetAudioSettings(Location, NULL, Ambient);
 
 	const FFMODListener& Listener = IFMODStudioModule::Get().GetNearestListener(Location);
 	if( InteriorLastUpdateTime < Listener.InteriorStartTime )
@@ -145,13 +145,13 @@ void UFMODAudioComponent::UpdateInteriorVolumes()
 	else
 	{
 		// Ambient and listener in different ambient zone
-		if( Ambient.bIsWorldSettings )
+		if (Ambient->bIsWorldSettings)
 		{
 			// The ambient sound is 'outside' - use the listener's exterior volume
-			CurrentInteriorVolume = ( SourceInteriorVolume * ( 1.0f - Listener.ExteriorVolumeInterp ) ) + ( Listener.InteriorSettings.ExteriorVolume * Listener.ExteriorVolumeInterp );
+			CurrentInteriorVolume = (SourceInteriorVolume * (1.0f - Listener.ExteriorVolumeInterp)) + (Listener.InteriorSettings.ExteriorVolume * Listener.ExteriorVolumeInterp);
 			AmbientVolumeMultiplier *= CurrentInteriorVolume;
 
-			CurrentInteriorLPF = ( SourceInteriorLPF * ( 1.0f - Listener.ExteriorLPFInterp ) ) + ( Listener.InteriorSettings.ExteriorLPF * Listener.ExteriorLPFInterp );
+			CurrentInteriorLPF = (SourceInteriorLPF * (1.0f - Listener.ExteriorLPFInterp)) + (Listener.InteriorSettings.ExteriorLPF * Listener.ExteriorLPFInterp);
 			AmbientHighFrequencyGain *= CurrentInteriorLPF;
 
 			//UE_LOG(LogFMOD, Verbose, TEXT( "Ambient in diff volume, ambient outside. Volume *= %g LPF *= %g" ), CurrentInteriorVolume, CurrentInteriorLPF);
@@ -159,12 +159,12 @@ void UFMODAudioComponent::UpdateInteriorVolumes()
 		else
 		{
 			// The ambient sound is 'inside' - use the ambient sound's interior volume multiplied with the listeners exterior volume
-			CurrentInteriorVolume = (( SourceInteriorVolume * ( 1.0f - Listener.InteriorVolumeInterp ) ) + ( Ambient.InteriorVolume * Listener.InteriorVolumeInterp ))
-										* (( SourceInteriorVolume * ( 1.0f - Listener.ExteriorVolumeInterp ) ) + ( Listener.InteriorSettings.ExteriorVolume * Listener.ExteriorVolumeInterp ));
+			CurrentInteriorVolume = ((SourceInteriorVolume * (1.0f - Listener.InteriorVolumeInterp)) + (Ambient->InteriorVolume * Listener.InteriorVolumeInterp))
+				* ((SourceInteriorVolume * (1.0f - Listener.ExteriorVolumeInterp)) + (Listener.InteriorSettings.ExteriorVolume * Listener.ExteriorVolumeInterp));
 			AmbientVolumeMultiplier *= CurrentInteriorVolume;
 
-			CurrentInteriorLPF = (( SourceInteriorLPF * ( 1.0f - Listener.InteriorLPFInterp ) ) + ( Ambient.InteriorLPF * Listener.InteriorLPFInterp ))
-										* (( SourceInteriorLPF * ( 1.0f - Listener.ExteriorLPFInterp ) ) + ( Listener.InteriorSettings.ExteriorLPF * Listener.ExteriorLPFInterp ));
+			CurrentInteriorLPF = ((SourceInteriorLPF * (1.0f - Listener.InteriorLPFInterp)) + (Ambient->InteriorLPF * Listener.InteriorLPFInterp))
+				* ((SourceInteriorLPF * (1.0f - Listener.ExteriorLPFInterp)) + (Listener.InteriorSettings.ExteriorLPF * Listener.ExteriorLPFInterp));
 			AmbientHighFrequencyGain *= CurrentInteriorLPF;
 
 			//UE_LOG(LogFMOD, Verbose, TEXT( "Ambient in diff volume, ambient inside. Volume *= %g LPF *= %g" ), CurrentInteriorVolume, CurrentInteriorLPF);
@@ -367,7 +367,7 @@ void UFMODAudioComponent::EventCallbackCreateProgrammerSound(FMOD_STUDIO_PROGRAM
 			FString SoundPath = SoundName;
 			if (FPaths::IsRelative(SoundPath))
 			{
-				SoundPath = FPaths::GameContentDir() / SoundPath;
+				SoundPath = FPaths::ProjectContentDir() / SoundPath;
 			}
 
 			FMOD::Sound* Sound = nullptr;

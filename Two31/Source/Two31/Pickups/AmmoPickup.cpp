@@ -1,5 +1,5 @@
-#include "Two31.h"
 #include "AmmoPickup.h"
+#include "Two31.h"
 
 AAmmoPickup::AAmmoPickup()
 	: APickup()

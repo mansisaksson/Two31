@@ -3,7 +3,7 @@ using UnrealBuildTool;
 
 public class JSONQuery : ModuleRules
 {
-	public JSONQuery(TargetInfo Target)
+	public JSONQuery(ReadOnlyTargetRules Target) : base(Target)
 	{
         PublicDependencyModuleNames.AddRange(
 			new string[] { 

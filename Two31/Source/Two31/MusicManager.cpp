@@ -1,5 +1,5 @@
-#include "Two31.h"
 #include "MusicManager.h"
+#include "Two31.h"
 
 bool UMusicManager::FirstTime = true;
 int32 UMusicManager::StateCounter[NumberOfStates];

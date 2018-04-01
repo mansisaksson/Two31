@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Two31.h"
 #include "StatsPornManager.h"
+#include "Two31.h"
 
 //Initialize all Stats to 0
 int32 UStatsPornManager::Filler = 0;

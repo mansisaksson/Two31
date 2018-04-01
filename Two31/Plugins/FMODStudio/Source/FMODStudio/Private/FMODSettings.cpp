@@ -32,7 +32,7 @@ FString UFMODSettings::GetFullBankPath() const
 	FString FullPath = BankOutputDirectory.Path;
 	if (FPaths::IsRelative(FullPath))
 	{
-		FullPath = FPaths::GameContentDir() / FullPath;
+		FullPath = FPaths::ProjectContentDir() / FullPath;
 	}
 
 	if (ForcePlatformName == TEXT("."))

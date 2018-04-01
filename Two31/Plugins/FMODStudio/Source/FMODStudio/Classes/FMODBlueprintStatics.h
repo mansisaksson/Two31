@@ -20,7 +20,7 @@ class UFMODAsset;
 class UFMODEvent;
 class USceneComponent;
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FFMODEventInstance
 {
 	GENERATED_USTRUCT_BODY()

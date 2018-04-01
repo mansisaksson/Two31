@@ -1,5 +1,5 @@
-#include "Two31.h"
 #include "Projectile.h"
+#include "Two31.h"
 #include "../Characters/EnemyCharacter.h"
 #include "Engine.h"
 #include "GameFramework/ProjectileMovementComponent.h"
